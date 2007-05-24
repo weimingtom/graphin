@@ -1,0 +1,6 @@
+LIBRARY
+EXPORTS
+	create_image 			@1
+	image_release			@2
+	image_get_info			@3
+	image_blit				@4
