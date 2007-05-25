@@ -98,6 +98,10 @@ SOURCE=..\..\src\graphin.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\graphin.def
+# End Source File
+# Begin Source File
+
 SOURCE=.\main.cpp
 # End Source File
 # End Group

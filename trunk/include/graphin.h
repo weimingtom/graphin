@@ -36,12 +36,13 @@ typedef double POS;
 
 enum GRAPHIN_RESULT
 {
-  GRAPHIN_OK,
-  GRAPHIN_BAD_PARAM,
+  GRAPHIN_PANIC = -1, // e.g. not enough memory
+  GRAPHIN_OK = 0,
+  GRAPHIN_BAD_PARAM = 1,
 };
 
-GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL 
-        image_create( int width, int height, HIMG* poutImg );
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL  
+        image_create( unsigned int width, unsigned int height, HIMG* poutImg );
 
 GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL 
         image_release( HIMG himg );
@@ -69,23 +70,23 @@ GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
         graphics_release(HGFX gfx);
 
 // Draws line from x1,y1 to x2,y2 using current lineColor and lineGradient.
-GRAPHIN_API GRAPHIN_RESULT 
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
         graphics_line ( POS x1, POS y1, POS x2, POS y2 );
 
 // Draws triangle using current lineColor/lineGradient and fillColor/fillGradient.
-GRAPHIN_API GRAPHIN_RESULT 
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
         graphics_triangle ( POS x1, POS y1, POS x2, POS y2, POS x3, POS y3 );
 
 // Draws rectangle using current lineColor/lineGradient and fillColor/fillGradient with (optional) rounded corners.
-GRAPHIN_API GRAPHIN_RESULT 
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
         graphics_rectangle ( POS x1, POS y1, POS x2, POS y2 );
 
 // Draws rounded rectangle using current lineColor/lineGradient and fillColor/fillGradient with (optional) rounded corners.
-GRAPHIN_API GRAPHIN_RESULT 
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
         graphics_rounded_rectangle ( POS x1, POS y1, POS x2, POS y2, POS rx, POS ry);
 
 // Draws circle or ellipse using current lineColor/lineGradient and fillColor/fillGradient.
-GRAPHIN_API GRAPHIN_RESULT 
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
         graphics_ellipse ( POS x, POS y, POS rx, POS ry );
 
 
