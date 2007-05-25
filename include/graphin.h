@@ -32,6 +32,7 @@ typedef image*    HIMG;
   typedef unsigned char   BYTE;
 #endif 
 typedef double POS;
+typedef unsigned int COLOR;
 
 
 enum GRAPHIN_RESULT
@@ -40,6 +41,8 @@ enum GRAPHIN_RESULT
   GRAPHIN_OK = 0,
   GRAPHIN_BAD_PARAM = 1,
 };
+
+// image primitives
 
 GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL  
         image_create( unsigned int width, unsigned int height, HIMG* poutImg );
@@ -63,6 +66,15 @@ GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
 GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL 
         image_load( const BYTE* bytes, unsigned int num_bytes, HIMG* pout_img ); // load png/jpeg/etc. image from stream of bytes
 
+
+// graphics primitives and drawing operations
+
+
+// create color value
+GRAPHIN_API COLOR GRAPHIN_CALL 
+        graphics_rgbt(unsigned int red, unsigned int green, unsigned int blue, unsigned int transparency);
+// Note: transparent color (no-color value) is rgba(?, ?, ?, 0xff);
+
 GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL 
         graphics_create(HIMG img, HGFX* pout_gfx );
 
@@ -71,22 +83,27 @@ GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
 
 // Draws line from x1,y1 to x2,y2 using current lineColor and lineGradient.
 GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
-        graphics_line ( POS x1, POS y1, POS x2, POS y2 );
+        graphics_line ( HGFX hgfx, POS x1, POS y1, POS x2, POS y2 );
 
 // Draws triangle using current lineColor/lineGradient and fillColor/fillGradient.
 GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
-        graphics_triangle ( POS x1, POS y1, POS x2, POS y2, POS x3, POS y3 );
+        graphics_triangle ( HGFX hgfx, POS x1, POS y1, POS x2, POS y2, POS x3, POS y3 );
 
 // Draws rectangle using current lineColor/lineGradient and fillColor/fillGradient with (optional) rounded corners.
 GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
-        graphics_rectangle ( POS x1, POS y1, POS x2, POS y2 );
+        graphics_rectangle ( HGFX hgfx, POS x1, POS y1, POS x2, POS y2 );
 
 // Draws rounded rectangle using current lineColor/lineGradient and fillColor/fillGradient with (optional) rounded corners.
 GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
-        graphics_rounded_rectangle ( POS x1, POS y1, POS x2, POS y2, POS rx, POS ry);
+        graphics_rounded_rectangle ( HGFX hgfx, POS x1, POS y1, POS x2, POS y2, POS rx, POS ry);
 
 // Draws circle or ellipse using current lineColor/lineGradient and fillColor/fillGradient.
 GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
-        graphics_ellipse ( POS x, POS y, POS rx, POS ry );
+        graphics_ellipse ( HGFX hgfx, POS x, POS y, POS rx, POS ry );
+
+// Set line color
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+        graphics_line_color ( HGFX hgfx, COLOR c);
+
 
 

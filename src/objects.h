@@ -43,13 +43,13 @@ struct graphics:
     if(!p)
       return;
     Agg2D::attach(p->pmap.buf(), p->pmap.width(), p->pmap.height(), p->pmap.stride());
-    //Agg2D::clearAll(gool::r(clr), gool::g(clr), gool::b(clr), gool::a(clr));
+    Agg2D::clearAll(0xff, 0xff, 0xff);
     Agg2D::antiAliasGamma(1.4);
     Agg2D::blendMode(Agg2D::BlendAlpha);
     Agg2D::imageFilter(Agg2D::Bilinear);
 
     Agg2D::viewport(0, 0, p->width(), p->height(), 
-                 0, p->width(), p->height(), 0, 
+                 0, p->height(), p->width(), 0, 
                  Agg2D::Anisotropic);
 
     Agg2D::flipText(true);

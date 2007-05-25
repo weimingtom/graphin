@@ -80,3 +80,79 @@ GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL graphics_release( HGFX hgfx )
   return GRAPHIN_OK;
 }
 
+// Draws line from x1,y1 to x2,y2 using current lineColor and lineGradient.
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+        graphics_line ( HGFX hgfx, POS x1, POS y1, POS x2, POS y2 )
+{
+  if(!hgfx)
+    return GRAPHIN_BAD_PARAM;
+  hgfx->line(x1,y1,x2,y2);
+  return GRAPHIN_OK;
+}
+
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+        graphics_triangle ( HGFX hgfx, POS x1, POS y1, POS x2, POS y2, POS x3, POS y3 )
+{
+  if(!hgfx)
+    return GRAPHIN_BAD_PARAM;
+  hgfx->triangle(x1,y1,x2,y2,x3,y3);
+  return GRAPHIN_OK;
+}
+
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+        graphics_rectangle ( HGFX hgfx, POS x1, POS y1, POS x2, POS y2 )
+{
+  if(!hgfx)
+    return GRAPHIN_BAD_PARAM;
+  hgfx->rectangle(x1,y1,x2,y2);
+  return GRAPHIN_OK;
+}
+
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+        graphics_rounded_rectangle ( HGFX hgfx, POS x1, POS y1, POS x2, POS y2, POS rx, POS ry)
+{
+  if(!hgfx)
+    return GRAPHIN_BAD_PARAM;
+  hgfx->roundedRect(x1,y1,x2,y2,rx,ry); 
+  return GRAPHIN_OK;
+}
+
+inline COLOR rgbt( unsigned r, unsigned g, unsigned b, unsigned a ) { return ((a & 0xff) << 24) | ((b & 0xff) << 16) | ((g & 0xff) << 8) | (r & 0xff); }
+inline unsigned r( COLOR c ) { return c & 0xff; }
+inline unsigned g( COLOR c ) { return (c >> 8)  & 0xff; }
+inline unsigned b( COLOR c ) { return (c >> 16) & 0xff; }
+inline unsigned a( COLOR c ) { return (c >> 24) & 0xff; } // alpha
+inline unsigned t( COLOR c ) { return 255 - a(c); }       // transparency
+
+inline Agg2D::Color AGG_COLOR(COLOR c)
+{
+  return Agg2D::Color( r(c), g(c), b(c), a(c) );
+}
+
+GRAPHIN_API COLOR GRAPHIN_CALL
+        graphics_rgbt(unsigned int red, unsigned int green, unsigned int blue, unsigned int transparency)
+{
+  return rgbt(red,green,blue,255-transparency);
+}
+
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+        graphics_line_color ( HGFX hgfx, COLOR c)
+{
+  if(!hgfx)
+    return GRAPHIN_BAD_PARAM;
+  if( t(c) == 0xFF000000 )
+    hgfx->noLine();
+  else 
+    hgfx->lineColor(AGG_COLOR(c));
+  return GRAPHIN_OK;
+}
+
+// Draws circle or ellipse using current lineColor/lineGradient and fillColor/fillGradient.
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+        graphics_ellipse ( HGFX hgfx, POS x, POS y, POS rx, POS ry )
+{
+  if(!hgfx)
+    return GRAPHIN_BAD_PARAM;
+  hgfx->ellipse(x,y,rx,ry); 
+  return GRAPHIN_OK;
+}
