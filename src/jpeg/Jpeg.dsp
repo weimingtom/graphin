@@ -19,12 +19,12 @@ CFG=Jpeg - Win32 Release
 !MESSAGE 
 !MESSAGE "Jpeg - Win32 Release" (based on "Win32 (x86) Static Library")
 !MESSAGE "Jpeg - Win32 Debug" (based on "Win32 (x86) Static Library")
-!MESSAGE "Jpeg - Win32 ReleaseRetail" (based on "Win32 (x86) Static Library")
-!MESSAGE "Jpeg - Win32 ReleaseMinSize" (based on "Win32 (x86) Static Library")
 !MESSAGE 
 
 # Begin Project
 # PROP AllowPerConfigDependencies 0
+# PROP Scc_ProjName ""
+# PROP Scc_LocalPath ""
 CPP=cl.exe
 RSC=rc.exe
 
@@ -76,64 +76,12 @@ LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
 # ADD LIB32 /nologo
 
-!ELSEIF  "$(CFG)" == "Jpeg - Win32 ReleaseRetail"
-
-# PROP BASE Use_MFC 2
-# PROP BASE Use_Debug_Libraries 0
-# PROP BASE Output_Dir "Jpeg___Win32_ReleaseRetail"
-# PROP BASE Intermediate_Dir "Jpeg___Win32_ReleaseRetail"
-# PROP BASE Target_Dir ""
-# PROP Use_MFC 2
-# PROP Use_Debug_Libraries 0
-# PROP Output_Dir "..\..\ReleaseRetail"
-# PROP Intermediate_Dir "..\..\ReleaseRetail"
-# PROP Target_Dir ""
-# ADD BASE CPP /nologo /MT /W3 /GX /O1 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_AFXDLL" /FD /c
-# SUBTRACT BASE CPP /YX
-# ADD CPP /nologo /MT /W3 /GX /O1 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_AFXDLL" /FD /c
-# SUBTRACT CPP /YX
-# ADD BASE RSC /l 0x410 /d "_AFXDLL"
-# ADD RSC /l 0x410 /d "_AFXDLL"
-BSC32=bscmake.exe
-# ADD BASE BSC32 /nologo
-# ADD BSC32 /nologo
-LIB32=link.exe -lib
-# ADD BASE LIB32 /nologo
-# ADD LIB32 /nologo
-
-!ELSEIF  "$(CFG)" == "Jpeg - Win32 ReleaseMinSize"
-
-# PROP BASE Use_MFC 2
-# PROP BASE Use_Debug_Libraries 0
-# PROP BASE Output_Dir "Jpeg___Win32_ReleaseMinSize"
-# PROP BASE Intermediate_Dir "Jpeg___Win32_ReleaseMinSize"
-# PROP BASE Target_Dir ""
-# PROP Use_MFC 2
-# PROP Use_Debug_Libraries 0
-# PROP Output_Dir "Jpeg___Win32_ReleaseMinSize"
-# PROP Intermediate_Dir "Jpeg___Win32_ReleaseMinSize"
-# PROP Target_Dir ""
-# ADD BASE CPP /nologo /MT /W3 /GX /O1 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_AFXDLL" /FD /c
-# SUBTRACT BASE CPP /YX
-# ADD CPP /nologo /MT /W3 /GX /O1 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_AFXDLL" /FD /c
-# SUBTRACT CPP /YX
-# ADD BASE RSC /l 0x410 /d "_AFXDLL"
-# ADD RSC /l 0x410 /d "_AFXDLL"
-BSC32=bscmake.exe
-# ADD BASE BSC32 /nologo
-# ADD BSC32 /nologo
-LIB32=link.exe -lib
-# ADD BASE LIB32 /nologo
-# ADD LIB32 /nologo
-
 !ENDIF 
 
 # Begin Target
 
 # Name "Jpeg - Win32 Release"
 # Name "Jpeg - Win32 Debug"
-# Name "Jpeg - Win32 ReleaseRetail"
-# Name "Jpeg - Win32 ReleaseMinSize"
 # Begin Source File
 
 SOURCE=.\Jcapimin.c

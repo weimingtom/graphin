@@ -5,13 +5,22 @@
 #include "objects.h"
 #include "graphin.h"
 
+#undef GRAPHIN_API
+#define GRAPHIN_API
+
 // this is an example of an exported function.
-GRAPHIN_API GRAPHIN_CALL create_image( unsigned int width, unsigned int height, HIMG* pout_img )
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL image_create( unsigned int width, unsigned int height, HIMG* pout_img )
 {
   if( !pout_img )
     return GRAPHIN_BAD_PARAM;
-  *pout_img = new image(width, height);
-  return GRAPHIN_OK;
+  image* p = new image(width, height);
+  if( p )
+  {
+    p->add_ref();
+    *pout_img = p;
+    return GRAPHIN_OK;
+  }
+  return GRAPHIN_PANIC;
 }
 
 GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL image_release( HIMG himg )
@@ -51,4 +60,23 @@ GRAPHIN_API GRAPHIN_RESULT  GRAPHIN_CALL image_blit( HPLATFORMGFX dst, int dst_x
   return GRAPHIN_OK;
 }
 
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL graphics_create(HIMG img, HGFX* pout_gfx )
+{
+  if( !pout_gfx )
+    return GRAPHIN_BAD_PARAM;
+  graphics* p = new graphics(img);
+  if(p) 
+  {
+    p->add_ref();
+    *pout_gfx = p;
+    return GRAPHIN_OK;
+  }
+  return GRAPHIN_PANIC;
+}
+
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL graphics_release( HGFX hgfx )
+{
+  if(hgfx) hgfx->release();
+  return GRAPHIN_OK;
+}
 

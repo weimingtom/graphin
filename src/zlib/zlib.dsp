@@ -19,8 +19,6 @@ CFG=zlib - Win32 Release
 !MESSAGE 
 !MESSAGE "zlib - Win32 Release" (based on "Win32 (x86) Static Library")
 !MESSAGE "zlib - Win32 Debug" (based on "Win32 (x86) Static Library")
-!MESSAGE "zlib - Win32 ReleaseRetail" (based on "Win32 (x86) Static Library")
-!MESSAGE "zlib - Win32 ReleaseMinSize" (based on "Win32 (x86) Static Library")
 !MESSAGE 
 
 # Begin Project
@@ -77,60 +75,12 @@ LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
 # ADD LIB32 /nologo
 
-!ELSEIF  "$(CFG)" == "zlib - Win32 ReleaseRetail"
-
-# PROP BASE Use_MFC 0
-# PROP BASE Use_Debug_Libraries 0
-# PROP BASE Output_Dir "zlib___Win32_ReleaseRetail"
-# PROP BASE Intermediate_Dir "zlib___Win32_ReleaseRetail"
-# PROP BASE Target_Dir ""
-# PROP Use_MFC 0
-# PROP Use_Debug_Libraries 0
-# PROP Output_Dir "..\..\ReleaseRetail"
-# PROP Intermediate_Dir "..\..\ReleaseRetail"
-# PROP Target_Dir ""
-# ADD BASE CPP /nologo /MT /W3 /GX /O1 /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /YX /FD /c
-# ADD CPP /nologo /MT /W3 /GX /O1 /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /YX /FD /c
-# ADD BASE RSC /l 0x1009 /d "NDEBUG"
-# ADD RSC /l 0x1009 /d "NDEBUG"
-BSC32=bscmake.exe
-# ADD BASE BSC32 /nologo
-# ADD BSC32 /nologo
-LIB32=link.exe -lib
-# ADD BASE LIB32 /nologo
-# ADD LIB32 /nologo
-
-!ELSEIF  "$(CFG)" == "zlib - Win32 ReleaseMinSize"
-
-# PROP BASE Use_MFC 0
-# PROP BASE Use_Debug_Libraries 0
-# PROP BASE Output_Dir "zlib___Win32_ReleaseMinSize"
-# PROP BASE Intermediate_Dir "zlib___Win32_ReleaseMinSize"
-# PROP BASE Target_Dir ""
-# PROP Use_MFC 0
-# PROP Use_Debug_Libraries 0
-# PROP Output_Dir "zlib___Win32_ReleaseMinSize"
-# PROP Intermediate_Dir "zlib___Win32_ReleaseMinSize"
-# PROP Target_Dir ""
-# ADD BASE CPP /nologo /MT /W3 /GX /O1 /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /YX /FD /c
-# ADD CPP /nologo /MT /W3 /GX /O1 /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /YX /FD /c
-# ADD BASE RSC /l 0x1009 /d "NDEBUG"
-# ADD RSC /l 0x1009 /d "NDEBUG"
-BSC32=bscmake.exe
-# ADD BASE BSC32 /nologo
-# ADD BSC32 /nologo
-LIB32=link.exe -lib
-# ADD BASE LIB32 /nologo
-# ADD LIB32 /nologo
-
 !ENDIF 
 
 # Begin Target
 
 # Name "zlib - Win32 Release"
 # Name "zlib - Win32 Debug"
-# Name "zlib - Win32 ReleaseRetail"
-# Name "zlib - Win32 ReleaseMinSize"
 # Begin Group "Source Files"
 
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
