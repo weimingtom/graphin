@@ -135,17 +135,6 @@ GRAPHIN_API COLOR GRAPHIN_CALL
   return rgbt(red,green,blue,255-transparency);
 }
 
-GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
-        graphics_line_color ( HGFX hgfx, COLOR c)
-{
-  if(!hgfx)
-    return GRAPHIN_BAD_PARAM;
-  if( t(c) == 0xFF000000 )
-    hgfx->noLine();
-  else 
-    hgfx->lineColor(AGG_COLOR(c));
-  return GRAPHIN_OK;
-}
 
 // Draws circle or ellipse using current lineColor/lineGradient and fillColor/fillGradient.
 GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
@@ -196,7 +185,7 @@ GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
 }
 
 GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
-        graphics_begin_path ( HGFX hgfx )
+        graphics_open_path ( HGFX hgfx )
 {
   if(!hgfx)
     return GRAPHIN_BAD_PARAM;
@@ -263,3 +252,248 @@ GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
     hgfx->arcTo(rx, ry, angle, is_large_arc, sweep_flag, x, y);
   return GRAPHIN_OK;
 }
+
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+        graphics_ellipse_to ( HGFX hgfx, POS x, POS y, POS rx, POS ry, bool clockwise )
+{
+  if(!hgfx)
+    return GRAPHIN_BAD_PARAM;
+  hgfx->addEllipse(x,y,rx,ry, clockwise? Agg2D::CW: Agg2D::CCW);
+  return GRAPHIN_OK;
+}
+
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+        graphics_quadratic_curve_to ( HGFX hgfx, POS xc, POS yc, POS x, POS y, bool rel )
+{
+  if(!hgfx)
+    return GRAPHIN_BAD_PARAM;
+  if(rel)
+    hgfx->quadricCurveRel(xc, yc, x, y);
+  else
+    hgfx->quadricCurveTo(xc, yc, x, y);
+  return GRAPHIN_OK;
+}
+
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+        graphics_bezier_curve_to ( HGFX hgfx, POS xc1, POS yc1, POS xc2, POS yc2, POS x, POS y, bool rel )
+{
+  if(!hgfx)
+    return GRAPHIN_BAD_PARAM;
+  if(rel)
+    hgfx->cubicCurveRel(xc1, yc1, xc2, yc2, x, y);
+  else
+    hgfx->cubicCurveTo(xc1, yc1, xc2, yc2, x, y);
+  return GRAPHIN_OK;
+}
+
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+        graphics_close_path ( HGFX hgfx )
+{
+  if(!hgfx)
+    return GRAPHIN_BAD_PARAM;
+  hgfx->closePolygon();
+  return GRAPHIN_OK;
+}
+
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+        graphics_draw_path ( HGFX hgfx, DRAW_PATH_MODE dpm )
+{
+  if(!hgfx)
+    return GRAPHIN_BAD_PARAM;
+  hgfx->drawPath(Agg2D::DrawPathFlag(dpm));
+  return GRAPHIN_OK;
+}
+
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+        graphics_rotate ( HGFX hgfx, ANGLE radians, POS* cx, POS* cy )
+{
+  if(!hgfx)
+    return GRAPHIN_BAD_PARAM;
+  if(cx && cy)
+    hgfx->rotate(radians, *cx, *cy);
+  else
+    hgfx->rotate(radians);
+  return GRAPHIN_OK;
+}
+
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+        graphics_translate ( HGFX hgfx, POS cx, POS cy )
+{
+  if(!hgfx)
+    return GRAPHIN_BAD_PARAM;
+  hgfx->translate(cx, cy);
+  return GRAPHIN_OK;
+}
+
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+        graphics_scale ( HGFX hgfx, double x, double y )
+{
+  if(!hgfx)
+    return GRAPHIN_BAD_PARAM;
+  hgfx->scale(x, y);
+  return GRAPHIN_OK;
+}
+
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+        graphics_skew ( HGFX hgfx, double sx, double sy )
+{
+  if(!hgfx)
+    return GRAPHIN_BAD_PARAM;
+  hgfx->skew(sx, sy);
+  return GRAPHIN_OK;
+}
+
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+        graphics_transform ( HGFX hgfx, POS m11, POS m12, POS m21, POS m22, POS dx, POS dy )
+{
+  if(!hgfx)
+    return GRAPHIN_BAD_PARAM;
+
+  Agg2D::Affine m(m11, m12, m21, m22, dx, dy);
+  hgfx->matrix(m); 
+  return GRAPHIN_OK;
+}
+
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+        graphics_state_save ( HGFX hgfx )
+{
+  if(!hgfx)
+    return GRAPHIN_BAD_PARAM;
+  hgfx->save_state();
+  return GRAPHIN_OK;
+}
+
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+        graphics_state_restore ( HGFX hgfx )
+{
+  if(!hgfx)
+    return GRAPHIN_BAD_PARAM;
+  return hgfx->restore_state()? 
+    GRAPHIN_OK: 
+    GRAPHIN_FAILURE;
+}
+
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+      graphics_line_width ( HGFX hgfx, DIM width )
+{
+  if(!hgfx)
+    return GRAPHIN_BAD_PARAM;
+  hgfx->lineWidth(width);
+  if( width == 0.0 )
+    hgfx->noLine();
+  return GRAPHIN_OK;
+}
+
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+      graphics_line_color ( HGFX hgfx, COLOR color )
+{
+  if(!hgfx)
+    return GRAPHIN_BAD_PARAM;
+  //if( t(c) == 0xFF000000 )
+  //  hgfx->noLine();
+  //else 
+  //  hgfx->lineColor(AGG_COLOR(c));
+  hgfx->lineColor(AGG_COLOR(color));
+  return GRAPHIN_OK;
+}
+
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+      graphics_fill_color ( HGFX hgfx, COLOR color )
+{
+  if(!hgfx)
+    return GRAPHIN_BAD_PARAM;
+  if( t(color) == 0xFF )
+    hgfx->noFill();
+  else 
+    hgfx->fillColor(AGG_COLOR(color));
+  return GRAPHIN_OK;
+}
+
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+      graphics_line_linear_gradient( HGFX hgfx,  	
+       POS x1, POS y1, POS x2, POS y2, COLOR color1, COLOR color2, POS profile )
+{
+  if(!hgfx)
+    return GRAPHIN_BAD_PARAM;
+
+  hgfx->lineLinearGradient(x1, y1, x2, y2, AGG_COLOR(color1), AGG_COLOR(color2), profile);
+
+  return GRAPHIN_OK;
+}
+
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+      graphics_fill_linear_gradient( HGFX hgfx,  	
+       POS x1, POS y1, POS x2, POS y2, COLOR color1, COLOR color2, POS profile )
+{
+  if(!hgfx)
+    return GRAPHIN_BAD_PARAM;
+
+  hgfx->fillLinearGradient(x1, y1, x2, y2, AGG_COLOR(color1), AGG_COLOR(color2), profile);
+
+  return GRAPHIN_OK;
+}
+
+// setup parameters of line gradient radial fills.
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+      graphics_line_radial_gradient( HGFX hgfx, POS x, POS y, DIM r, COLOR color1, COLOR color2, double profile )
+{
+  if(!hgfx)
+    return GRAPHIN_BAD_PARAM;
+
+  hgfx->lineRadialGradient(x, y, r, AGG_COLOR(color1), AGG_COLOR(color2), profile);
+
+  return GRAPHIN_OK;
+}
+
+// setup parameters of gradient radial fills.
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+      graphics_fill_radial_gradient( HGFX hgfx, POS x, POS y, DIM r, COLOR color1, COLOR color2, double profile )
+{
+  if(!hgfx)
+    return GRAPHIN_BAD_PARAM;
+
+  hgfx->fillRadialGradient(x, y, r, AGG_COLOR(color1), AGG_COLOR(color2), profile);
+
+  return GRAPHIN_OK;
+}
+
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+      graphics_fill_mode( HGFX hgfx, bool even_odd /* false - fill_non_zero */ )
+{
+  if(!hgfx)
+    return GRAPHIN_BAD_PARAM;
+
+  hgfx->fillEvenOdd( even_odd );
+
+  return GRAPHIN_OK;
+}
+
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+      graphics_font( HGFX hgfx, const char* name, DIM size, bool bold, bool italic, ANGLE angle)
+{
+  if(!hgfx)
+    return GRAPHIN_BAD_PARAM;
+  hgfx->font( name, size, bold, italic, Agg2D::VectorFontCache, angle); 
+  return GRAPHIN_OK;
+
+}
+
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+      graphics_text( HGFX hgfx, POS x, POS y, const wchar_t* text, unsigned int text_length)
+{
+  if(!hgfx)
+    return GRAPHIN_BAD_PARAM;
+  hgfx->text( x, y, text, text_length ); 
+  return GRAPHIN_OK;
+}
+
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+      graphics_text_width( HGFX hgfx, const wchar_t* text, unsigned int text_length, DIM* out_width)
+{
+  if(!hgfx || !out_width)
+    return GRAPHIN_BAD_PARAM;
+  *out_width = hgfx->textWidth( text, text_length ); 
+  return GRAPHIN_OK;
+}
+
+
