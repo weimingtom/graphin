@@ -31,15 +31,17 @@ typedef image*    HIMG;
 #ifndef BYTE
   typedef unsigned char   BYTE;
 #endif 
-typedef double POS;
-typedef double ANGLE;
-typedef unsigned int COLOR;
+typedef double POS;         // position 
+typedef double DIM;         // dimention
+typedef double ANGLE;       // angle (radians)
+typedef unsigned int COLOR; // guess what?
 
 enum GRAPHIN_RESULT
 {
   GRAPHIN_PANIC = -1, // e.g. not enough memory
   GRAPHIN_OK = 0,
-  GRAPHIN_BAD_PARAM = 1,
+  GRAPHIN_BAD_PARAM = 1,  // bad parameter
+  GRAPHIN_FAILURE = 2,    // operation failed, e.g. restore() without save()
 };
 
 // image primitives
@@ -67,12 +69,11 @@ GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
         image_load( const BYTE* bytes, unsigned int num_bytes, HIMG* pout_img ); // load png/jpeg/etc. image from stream of bytes
 
 
-// graphics primitives and drawing operations
-
+// SECTION: graphics primitives and drawing operations
 
 // create color value
 GRAPHIN_API COLOR GRAPHIN_CALL 
-        graphics_rgbt(unsigned int red, unsigned int green, unsigned int blue, unsigned int transparency);
+        graphics_rgbt(unsigned int red, unsigned int green, unsigned int blue, unsigned int transparency = 0);
 // Note: transparent color (no-color value) is rgba(?, ?, ?, 0xff);
 
 GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL 
@@ -121,10 +122,10 @@ GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
 GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
         graphics_polyline ( HGFX hgfx, POS* xy, unsigned int num_points );
 
-// Path operations
+// SECTION: Path operations
 
 GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
-        graphics_begin_path ( HGFX hgfx );
+        graphics_open_path ( HGFX hgfx );
 
 GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
         graphics_move_to ( HGFX hgfx, POS x, POS y, bool relative );
@@ -140,3 +141,113 @@ GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
 
 GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
         graphics_arc_to ( HGFX hgfx, POS x, POS y, ANGLE angle, POS rx, POS ry, bool is_large_arc, bool sweep_flag, bool relative );
+
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+        graphics_ellipse_to ( HGFX hgfx, POS x, POS y, POS rx, POS ry, bool clockwise );
+
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+        graphics_quadratic_curve_to ( HGFX hgfx, POS xc, POS yc, POS x, POS y, bool relative );
+
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+        graphics_bezier_curve_to ( HGFX hgfx, POS xc1, POS yc1, POS xc2, POS yc2, POS x, POS y, bool relative );
+
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+        graphics_close_path ( HGFX hgfx );
+
+enum DRAW_PATH_MODE
+{
+    FILL_ONLY, 
+    STROKE_ONLY,
+    FILL_AND_STROKE,
+    FILL_BY_LINE_COLOR
+};
+
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+        graphics_draw_path ( HGFX hgfx, DRAW_PATH_MODE dpm );
+
+// end of path opearations
+
+// SECTION: affine tranformations:
+
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+        graphics_rotate ( HGFX hgfx, ANGLE radians, POS* cx = 0, POS* cy = 0 );
+
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+        graphics_translate ( HGFX hgfx, POS cx, POS cy );
+
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+        graphics_scale ( HGFX hgfx, double x, double y );
+
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+        graphics_skew ( HGFX hgfx, double dx, double dy );
+
+// all above in one shot
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+        graphics_transform ( HGFX hgfx, POS m11, POS m12, POS m21, POS m22, POS dx, POS dy );
+
+// end of affine tranformations.
+
+// SECTION: state save/restore
+
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+        graphics_state_save ( HGFX hgfx );
+
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+        graphics_state_restore ( HGFX hgfx );
+
+// end of state save/restore
+
+// SECTION: drawing attributes 
+
+// set line width for subsequent drawings.
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+      graphics_line_width ( HGFX hgfx, DIM width );  	
+
+inline void 
+      graphics_no_line ( HGFX hgfx ) { graphics_line_width(hgfx,0.0); }
+
+// color for solid lines/strokes
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+      graphics_line_color ( HGFX hgfx, COLOR color );
+
+// color for solid fills
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+      graphics_fill_color ( HGFX hgfx, COLOR color );
+
+inline void 
+      graphics_no_fill ( HGFX hgfx ) { graphics_fill_color(hgfx, graphics_rgbt(0,0,0,0xFF)); }
+
+// setup parameters of linear gradient of lines.
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+      graphics_line_linear_gradient( HGFX hgfx, POS x1, POS y1, POS x2, POS y2, COLOR color1, COLOR color2, double profile = 1.0 );
+
+// setup parameters of linear gradient of fills.
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+      graphics_fill_linear_gradient( HGFX hgfx, POS x1, POS y1, POS x2, POS y2, COLOR color1, COLOR color2, double profile = 1.0 );
+
+// setup parameters of line gradient radial fills.
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+      graphics_line_radial_gradient( HGFX hgfx, POS x, POS y, DIM r, COLOR color1, COLOR color2, double profile = 1.0 );  	
+
+// setup parameters of gradient radial fills.
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+      graphics_fill_radial_gradient( HGFX hgfx, POS x, POS y, DIM r, COLOR color1, COLOR color2, double profile = 1.0 );
+
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+      graphics_fill_mode( HGFX hgfx, bool even_odd /* false - fill_non_zero */ );
+
+// SECTION: text 
+
+// define font attributes for all subsequent text operations.
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+      graphics_font( HGFX hgfx, const char* name, DIM size, bool bold, bool italic, ANGLE angle = 0);
+
+// draw text at x,y with text alignment
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+      graphics_text( HGFX hgfx, POS x, POS y, const wchar_t* text, unsigned int text_length);
+
+// calculates width of the text string
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+      graphics_text_width( HGFX hgfx, const wchar_t* text, unsigned int text_length, DIM* out_width);
+
+

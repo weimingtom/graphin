@@ -32,13 +32,22 @@ struct image:
     }
 };
 
+
 struct graphics: 
   public resource,
   public Agg2D
 {
-  handle<image> img;
+  struct state: Agg2D::State
+  {
+    state* next;
+    state( state* n = 0): next(n) {}
+    ~state() { delete next; }
+  };
 
-  graphics(image* p)
+  handle<image> img;
+  state*        saved_states;
+
+  graphics(image* p): saved_states(0)
   {
     if(!p)
       return;
@@ -56,6 +65,26 @@ struct graphics:
     Agg2D::noFill();
     Agg2D::lineWidth(1);
   }
+
+  ~graphics()
+  {
+    delete saved_states;
+  }
+
+  void save_state()
+  {
+    saved_states = new state(saved_states); 
+    saveStateTo(*saved_states);
+  }
+  bool restore_state()
+  {
+    if(!saved_states) 
+      return false;
+    restoreStateFrom(*saved_states);
+    saved_states = saved_states->next;
+    return true;
+  }
+
 
 };
 

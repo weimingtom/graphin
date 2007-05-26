@@ -17,4 +17,41 @@ EXPORTS
 	graphics_ellipse	        @12
 	graphics_arc				@13
 	graphics_star				@14
-  
+
+	graphics_open_path			@16
+    graphics_move_to			@17
+    graphics_line_to			@18
+    graphics_hline_to			@19
+    graphics_vline_to			@20
+    graphics_arc_to				@21
+    graphics_ellipse_to			@22
+    graphics_quadratic_curve_to @23
+    graphics_bezier_curve_to    @24
+    graphics_close_path			@25
+    graphics_draw_path			@26
+
+    graphics_rotate				@27
+    graphics_translate			@28
+    graphics_scale				@29
+    graphics_skew				@30
+    graphics_transform			@31
+
+    graphics_state_save			@32
+    graphics_state_restore		@33
+
+    graphics_line_color			@34
+    graphics_fill_color			@35
+
+    graphics_line_linear_gradient	@36
+	graphics_fill_linear_gradient	@37
+
+    graphics_line_radial_gradient   @38
+    graphics_fill_radial_gradient   @39
+
+    graphics_fill_mode			@40
+
+    graphics_font				@41
+    graphics_text				@42
+
+	graphics_text_width			@43
+
