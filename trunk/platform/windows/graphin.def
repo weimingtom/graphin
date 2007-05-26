@@ -1,18 +1,20 @@
 LIBRARY
 EXPORTS
-	image_create 			@1
-	image_release			@2
-	image_get_info		@3
-	image_blit				@4
+	image_create 				@1
+	image_release				@2
+	image_get_info				@3
+	image_blit					@4
 
-	graphics_create         @5
-	graphics_release        @6
+	graphics_create				@5
+	graphics_release			@6
 
-	graphics_rgbt           @7
+	graphics_rgbt				@7
 	
-	graphics_line				        @8
-	graphics_triangle		      	@9
-	graphics_rectangle			    @10
-	graphics_rounded_rectangle	@11
-  graphics_ellipse	          @12
+	graphics_line				@8
+	graphics_triangle      		@9
+	graphics_rectangle			@10
+	graphics_rounded_rectangle  @11
+	graphics_ellipse	        @12
+	graphics_arc				@13
+	graphics_star				@14
   

@@ -156,3 +156,110 @@ GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
   hgfx->ellipse(x,y,rx,ry); 
   return GRAPHIN_OK;
 }
+
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+        graphics_arc ( HGFX hgfx, POS x, POS y, POS rx, POS ry, ANGLE start, ANGLE sweep )
+{
+  if(!hgfx)
+    return GRAPHIN_BAD_PARAM;
+  hgfx->arc(x, y, rx, ry, start, sweep);
+  return GRAPHIN_OK;
+}
+
+
+// Draws star.
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+        graphics_star ( HGFX hgfx, POS x, POS y, POS r1, POS r2, ANGLE start, unsigned rays )
+{
+  if(!hgfx)
+    return GRAPHIN_BAD_PARAM;
+  hgfx->star(x, y, r1, r2, start, rays);
+  return GRAPHIN_OK;
+}
+
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+        graphics_polygon ( HGFX hgfx, POS* xy, unsigned int num_points )
+{
+  if(!hgfx)
+    return GRAPHIN_BAD_PARAM;
+  hgfx->polygon(xy, num_points);
+  return GRAPHIN_OK;
+}
+
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+        graphics_polyline ( HGFX hgfx, POS* xy, unsigned int num_points )
+{
+  if(!hgfx)
+    return GRAPHIN_BAD_PARAM;
+  hgfx->polyline(xy, num_points);
+  return GRAPHIN_OK;
+}
+
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+        graphics_begin_path ( HGFX hgfx )
+{
+  if(!hgfx)
+    return GRAPHIN_BAD_PARAM;
+  hgfx->resetPath();
+  return GRAPHIN_OK;
+}
+
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+        graphics_move_to ( HGFX hgfx, POS x, POS y, bool rel )
+{
+  if(!hgfx)
+    return GRAPHIN_BAD_PARAM;
+  if( rel )
+    hgfx->moveRel(x, y);
+  else
+    hgfx->moveTo(x, y);
+  return GRAPHIN_OK;
+}
+
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+        graphics_line_to ( HGFX hgfx, POS x, POS y, bool rel )
+{
+  if(!hgfx)
+    return GRAPHIN_BAD_PARAM;
+  if( rel )
+    hgfx->lineRel(x, y);
+  else
+    hgfx->lineTo(x, y);
+  return GRAPHIN_OK;
+}
+
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+        graphics_hline_to ( HGFX hgfx, POS x, bool rel )
+{
+  if(!hgfx)
+    return GRAPHIN_BAD_PARAM;
+  if( rel )
+    hgfx->horLineRel(x);
+  else
+    hgfx->horLineTo(x);
+  return GRAPHIN_OK;
+}
+
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+        graphics_vline_to ( HGFX hgfx, POS y, bool rel )
+{
+  if(!hgfx)
+    return GRAPHIN_BAD_PARAM;
+  if( rel )
+    hgfx->verLineRel(y);
+  else
+    hgfx->verLineTo(y);
+  return GRAPHIN_OK;
+}
+
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+        graphics_arc_to ( HGFX hgfx, POS x, POS y, ANGLE angle, POS rx, POS ry, bool is_large_arc, bool sweep_flag, bool rel )
+{
+  if(!hgfx)
+    return GRAPHIN_BAD_PARAM;
+  if( rel )
+    hgfx->arcRel(rx, ry, angle, is_large_arc, sweep_flag, x, y);
+  else
+    hgfx->arcTo(rx, ry, angle, is_large_arc, sweep_flag, x, y);
+  return GRAPHIN_OK;
+}

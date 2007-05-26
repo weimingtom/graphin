@@ -110,6 +110,10 @@ SOURCE=.\main.cpp
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
 # Begin Source File
 
+SOURCE=..\..\src\agg\include\agg2D.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\include\graphin.h
 
 !IF  "$(CFG)" == "graphin - Win32 Release"

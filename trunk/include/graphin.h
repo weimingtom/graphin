@@ -32,8 +32,8 @@ typedef image*    HIMG;
   typedef unsigned char   BYTE;
 #endif 
 typedef double POS;
+typedef double ANGLE;
 typedef unsigned int COLOR;
-
 
 enum GRAPHIN_RESULT
 {
@@ -81,6 +81,10 @@ GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
 GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL 
         graphics_release(HGFX gfx);
 
+// Set line color
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+        graphics_line_color ( HGFX hgfx, COLOR c);
+
 // Draws line from x1,y1 to x2,y2 using current lineColor and lineGradient.
 GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
         graphics_line ( HGFX hgfx, POS x1, POS y1, POS x2, POS y2 );
@@ -101,9 +105,38 @@ GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
 GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
         graphics_ellipse ( HGFX hgfx, POS x, POS y, POS rx, POS ry );
 
-// Set line color
+// Draws closed arc using current lineColor/lineGradient and fillColor/fillGradient.
 GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
-        graphics_line_color ( HGFX hgfx, COLOR c);
+        graphics_arc ( HGFX hgfx, POS x, POS y, POS rx, POS ry, ANGLE start, ANGLE sweep );
 
+// Draws star.
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+        graphics_star ( HGFX hgfx, POS x, POS y, POS r1, POS r2, ANGLE start, unsigned rays );
 
+// Closed polygon.
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+        graphics_polygon ( HGFX hgfx, POS* xy, unsigned int num_points );
 
+// Polyline.
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+        graphics_polyline ( HGFX hgfx, POS* xy, unsigned int num_points );
+
+// Path operations
+
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+        graphics_begin_path ( HGFX hgfx );
+
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+        graphics_move_to ( HGFX hgfx, POS x, POS y, bool relative );
+
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+        graphics_line_to ( HGFX hgfx, POS x, POS y, bool relative );
+
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+        graphics_hline_to ( HGFX hgfx, POS x, bool relative );
+
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+        graphics_vline_to ( HGFX hgfx, POS y, bool relative );
+
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+        graphics_arc_to ( HGFX hgfx, POS x, POS y, ANGLE angle, POS rx, POS ry, bool is_large_arc, bool sweep_flag, bool relative );
