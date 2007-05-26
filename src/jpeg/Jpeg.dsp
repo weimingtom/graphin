@@ -1,4 +1,4 @@
-# Microsoft Developer Studio Project File - Name="Jpeg" - Package Owner=<4>
+# Microsoft Developer Studio Project File - Name="jpeg" - Package Owner=<4>
 # Microsoft Developer Studio Generated Build File, Format Version 6.00
 # ** DO NOT EDIT **
 
@@ -8,17 +8,17 @@ CFG=Jpeg - Win32 Release
 !MESSAGE This is not a valid makefile. To build this project using NMAKE,
 !MESSAGE use the Export Makefile command and run
 !MESSAGE 
-!MESSAGE NMAKE /f "Jpeg.mak".
+!MESSAGE NMAKE /f "jpeg.mak".
 !MESSAGE 
 !MESSAGE You can specify a configuration when running NMAKE
 !MESSAGE by defining the macro CFG on the command line. For example:
 !MESSAGE 
-!MESSAGE NMAKE /f "Jpeg.mak" CFG="Jpeg - Win32 Release"
+!MESSAGE NMAKE /f "jpeg.mak" CFG="jpeg - Win32 Release"
 !MESSAGE 
 !MESSAGE Possible choices for configuration are:
 !MESSAGE 
-!MESSAGE "Jpeg - Win32 Release" (based on "Win32 (x86) Static Library")
-!MESSAGE "Jpeg - Win32 Debug" (based on "Win32 (x86) Static Library")
+!MESSAGE "jpeg - Win32 Release" (based on "Win32 (x86) Static Library")
+!MESSAGE "jpeg - Win32 Debug" (based on "Win32 (x86) Static Library")
 !MESSAGE 
 
 # Begin Project
@@ -28,7 +28,7 @@ CFG=Jpeg - Win32 Release
 CPP=cl.exe
 RSC=rc.exe
 
-!IF  "$(CFG)" == "Jpeg - Win32 Release"
+!IF  "$(CFG)" == "jpeg - Win32 Release"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 0
@@ -52,7 +52,7 @@ LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
 # ADD LIB32 /nologo
 
-!ELSEIF  "$(CFG)" == "Jpeg - Win32 Debug"
+!ELSEIF  "$(CFG)" == "jpeg - Win32 Debug"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 1
@@ -80,8 +80,8 @@ LIB32=link.exe -lib
 
 # Begin Target
 
-# Name "Jpeg - Win32 Release"
-# Name "Jpeg - Win32 Debug"
+# Name "jpeg - Win32 Release"
+# Name "jpeg - Win32 Debug"
 # Begin Source File
 
 SOURCE=.\Jcapimin.c

@@ -40,7 +40,16 @@ void graphic_paint(HDC hdc, int width, int height)
 
     graphics_line_color(g,graphics_rgbt(0,127,127,0));
   graphics_ellipse(g, width/2, height/2, width/4, height/4);
-  
+
+  int r = min(width, height);
+
+    graphics_line_color(g,graphics_rgbt(127,0,127,0));
+  graphics_arc(g, width/2, height/2, r/8, r/8, 0,6);
+
+    graphics_line_color(g,graphics_rgbt(127,127,0,0));
+  graphics_star(g, width/2, height/2, r/5, r/8, 0,5);
+
+
   image_blit(hdc,0,0,_img,0,0,width,height, false);  
   graphics_release(g);
 }
