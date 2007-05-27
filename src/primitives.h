@@ -25,6 +25,8 @@
 
     bool operator == ( T *p ) const  { return _ptr == p;  }
 
+    T* detach ()            { T* t = _ptr; _ptr = 0; return t; }
+
     private:
     T* _ptr;
 

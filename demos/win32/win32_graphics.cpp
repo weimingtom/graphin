@@ -1,4 +1,6 @@
 #include "win32.h"
+#include "mm_file.h"
+#include <direct.h>
 
 static HIMG _img = 0;
 static int  _width = 0;
@@ -24,6 +26,8 @@ HGFX gfx(int width, int height)
 
   return _gfx;
 }
+
+HIMG img = 0;
 
 void graphic_paint(HDC hdc, int width, int height)
 {
@@ -86,6 +90,60 @@ void graphic_paint(HDC hdc, int width, int height)
       graphics_rounded_rectangle(g, 200, 30, 200 + 100, 30 + 100, 10, 10);
 
   graphics_state_restore(g);
+
+
+  // Third quadrant, text output
+
+  graphics_state_save(g);
+
+    graphics_translate(g,0,height/2);
+    graphics_scale(g,0.5,0.5);
+
+      graphics_line(g,0,height/2, width, height/2);
+
+      graphics_line_width(g,3);
+      graphics_line_color(g, graphics_rgbt(0xAF,0x7F,0x2F)); // brown
+
+      graphics_fill_radial_gradient(g, width/2, height/2, r / 2, 
+          graphics_rgbt(0xFF,0xFF,0), // yellow
+          graphics_rgbt(0,0x8F,0)); // green
+
+
+      graphics_text_alignment(g, ALIGN_CENTER, ALIGN_BASELINE);
+      graphics_font(g, "Century Gothic", r / 5);
+
+      graphics_text(g, width/2, height/2, L"graphinius", 10);
+     
+
+  graphics_state_restore(g);
+
+
+  // Fourth quadrant, image output
+
+  graphics_state_save(g);
+
+    graphics_translate(g,width/2,height/2);
+    graphics_scale(g,0.5,0.5);
+
+    if(!img)
+    {
+      tool::mm_file mf;
+      if( mf.open("../petrov_vodkin_A_Candle_and_a_Decanter.jpg") )
+        image_load( (BYTE*) mf.data(), mf.size(), &img ); // load png/jpeg/etc. image from stream of bytes
+    }
+
+    if(img)
+    {
+      DIM w = width - 20;
+      DIM h = height - 20;
+      graphics_draw_image ( g, img, 10, 10, &w, &h );
+    }
+ 
+
+  graphics_state_restore(g);
+
+
+
 
   image_blit(hdc,0,0,_img,0,0,width,height, false);  
   graphics_release(g);

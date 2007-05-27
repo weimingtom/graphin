@@ -496,4 +496,84 @@ GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
   return GRAPHIN_OK;
 }
 
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+      graphics_text_alignment( HGFX hgfx, TEXT_ALIGNMENT x, TEXT_ALIGNMENT y)
+{
+  if(!hgfx)
+    return GRAPHIN_BAD_PARAM;
+  hgfx->textAlignment( Agg2D::TextAlignment(x), Agg2D::TextAlignment(y) ); 
+  return GRAPHIN_OK;
+}
 
+// returns height and ascent of the font.
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+      graphics_font_metrics( HGFX hgfx, DIM* out_height, DIM* out_ascent )
+{
+  if(!hgfx)
+    return GRAPHIN_BAD_PARAM;
+  if(out_height)
+    *out_height = hgfx->fontHeight();
+  if(out_ascent)
+    *out_ascent = hgfx->fontAscent();
+  return GRAPHIN_OK;
+}
+
+#include "imageio.h"
+
+bool image_ctor(void* pctorPrm, unsigned int width, unsigned int height, BYTE** rowPtrs)
+{
+  image* pim = new image(width, height);
+  if(!pim) return 0;
+
+  int   stride = pim->pmap.stride();
+  BYTE* ptr    = pim->pmap.buf();
+
+  for(unsigned n = 0; n < height; ++n, ptr += stride)
+    rowPtrs[n] = ptr;
+
+  handle<image>* him = (handle<image>*)pctorPrm;
+  *him = pim;
+  return true;
+}
+
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL 
+        image_load( const BYTE* bytes, unsigned int num_bytes, HIMG* pout_img ) // load png/jpeg/etc. image from stream of bytes
+{
+  handle<image> img;
+  if( !DecodeImage(&image_ctor, &img, const_cast<BYTE*>(bytes), num_bytes) )
+    return GRAPHIN_FAILURE;
+
+  *pout_img = img.detach();
+
+  return GRAPHIN_OK;
+}
+
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+      graphics_draw_image ( HGFX hgfx, HIMG himg, POS x, POS y, 
+                            DIM* w, DIM* h, unsigned* ix, unsigned* iy, unsigned* iw, unsigned* ih )
+{
+  if(!hgfx || !himg)
+    return GRAPHIN_BAD_PARAM;
+
+  double unit = 0;
+
+  if(!w && !h)
+    unit = hgfx->screenToWorld(1.0);
+
+  unsigned src_x = ix? *ix : 0;
+  unsigned src_y = iy? *iy : 0;
+  unsigned src_width = iw? *iw : himg->pmap.width();
+  unsigned src_height = ih? *ih : himg->pmap.height();
+  
+  DIM dst_width = w? *w : unit * src_width;  
+  DIM dst_height = h? *h : unit * src_height;
+
+  // void transformImage(const Image& img,    
+  //                        int imgX1,    int imgY1,    int imgX2,    int imgY2,
+  //                     double dstX1, double dstY1, double dstX2, double dstY2);
+
+  hgfx->transformImage(*himg, src_x, src_y, src_x + src_width, src_y + src_height, 
+                              x,y, x + dst_width, y + dst_height);
+  return GRAPHIN_OK;
+
+}

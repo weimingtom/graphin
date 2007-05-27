@@ -54,4 +54,11 @@ EXPORTS
     graphics_text				@42
 
 	graphics_text_width			@43
+    graphics_text_alignment     @44
+    graphics_font_metrics       @45
+
+	graphics_draw_image         @46
+
+
+
 
