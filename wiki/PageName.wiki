@@ -1,0 +1,87 @@
+#summary Graphin API .
+#labels Phase-Implementation
+
+= Introduction =
+
+Graphin application programming interface is a set of plain C functions defined in graphin.h file. Design goal is to provide as compact as possible set of primitives. 
+
+= List of functions =
+
+== Bitmap functions ==
+
+  *	image_create 				
+  *	image_release				
+  *	image_get_info			
+  *	image_blit					
+
+== Graphics initialization ==
+
+  *	graphics_create			
+  *	graphics_release		
+
+  *	graphics_rgbt				
+
+== Basic shapes ==
+
+  *	graphics_line				
+  *	graphics_triangle   
+  *	graphics_rectangle	
+  *	graphics_rounded_rectangle
+  *	graphics_ellipse	       
+  *	graphics_arc				
+  *	graphics_star				
+
+== Path primitives ==
+
+  * graphics_open_path	
+  * graphics_move_to		
+  * graphics_line_to		
+  * graphics_hline_to		
+  * graphics_vline_to		
+  * graphics_arc_to			
+  * graphics_ellipse_to	
+  * graphics_quadratic_curve_to
+  * graphics_bezier_curve_to  
+  * graphics_close_path			
+  * graphics_draw_path			
+
+== Affine transformations ==
+
+  * graphics_rotate				
+  * graphics_translate		
+  * graphics_scale				
+  * graphics_skew				  
+  * graphics_transform		
+
+== State ==
+
+  * graphics_state_save			
+  * graphics_state_restore	
+
+== Drawing attributes ==
+
+  * graphics_line_color			
+  * graphics_fill_color			
+
+  * graphics_line_linear_gradient	
+  * graphics_fill_linear_gradient	
+
+  * graphics_line_radial_gradient 
+  * graphics_fill_radial_gradient 
+
+  * graphics_fill_mode		
+
+== Text drawing ==
+
+  * graphics_font			
+  * graphics_text			
+
+  * graphics_text_width		
+  * graphics_text_alignment
+  * graphics_font_metrics  
+
+== Bitmap rendering ==
+
+  * graphics_draw_image    
+  * graphics_blit_image    
+  * graphics_blend_image  
