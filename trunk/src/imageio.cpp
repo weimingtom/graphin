@@ -1,9 +1,10 @@
 #include "imageio.h"
+#include <malloc.h>
 
 int DecodePNGImage(ImageCtor* pctor, void* pctorPrm, unsigned char* src, unsigned int srclength);
 int DecodeJPGImage(ImageCtor* pctor, void* pctorPrm, unsigned char* src, unsigned int srclength);
 
-int DecodeImage(ImageCtor* pctor, void* pctorPrm, unsigned char* src, unsigned int srclength)
+bool DecodeImage(ImageCtor* pctor, void* pctorPrm, unsigned char* src, unsigned int srclength)
 {
   if( DecodePNGImage(pctor, pctorPrm, src, srclength) )
     return 1;
@@ -18,8 +19,7 @@ typedef struct _imginput
   unsigned char* end;
 } imginput;
 
-
-#include "png/png.h"
+#include "png.h"
 
 static void PNGAPI png_read_data(png_structp png_ptr,png_bytep data, png_size_t length) 
 {
@@ -87,7 +87,7 @@ int DecodePNGImage(ImageCtor* pctor, void* pctorPrm, unsigned char* src, unsigne
     //  png_set_background(png_ptr, &my_background,
 		//	 PNG_BACKGROUND_GAMMA_SCREEN, 0, 1.0);
 
-    double screen_gamma=2.0; // typical value
+    double screen_gamma=2.2; // typical value
     double gamma;
     if (png_get_gAMA(png_ptr, info_ptr, &gamma))
       png_set_gamma(png_ptr, screen_gamma, gamma);
@@ -95,18 +95,24 @@ int DecodePNGImage(ImageCtor* pctor, void* pctorPrm, unsigned char* src, unsigne
       png_set_gamma(png_ptr, screen_gamma, 0.45455);
 //#endif
 
+
     // update info after applying transformations
     png_read_update_info(png_ptr,info_ptr);
 
     int		rowBytes = png_get_rowbytes(png_ptr, info_ptr);
     int   bpp = rowBytes / width;
-    
+
+    if( bpp == 3 )
+      png_set_add_alpha(png_ptr,0xff,1);
+    else
+      png_set_invert_alpha(png_ptr);
+   
     png_byte** rowPtrs = (png_byte**)malloc(sizeof(png_byte*)*height);
     rowPtrs[0] = 0;
     void* retval = 0;
     if(rowPtrs && height && width)
     {
-      if(pctor(pctorPrm, width,height,bpp,rowPtrs))
+      if(pctor(pctorPrm, width,height,rowPtrs))
          png_read_image(png_ptr, rowPtrs);
     }
     png_read_end(png_ptr,info_ptr);
@@ -121,8 +127,10 @@ int DecodePNGImage(ImageCtor* pctor, void* pctorPrm, unsigned char* src, unsigne
 
 // JPEG
 
-  #include "jpeg/jpeglib.h"
-
+extern "C"
+{
+  #include "jpeglib.h"
+}
 
   struct my_error_mgr {
     struct jpeg_error_mgr pub;	/* "public" fields */
@@ -198,12 +206,12 @@ int DecodePNGImage(ImageCtor* pctor, void* pctorPrm, unsigned char* src, unsigne
 
     (void) jpeg_start_decompress(&cinfo);
 	
-	unsigned char** rowPtrs = (unsigned char**)malloc(sizeof(unsigned char*)*cinfo.image_height);
+	  unsigned char** rowPtrs = (unsigned char**)malloc(sizeof(unsigned char*)*cinfo.image_height);
     rowPtrs[0] = 0;
     void* retval = 0;
     if(rowPtrs && cinfo.image_height && cinfo.image_width)
     {
-      if(!pctor(pctorPrm, cinfo.image_width ,cinfo.image_height,3,rowPtrs))
+      if(!pctor(pctorPrm, cinfo.image_width ,cinfo.image_height,rowPtrs))
          goto FAIL;
     }
 
@@ -216,9 +224,12 @@ int DecodePNGImage(ImageCtor* pctor, void* pctorPrm, unsigned char* src, unsigne
        {
 	     int scan = cinfo.output_scanline;
          (void) jpeg_read_scanlines(&cinfo, row_pointer , 1);
-         unsigned char* rgb = rowPtrs[scan];
-         for(size_t i = 0; i < cinfo.image_width; i++, rgb+=3)
-           rgb[0] = rgb[1] = rgb[2] = row[i];
+         unsigned char* rgba = rowPtrs[scan];
+         for(size_t i = 0; i < cinfo.image_width; i++, rgba += 4)
+         {
+           rgba[0] = rgba[1] = rgba[2] = row[i];
+           rgba[3] = 0xff;
+         }
        }
     }
     else {
@@ -228,14 +239,15 @@ int DecodePNGImage(ImageCtor* pctor, void* pctorPrm, unsigned char* src, unsigne
        {
 	     int scan = cinfo.output_scanline;
          (void) jpeg_read_scanlines(&cinfo, row_pointer , 1);
-         unsigned char* rgb = rowPtrs[scan];
-		 unsigned char* src = row;
-         for(size_t i = 0; i < cinfo.image_width; i++, src += 3, rgb += 3)
-		 {
-           rgb[0] = src[2];
-		   rgb[1] = src[1]; 
-		   rgb[2] = src[0];
-		 }
+         unsigned char* rgba = rowPtrs[scan];
+		     unsigned char* src = row;
+         for(size_t i = 0; i < cinfo.image_width; i++, src += 3, rgba += 4)
+		     {
+           rgba[0] = src[2];
+		       rgba[1] = src[1]; 
+		       rgba[2] = src[0];
+           rgba[3] = 0xff;
+		     }
        }
     }
    

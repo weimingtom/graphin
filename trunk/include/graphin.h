@@ -68,7 +68,6 @@ GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
 GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL 
         image_load( const BYTE* bytes, unsigned int num_bytes, HIMG* pout_img ); // load png/jpeg/etc. image from stream of bytes
 
-
 // SECTION: graphics primitives and drawing operations
 
 // create color value
@@ -240,7 +239,7 @@ GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
 
 // define font attributes for all subsequent text operations.
 GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
-      graphics_font( HGFX hgfx, const char* name, DIM size, bool bold, bool italic, ANGLE angle = 0);
+      graphics_font( HGFX hgfx, const char* name, DIM size, bool bold = false, bool italic = false, ANGLE angle = 0);
 
 // draw text at x,y with text alignment
 GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
@@ -250,4 +249,31 @@ GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
 GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
       graphics_text_width( HGFX hgfx, const wchar_t* text, unsigned int text_length, DIM* out_width);
 
+// returns height and ascent of the font.
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+      graphics_font_metrics( HGFX hgfx, DIM* out_height, DIM* out_ascent );
+
+enum TEXT_ALIGNMENT
+{
+  ALIGN_TOP,
+  ALIGN_BOTTOM,
+  ALIGN_CENTER,
+  ALIGN_BASELINE,
+  ALIGN_RIGHT = ALIGN_TOP,
+  ALIGN_LEFT = ALIGN_BOTTOM
+  
+};
+
+// calculates width of the text string
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+      graphics_text_alignment( HGFX hgfx, TEXT_ALIGNMENT x, TEXT_ALIGNMENT y);
+
+// SECTION: 
+
+// draws img onto the graphics surface with current transformation applied (scale, rotation). 
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+      graphics_draw_image ( HGFX hgfx, HIMG himg, POS x, POS y, 
+                            DIM* w = 0, DIM* h = 0, unsigned* ix = 0, unsigned* iy = 0, unsigned* iw = 0, unsigned* ih = 0 );
+
+ 
 

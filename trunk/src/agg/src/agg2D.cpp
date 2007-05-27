@@ -1080,6 +1080,13 @@ double Agg2D::fontHeight() const
 }
 
 //------------------------------------------------------------------------
+double Agg2D::fontAscent() const
+{
+   return m_fontAscent;
+}
+
+
+//------------------------------------------------------------------------
 void Agg2D::textAlignment(TextAlignment alignX, TextAlignment alignY)
 {
    m_textAlignX = alignX;
@@ -1154,7 +1161,6 @@ void Agg2D::textHints(bool hints)
 //------------------------------------------------------------------------
 void Agg2D::text(double x, double y, const char* str, unsigned int len, bool roundOff, double ddx, double ddy)
 {
-#if !defined( UNDER_CE )
 
    double dx = 0.0;
    double dy = 0.0;
@@ -1181,8 +1187,9 @@ void Agg2D::text(double x, double y, const char* str, unsigned int len, bool rou
 
    switch(m_textAlignY)
    {
-       case AlignCenter:  dy = -asc * 0.5; break;
-       case AlignTop:     dy = -asc;       break;
+       case AlignCenter:    dy = -asc * 0.5; break;
+       case AlignTop:       dy = -asc;       break;
+       case AlignBaseline:  dy = -fontAscent();   break;
        default: break;
    }
 
@@ -1237,12 +1244,11 @@ void Agg2D::text(double x, double y, const char* str, unsigned int len, bool rou
             start_y += glyph->advance_y;
         }
     }
-#endif
+
 }
 
 void Agg2D::text(double x, double y, const wchar_t* str, unsigned int len, bool roundOff, double ddx, double ddy)
 {
-#if !defined( UNDER_CE )
 
    double dx = 0.0;
    double dy = 0.0;
@@ -1268,8 +1274,9 @@ void Agg2D::text(double x, double y, const wchar_t* str, unsigned int len, bool 
 
    switch(m_textAlignY)
    {
-       case AlignCenter:  dy = -asc * 0.5; break;
-       case AlignTop:     dy = -asc;       break;
+       case AlignCenter:    dy = -asc * 0.5; break;
+       case AlignTop:       dy = -asc;       break;
+       case AlignBaseline:  dy = -fontAscent();   break;
        default: break;
    }
 
@@ -1312,7 +1319,7 @@ void Agg2D::text(double x, double y, const wchar_t* str, unsigned int len, bool 
             {
                 m_path.remove_all();
                 //m_path.add_path(tr, 0, false);
-				m_path.concat_path(tr,0); // JME
+				        m_path.concat_path(tr,0); // JME
                 drawPath();
             }
 
@@ -1325,7 +1332,7 @@ void Agg2D::text(double x, double y, const wchar_t* str, unsigned int len, bool 
             start_y += glyph->advance_y;
         }
     }
-  #endif 
+
 }
 
 
