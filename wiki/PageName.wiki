@@ -1,5 +1,4 @@
 #summary Graphin API .
-#labels Phase-Implementation,Featured
 
 = Introduction =
 
