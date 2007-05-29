@@ -268,12 +268,52 @@ enum TEXT_ALIGNMENT
 GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
       graphics_text_alignment( HGFX hgfx, TEXT_ALIGNMENT x, TEXT_ALIGNMENT y);
 
-// SECTION: 
+// SECTION: image rendering
 
 // draws img onto the graphics surface with current transformation applied (scale, rotation). 
 GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
       graphics_draw_image ( HGFX hgfx, HIMG himg, POS x, POS y, 
                             DIM* w = 0, DIM* h = 0, unsigned* ix = 0, unsigned* iy = 0, unsigned* iw = 0, unsigned* ih = 0 );
 
- 
+// blits image bits onto underlying pixel buffer. no affine transformations.  
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+      graphics_blit_image ( HGFX hgfx, HIMG himg, POS x, POS y, unsigned* ix = 0, unsigned* iy = 0, unsigned* iw = 0, unsigned* ih = 0 );
+
+// blends image bits with bits of the buffer. no affine transformations.  
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+      graphics_blend_image ( HGFX hgfx, HIMG himg, POS x, POS y, unsigned opacity = 0xFF, unsigned* ix = 0, unsigned* iy = 0, unsigned* iw = 0, unsigned* ih = 0 );
+
+// SECTION: coordinate space
+
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+      graphics_world_to_screen ( HGFX hgfx, POS* inout_x, POS* inout_y);
+
+inline GRAPHIN_RESULT
+      graphics_world_to_screen ( HGFX hgfx, POS* length)
+{
+   return graphics_world_to_screen ( hgfx, length, 0);
+}
+
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+      graphics_screen_to_world ( HGFX hgfx, POS* inout_x, POS* inout_y);
+
+inline GRAPHIN_RESULT
+      graphics_screen_to_world ( HGFX hgfx, POS* length)
+{
+   return graphics_screen_to_world (hgfx, length, 0);
+}
+
+// SECTION: clipping
+
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+      graphics_set_clip_box ( HGFX hgfx, POS x1, POS y1, POS x2, POS y2);
+
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+      graphics_get_clip_box ( HGFX hgfx, POS* x1, POS* y1, POS* x2, POS* y2);
+
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+      graphics_is_in_clip_box ( HGFX hgfx, POS x, POS y);
+
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+      graphics_rect_is_visible ( HGFX hgfx, POS x1, POS y1, POS x2, POS y2, bool* yes);
 

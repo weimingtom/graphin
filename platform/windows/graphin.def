@@ -58,7 +58,13 @@ EXPORTS
     graphics_font_metrics       @45
 
 	graphics_draw_image         @46
+    graphics_blit_image			@47
+    graphics_blend_image        @48
 
+    graphics_world_to_screen	@49
+    graphics_screen_to_world    @50
 
-
-
+    graphics_set_clip_box		@51
+    graphics_get_clip_box		@52
+    graphics_is_in_clip_box		@53
+    graphics_rect_is_visible	@54

@@ -84,9 +84,29 @@ struct graphics:
     saved_states = saved_states->next;
     return true;
   }
-
-
 };
+
+struct window
+{
+  //virtual caption()
+  window() {}
+  virtual ~window() {}
+  virtual bool on_key(...)        { return false; }
+  virtual bool on_mouse(...)      { return false; }
+  virtual bool on_timer(...)      { return false; }
+  virtual bool on_activation(...) { return false; }
+  virtual bool on_destory(...)    { return false; }
+  virtual bool on_size(...)       { return false; }
+  virtual bool on_move(...)       { return false; }
+};
+
+/*
+struct app: public resource 
+{
+  create_window()
+};*/
+
+
 
 
 
