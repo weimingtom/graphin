@@ -56,5 +56,15 @@
     void add_ref() { ++_ref_cntr; }
   };
    
+  template <class T>
+  inline T
+    limit ( T v, T minv, T maxv )
+  {
+    if (minv >= maxv)
+      return minv;
+    if (v > maxv) return maxv;
+    if (v < minv) return minv;
+    return v;
+  }
 
 #endif

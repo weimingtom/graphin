@@ -518,6 +518,32 @@ GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
   return GRAPHIN_OK;
 }
 
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+      graphics_world_to_screen ( HGFX hgfx, POS* x, POS* y)
+{
+  if(!hgfx || !x)
+    return GRAPHIN_BAD_PARAM;
+  if(y)
+    hgfx->worldToScreen(*x,*y);
+  else
+    *x = hgfx->worldToScreen(*x);
+  return GRAPHIN_OK;
+}
+
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+      graphics_screen_to_world ( HGFX hgfx, POS* x, POS* y)
+{
+  if(!hgfx || !x)
+    return GRAPHIN_BAD_PARAM;
+  if(y)
+    hgfx->screenToWorld(*x,*y);
+  else
+    *x = hgfx->screenToWorld(*x);
+  return GRAPHIN_OK;
+}
+
+
+
 #include "imageio.h"
 
 bool image_ctor(void* pctorPrm, unsigned int width, unsigned int height, BYTE** rowPtrs)
@@ -560,20 +586,125 @@ GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
   if(!w && !h)
     unit = hgfx->screenToWorld(1.0);
 
-  unsigned src_x = ix? *ix : 0;
-  unsigned src_y = iy? *iy : 0;
-  unsigned src_width = iw? *iw : himg->pmap.width();
-  unsigned src_height = ih? *ih : himg->pmap.height();
-  
-  DIM dst_width = w? *w : unit * src_width;  
-  DIM dst_height = h? *h : unit * src_height;
+  unsigned src_x1 = ix? *ix : 0;
+  unsigned src_y1 = iy? *iy : 0;
+  unsigned src_x2 = src_x1 + iw? *iw : himg->pmap.width();
+  unsigned src_y2 = src_y1 + ih? *ih : himg->pmap.height();
 
-  // void transformImage(const Image& img,    
-  //                        int imgX1,    int imgY1,    int imgX2,    int imgY2,
-  //                     double dstX1, double dstY1, double dstX2, double dstY2);
+  DIM dst_width = w? *w : unit * (src_x2 - src_x1);  
+  DIM dst_height = h? *h : unit * (src_y2 - src_y1);
 
-  hgfx->transformImage(*himg, src_x, src_y, src_x + src_width, src_y + src_height, 
-                              x,y, x + dst_width, y + dst_height);
+  hgfx->transformImage(*himg, 
+                   limit(src_x1, (unsigned)0, (unsigned)himg->pmap.width()), 
+                   limit(src_y1, (unsigned)0, (unsigned)himg->pmap.height()),
+                   limit(src_x2, (unsigned)0, (unsigned)himg->pmap.width()), 
+                   limit(src_y2, (unsigned)0, (unsigned)himg->pmap.height()),
+                   x,y, x + dst_width, y + dst_height);
+
   return GRAPHIN_OK;
 
 }
+
+// blits image bits onto underlying pixel buffer. 
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+      graphics_blit_image ( HGFX hgfx, HIMG himg, POS x, POS y, unsigned* ix, unsigned* iy, unsigned* iw, unsigned* ih )
+{
+  if(!hgfx || !himg)
+    return GRAPHIN_BAD_PARAM;
+
+  unsigned src_x1 = ix? *ix : 0;
+  unsigned src_y1 = iy? *iy : 0;
+  unsigned src_x2 = src_x1 + iw? *iw : himg->pmap.width();
+  unsigned src_y2 = src_y1 + ih? *ih : himg->pmap.height();
+
+  hgfx->copyImage(*himg,
+                   limit(src_x1, (unsigned)0, (unsigned)himg->pmap.width()), 
+                   limit(src_y1, (unsigned)0, (unsigned)himg->pmap.height()),
+                   limit(src_x2, (unsigned)0, (unsigned)himg->pmap.width()), 
+                   limit(src_y2, (unsigned)0, (unsigned)himg->pmap.height()),
+                   x, y);
+
+  return GRAPHIN_OK;
+}
+
+// blits image bits onto underlying pixel buffer. 
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+      graphics_blend_image ( HGFX hgfx, HIMG himg, POS x, POS y, unsigned opacity, unsigned* ix, unsigned* iy, unsigned* iw, unsigned* ih)
+{
+  if(!hgfx || !himg)
+    return GRAPHIN_BAD_PARAM;
+
+  unsigned src_x1 = ix? *ix : 0;
+  unsigned src_y1 = iy? *iy : 0;
+  unsigned src_x2 = src_x1 + iw? *iw : himg->pmap.width();
+  unsigned src_y2 = src_y1 + ih? *ih : himg->pmap.height();
+
+  hgfx->blendImage(*himg,
+                   limit(src_x1, (unsigned)0, (unsigned)himg->pmap.width()), 
+                   limit(src_y1, (unsigned)0, (unsigned)himg->pmap.height()),
+                   limit(src_x2, (unsigned)0, (unsigned)himg->pmap.width()), 
+                   limit(src_y2, (unsigned)0, (unsigned)himg->pmap.height()),
+                   x, y, opacity);
+
+  return GRAPHIN_OK;
+}
+
+
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+      graphics_set_clip_box ( HGFX hgfx, POS x1, POS y1, POS x2, POS y2)
+{
+  if(!hgfx)
+    return GRAPHIN_BAD_PARAM;
+
+  hgfx->clipBox(x1,y1,x2,y2);
+
+  return GRAPHIN_OK;
+}
+
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+      graphics_get_clip_box ( HGFX hgfx, POS* x1, POS* y1, POS* x2, POS* y2)
+{
+  if(!hgfx || !x1 || !y1 || !x2 || !y2 )
+    return GRAPHIN_BAD_PARAM;
+
+  Agg2D::RectD rc = hgfx->clipBox();
+  *x1 = rc.x1;
+  *x2 = rc.x2;
+  *y1 = rc.y1;
+  *y2 = rc.y2;
+
+  return GRAPHIN_OK;
+}
+
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+      graphics_is_in_clip_box ( HGFX hgfx, POS x, POS y, bool* out_yes)
+{
+  if(!hgfx || !out_yes)
+    return GRAPHIN_BAD_PARAM;
+
+  *out_yes = hgfx->inBox(x, y);
+
+  return GRAPHIN_OK;
+}
+
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+      graphics_rect_is_visible ( HGFX hgfx, POS x1, POS y1, POS x2, POS y2, bool *out_yes)
+{
+  if(!hgfx || !out_yes)
+    return GRAPHIN_BAD_PARAM;
+
+  Agg2D::RectD rc = hgfx->clipBox();
+
+  hgfx->worldToScreen(x1,y1);
+  hgfx->worldToScreen(x2,y2);
+
+  Agg2D::RectD rr(x1,y1,x2,y2);
+
+  *out_yes = 
+        ( max( rr.x1, rc.x1 ) <= min( rr.x2, rc.x2 ) ) 
+     && ( max( rr.y1, rc.y1 ) <= min( rr.y2, rc.y2 ) );
+
+  return GRAPHIN_OK;
+}
+
+
