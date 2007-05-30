@@ -28,10 +28,19 @@ struct WINDOW_ON_MOVE_PARAMS      { int x; int y; };
 struct WINDOW_ON_ACTIVATE_PARAMS  { int manner; };
 struct WINDOW_ON_TIMER_PARAMS     { unsigned long id; };
 
-GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL 
-        window_create(window_function* pf, void* tag, unsigned style, HWINDOW* out_hwnd);
+
+enum WINDOW_TYPE
+{
+  WINDOW_TYPE_POPUP,  // no border, no caption
+  WINDOW_TYPE_FRAME,  // caption and resizeable frame
+  WINDOW_TYPE_TOOL,   // narrow caption and resizeable frame
+  WINDOW_TYPE_DIALOG, // caption and not resizeable frame
+};
 
 GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL 
+        window_create(window_function* pf, void* tag, WINDOW_TYPE type, HWINDOW* out_hwnd);
+
+GRAPHIN_API bool GRAPHIN_CALL 
         window_is_valid(HWINDOW hwnd);
 
 GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL 
