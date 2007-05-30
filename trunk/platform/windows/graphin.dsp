@@ -43,7 +43,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "GRAPHIN_EXPORTS" /Yu"stdafx.h" /FD /c
-# ADD CPP /nologo /MT /W3 /GX /O2 /I "../../include" /I "../../src" /I "../../src/agg/include" /I "../../src/png/" /I "../../src/zlib/" /I "../../src/jpeg/" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "GRAPHIN_EXPORTS" /FD /c
+# ADD CPP /nologo /MT /W3 /GX /O2 /I "./" /I "../../include" /I "../../src" /I "../../src/agg/include" /I "../../src/png/" /I "../../src/zlib/" /I "../../src/jpeg/" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "GRAPHIN_EXPORTS" /FD /c
 # SUBTRACT CPP /X /YX /Yc /Yu
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
@@ -70,7 +70,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "GRAPHIN_EXPORTS" /Yu"stdafx.h" /FD /GZ /c
-# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /I "../../include" /I "../../src" /I "../../src/agg/include" /I "../../src/png/" /I "../../src/zlib/" /I "../../src/jpeg/" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "GRAPHIN_EXPORTS" /FD /GZ /c
+# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /I "./" /I "../../include" /I "../../src" /I "../../src/agg/include" /I "../../src/png/" /I "../../src/zlib/" /I "../../src/jpeg/" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "GRAPHIN_EXPORTS" /FD /GZ /c
 # SUBTRACT CPP /X /YX /Yc /Yu
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
@@ -112,6 +112,10 @@ SOURCE=..\..\src\imageio.cpp
 
 SOURCE=.\main.cpp
 # End Source File
+# Begin Source File
+
+SOURCE=.\window.cpp
+# End Source File
 # End Group
 # Begin Group "Header Files"
 
@@ -146,6 +150,10 @@ SOURCE=..\..\src\objects.h
 # Begin Source File
 
 SOURCE=..\..\src\primitives.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\include\window.h
 # End Source File
 # End Group
 # Begin Group "Resource Files"
