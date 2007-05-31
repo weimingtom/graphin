@@ -8,18 +8,10 @@
 
 void graphic_paint(WINDOW_ON_PAINT_PARAMS* p)
 {
-  HGFX g = 0;
+  HGFX g = p->surface;
   
-  unsigned int width;
-  unsigned int height;
-
-  image_get_info(p->surface,0,&width,&height,0,0);
-
-  graphics_create( p->surface, &g );
-
-  // next line is not working in the way I expect.
-  //graphics_set_clip_box ( g, p->clip_x, p->clip_y, p->clip_x + p->clip_w, p->clip_y + p->clip_h);
-  //
+  unsigned int width = p->view_w;
+  unsigned int height = p->view_h;
 
   graphics_state_save(g);
 
@@ -128,9 +120,7 @@ void graphic_paint(WINDOW_ON_PAINT_PARAMS* p)
       DIM h = height - 20;
       graphics_draw_image ( g, img, 10, 10, &w, &h );
     }
-
   graphics_state_restore(g);
-  graphics_release(g);
 }
 
 

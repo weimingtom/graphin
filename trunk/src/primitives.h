@@ -41,11 +41,12 @@
 
   class resource
   {
+  protected:
     int _ref_cntr;
   public:
     resource ()             {  _ref_cntr = 0; }
     virtual ~resource ()    {  assert ( _ref_cntr == 0 ); }
-    long release()
+    virtual long release()
     {
         assert(_ref_cntr > 0);
         long t = --_ref_cntr;
@@ -53,7 +54,7 @@
           delete this;
         return t;
     }
-    void add_ref() { ++_ref_cntr; }
+    virtual void add_ref() { ++_ref_cntr; }
   };
   template <class T>
   inline T

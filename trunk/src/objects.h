@@ -21,9 +21,9 @@ struct image:
 {
     agg::pixel_map pmap;
 
-    image(unsigned int width, unsigned int height)
+    image(unsigned int width, unsigned int height, unsigned init = 256)
     {
-      pmap.create(width, height, agg::org_color32);
+      pmap.create(width, height, agg::org_color32, init);
       attach(pmap.buf(),width,height,pmap.stride());
     }
     ~image()
@@ -52,7 +52,7 @@ struct graphics:
     if(!p)
       return;
     Agg2D::attach(p->pmap.buf(), p->pmap.width(), p->pmap.height(), p->pmap.stride());
-    Agg2D::clearAll(0xff, 0xff, 0xff);
+    //Agg2D::clearAll(0xff, 0xff, 0xff);    
     Agg2D::antiAliasGamma(1.4);
     Agg2D::blendMode(Agg2D::BlendAlpha);
     Agg2D::imageFilter(Agg2D::Bilinear);
@@ -83,6 +83,20 @@ struct graphics:
     restoreStateFrom(*saved_states);
     saved_states = saved_states->next;
     return true;
+  }
+};
+
+struct paint_graphics: graphics
+{
+  paint_graphics(image* p, int clip_x1, int clip_y1, int clip_x2, int clip_y2): graphics(p)
+  {
+    clipBox( clip_x1, clip_y1, clip_x2, clip_y2 );
+    clearClipBox(255,255,255);
+  }
+  virtual long release() // we create paint_graphics on stack
+  {
+      assert(_ref_cntr > 0);
+      return --_ref_cntr;
   }
 };
 
