@@ -2,36 +2,24 @@
 #include "mm_file.h"
 #include <direct.h>
 
-static HIMG _img = 0;
-static int  _width = 0;
-static int  _height = 0;
+#include "window.h"
 
-HGFX gfx(int width, int height)
+
+
+void graphic_paint(WINDOW_ON_PAINT_PARAMS* p)
 {
-  HGFX _gfx = 0;
+  HGFX g = 0;
+  
+  unsigned int width;
+  unsigned int height;
 
-  if( !_img || _width != width || _height != height )
-  {
-    if( _img )
-      image_release(_img);
+  image_get_info(p->surface,0,&width,&height,0,0);
 
-    _width = width;
-    _height = height;
+  graphics_create( p->surface, &g );
 
-    image_create( _width, _height, &_img);
-  }
-
-  if( _img)
-    graphics_create( _img, &_gfx);
-
-  return _gfx;
-}
-
-HIMG img = 0;
-
-void graphic_paint(HDC hdc, int width, int height)
-{
-  HGFX g = gfx(width,height);
+  // next line is not working in the way I expect.
+  //graphics_set_clip_box ( g, p->clip_x, p->clip_y, p->clip_x + p->clip_w, p->clip_y + p->clip_h);
+  //
 
   graphics_state_save(g);
 
@@ -125,6 +113,8 @@ void graphic_paint(HDC hdc, int width, int height)
     graphics_translate(g,width/2,height/2);
     graphics_scale(g,0.5,0.5);
 
+    static HIMG img = 0;
+
     if(!img)
     {
       tool::mm_file mf;
@@ -138,14 +128,8 @@ void graphic_paint(HDC hdc, int width, int height)
       DIM h = height - 20;
       graphics_draw_image ( g, img, 10, 10, &w, &h );
     }
- 
 
   graphics_state_restore(g);
-
-
-
-
-  image_blit(hdc,0,0,_img,0,0,width,height, false);  
   graphics_release(g);
 }
 

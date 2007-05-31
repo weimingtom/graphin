@@ -3,6 +3,8 @@
 #include "resource.h"
 
 #include <windows.h>
+#include <windowsx.h>
+#include <commctrl.h>
 
 #ifndef WM_IDLE
 #define WM_IDLE WM_APP
@@ -16,14 +18,45 @@
     window_function*  pf;
     void*             tag;
     HWND              hwnd;
+    bool              mouse_inside;
     handle<image>     surface;
     
-    window(): signature(0xAFED), pf(0), tag(0), hwnd(0) {}
+    
+    window(): signature(0xAFED), pf(0), tag(0), hwnd(0),mouse_inside(false) {}
 
-    bool notify( unsigned cmd, void *params ) {  return pf( tag, cmd, params ); }
+    bool notify( unsigned cmd, void *params ) {  return pf( this, cmd, params ); }
     bool is_valid() { return signature == 0xAFED; }
   };
   
+  inline int get_buttons(WPARAM wp) {
+    int btns = 0;
+    if(wp & MK_LBUTTON)  btns |= MAIN_BUTTON;
+    if(wp & MK_RBUTTON)  btns |= PROP_BUTTON;
+    return btns;
+  }
+
+  inline int get_alts() 
+  {
+    int alts = 0;
+    if (GetAsyncKeyState(VK_SHIFT) < 0) alts |= SHIFT;
+    if (GetAsyncKeyState(VK_CONTROL) < 0) alts |= CONTROL;
+    if (GetAsyncKeyState(VK_MENU) < 0) alts |= ALT;
+    return alts;
+  }
+
+  inline int get_alts(WPARAM wp) 
+  {
+    int alts = 0;
+    if (wp & MK_SHIFT) alts |= SHIFT;
+    if (wp & MK_CONTROL) alts |= CONTROL;
+    return alts;
+  }
+
+  inline int get_buttons_async()
+  {
+    return (GetAsyncKeyState(VK_LBUTTON) < 0)?MAIN_BUTTON:0;
+  }
+
   static LRESULT CALLBACK wnd_proc( HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
   static LRESULT CALLBACK wnd_proc_primordial( HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
@@ -134,7 +167,8 @@
         {
           PAINTSTRUCT ps;
           HDC hdc = BeginPaint(hwnd, &ps);
-          wpaint(pw, hwnd, hdc, ps.rcPaint);
+          RECT ri; ::GetClipBox(hdc,&ri);
+          wpaint(pw, hwnd, hdc, ri);
           EndPaint(hwnd, &ps);
           return 0;
         } 
@@ -144,8 +178,119 @@
           RECT ri; ::GetClipBox(hdc,&ri);
           wpaint(pw, hwnd, hdc, ri);
           return 0;
-        } 
+        }
+      case WM_LBUTTONDOWN:
+      {
+          WINDOW_ON_MOUSE_PARAMS p;
+          p.event = MOUSE_DOWN;
+          p.buttons = MAIN_BUTTON;
+          p.x = GET_X_LPARAM(lParam); 
+          p.y = GET_Y_LPARAM(lParam); 
+          p.screen_x = p.x; 
+          p.screen_y = p.y; 
+          ::MapWindowPoints(hwnd,HWND_DESKTOP,(LPPOINT)&p.screen_x, 1);
+          p.alts = get_alts(wParam);
+          if(pw->notify(WINDOW_ON_MOUSE, &p))
+            return 0;
+          break;
+      }
+      case WM_RBUTTONDOWN:
+      {
+          WINDOW_ON_MOUSE_PARAMS p;
+          p.event = MOUSE_DOWN;
+          p.buttons = PROP_BUTTON;
+          p.x = GET_X_LPARAM(lParam); 
+          p.y = GET_Y_LPARAM(lParam); 
+          p.screen_x = p.x; 
+          p.screen_y = p.y; 
+          ::MapWindowPoints(hwnd,HWND_DESKTOP,(LPPOINT)&p.screen_x, 1);
+          p.alts = get_alts(wParam);
+          if(pw->notify(WINDOW_ON_MOUSE, &p))
+            return 0;
+          break;
+      }
+      case WM_LBUTTONUP:
+      {
+          WINDOW_ON_MOUSE_PARAMS p;
+          p.event = MOUSE_UP;
+          p.buttons = MAIN_BUTTON;
+          p.x = GET_X_LPARAM(lParam); 
+          p.y = GET_Y_LPARAM(lParam); 
+          p.screen_x = p.x; 
+          p.screen_y = p.y; 
+          ::MapWindowPoints(hwnd,HWND_DESKTOP,(LPPOINT)&p.screen_x, 1);
+          p.alts = get_alts(wParam);
+          if(pw->notify(WINDOW_ON_MOUSE, &p))
+            return 0;
+          break;
+      }
+      case WM_RBUTTONUP:
+      {
+          WINDOW_ON_MOUSE_PARAMS p;
+          p.event = MOUSE_UP;
+          p.buttons = PROP_BUTTON;
+          p.x = GET_X_LPARAM(lParam); 
+          p.y = GET_Y_LPARAM(lParam); 
+          p.screen_x = p.x; 
+          p.screen_y = p.y; 
+          ::MapWindowPoints(hwnd,HWND_DESKTOP,(LPPOINT)&p.screen_x, 1);
+          p.alts = get_alts(wParam);
+          if(pw->notify(WINDOW_ON_MOUSE, &p))
+            return 0;
+          break;
+      }
+      case WM_MOUSEMOVE:
+      {
+          WINDOW_ON_MOUSE_PARAMS p;
+          p.event = MOUSE_MOVE;
+          p.buttons = get_buttons(wParam);
+          p.x = GET_X_LPARAM(lParam); 
+          p.y = GET_Y_LPARAM(lParam); 
+          p.screen_x = p.x; 
+          p.screen_y = p.y; 
+          ::MapWindowPoints(hwnd,HWND_DESKTOP,(LPPOINT)&p.screen_x, 1);
+          p.alts = get_alts(wParam);
+          if( !pw->mouse_inside )
+          {
+            pw->mouse_inside = true;
+            TRACKMOUSEEVENT tme;
+            tme.cbSize = sizeof(tme);
+            tme.dwFlags = TME_HOVER | TME_LEAVE;
+            tme.hwndTrack = hwnd;
+            tme.dwHoverTime = HOVER_DEFAULT;
+            _TrackMouseEvent(&tme);
+            WINDOW_ON_MOUSE_PARAMS t = p;
+            t.event = MOUSE_ENTER;
+            pw->notify(WINDOW_ON_MOUSE, &t);
+          }
+          if(pw->notify(WINDOW_ON_MOUSE, &p))
+            return 0;
+          break;
+      }
+      case WM_MOUSELEAVE:
+      {
+          WINDOW_ON_MOUSE_PARAMS p;
+          p.event = MOUSE_LEAVE;
+          p.buttons = get_buttons(wParam);
+          p.x = GET_X_LPARAM(lParam); 
+          p.y = GET_Y_LPARAM(lParam); 
+          p.screen_x = p.x; 
+          p.screen_y = p.y; 
+          ::MapWindowPoints(hwnd,HWND_DESKTOP,(LPPOINT)&p.screen_x, 1);
+          p.alts = get_alts(wParam);
+          pw->mouse_inside = false;
 
+          TRACKMOUSEEVENT tme;
+          tme.cbSize = sizeof(tme);
+          tme.dwFlags = TME_CANCEL;
+          tme.hwndTrack = hwnd;
+          tme.dwHoverTime = HOVER_DEFAULT;
+          _TrackMouseEvent(&tme);
+         
+          if(pw->notify(WINDOW_ON_MOUSE, &p))
+            return 0;
+          break;
+      }
     }
     return DefWindowProc(hwnd, msg, wParam, lParam);
   }
@@ -154,6 +299,9 @@
 GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL 
         window_create(window_function* pf, void* tag, WINDOW_TYPE type, HWINDOW* out_hwnd)
 {
+    if(!pf)
+      return GRAPHIN_BAD_PARAM;
+
     unsigned wflags = 0;
     unsigned wflagsex = 0;
     switch( type )
@@ -184,7 +332,8 @@ GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
       delete pw;
       return GRAPHIN_FAILURE;
     }
-    *out_hwnd = pw;
+    if(out_hwnd)
+      *out_hwnd = pw;
     return GRAPHIN_OK;
 }
 
@@ -221,7 +370,12 @@ GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
 {
   if( window_is_valid(hw) )
   {
-    ::PostMessage(hw->hwnd, WM_CLOSE, 0, 0);
+    switch(cmd)
+    {
+      case WINDOW_SHOW: ::ShowWindow(hw->hwnd, SW_SHOW); break;
+      case WINDOW_EXPAND: ::ShowWindow(hw->hwnd, SW_MAXIMIZE); break;
+      case WINDOW_COLLAPSE: ::ShowWindow(hw->hwnd, SW_MINIMIZE); break;
+    }
     return GRAPHIN_OK;
   }
   return GRAPHIN_FAILURE;
@@ -285,10 +439,36 @@ GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
   return GRAPHIN_FAILURE;
 }
 
-bool application_init(void* hinstance)
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL 
+        window_get_tag(HWINDOW hw, void** ptag)
+{
+  if( !ptag )
+    return GRAPHIN_BAD_PARAM;
+  if( window_is_valid(hw) )
+  {
+    *ptag = hw->tag;    
+    return GRAPHIN_OK;
+  }
+  return GRAPHIN_FAILURE;
+}
+
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL 
+        window_set_tag(HWINDOW hw, void* tag)
+{
+  if( window_is_valid(hw) )
+  {
+    hw->tag = tag;    
+    return GRAPHIN_OK;
+  }
+  return GRAPHIN_FAILURE;
+}
+
+
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL 
+        application_init(void* hinstance, const char* command_line)
 {
   static bool done = false;
-  if( done ) return true;
+  if( done ) return GRAPHIN_OK;
 
   int class_flags = 
 #ifndef UNDER_CE
@@ -310,9 +490,36 @@ bool application_init(void* hinstance)
   if(::RegisterClassW(&wc))
   {
       done = true;
-      return true;
+      return GRAPHIN_OK;
   }
-  return false;
+  return GRAPHIN_FAILURE;
+}
+
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL 
+        application_do_event(int* retval)
+{
+  MSG msg;
+  int r = GetMessage( &msg, NULL, 0, 0 ); 
+  if (r)  
+  {
+    TranslateMessage(&msg); 
+    DispatchMessage(&msg); 
+  }
+  else
+  {
+    if(retval) 
+      *retval = msg.wParam;
+    return GRAPHIN_FAILURE;
+  }
+  return GRAPHIN_OK;
+}
+
+// request exit
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL 
+        application_request_exit(int retval)
+{
+  ::PostQuitMessage(retval);
+  return GRAPHIN_OK;
 }
 
 

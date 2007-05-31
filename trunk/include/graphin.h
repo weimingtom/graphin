@@ -1,8 +1,9 @@
+#ifndef __graphinius_h__
+#define __graphinius_h__
 
 #ifdef _WINDOWS
   #define WIN32_LEAN_AND_MEAN		// exclude unused stuff from Windows headers
   #include <windows.h>
-
   typedef HDC HPLATFORMGFX;
 #endif
 
@@ -317,3 +318,4 @@ GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
 GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
       graphics_rect_is_visible ( HGFX hgfx, POS x1, POS y1, POS x2, POS y2, bool* yes);
 
+#endif
