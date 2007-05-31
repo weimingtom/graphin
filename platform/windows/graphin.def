@@ -69,6 +69,8 @@ EXPORTS
     window_set_timer			@107
     window_set_caption			@108
     window_get_caption			@109
+    window_invalidate			@110
+    window_update				@111
 
     application_init			@150
     application_do_event		@151	

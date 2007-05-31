@@ -19,7 +19,8 @@
     void*             tag;
     HWND              hwnd;
     bool              mouse_inside;
-    handle<image>     surface;
+    handle<image>     buffer;
+    agg::rect_i       dirty_area;
     
     
     window(): signature(0xAFED), pf(0), tag(0), hwnd(0),mouse_inside(false) {}
@@ -72,29 +73,42 @@
     return DefWindowProc(hwnd, msg, wParam, lParam);
   }
 
-  void wpaint(window* pw, HWND hwnd, HDC hdc, RECT ri)
+  void w_validate_buffer(window* pw, int view_w, int view_h)
   {
-    WINDOW_ON_PAINT_PARAMS p;
+    if(pw->dirty_area.is_valid())
+    {
+      WINDOW_ON_PAINT_PARAMS p;
+      paint_graphics ps(pw->buffer, pw->dirty_area.x1, pw->dirty_area.y1, pw->dirty_area.x2, pw->dirty_area.y2 );
+      p.clip_x = pw->dirty_area.x1;
+      p.clip_y = pw->dirty_area.y1;
+      p.clip_w = pw->dirty_area.x2 - pw->dirty_area.x1;
+      p.clip_h = pw->dirty_area.y2 - pw->dirty_area.y1;
+      p.view_w = view_w;
+      p.view_h = view_h;
+      p.surface = &ps; 
+      pw->notify(WINDOW_ON_PAINT, &p);
+      pw->dirty_area = agg::rect_i(1,1,0,0);
+    }
+  }
+
+  void w_paint(window* pw, HWND hwnd, HDC hdc, RECT ri)
+  {
 		RECT rt; GetClientRect(hwnd, &rt);
-    if( rt.right - rt.left != int(pw->surface->pmap.width()) ||
-        rt.bottom - rt.top != int(pw->surface->pmap.height()) )
+
+    int view_w = rt.right - rt.left;
+    int view_h = rt.bottom - rt.top;
+
+    if( view_w != int(pw->buffer->pmap.width()) ||
+        view_h != int(pw->buffer->pmap.height()) )
     {
-      pw->surface = new image(rt.right - rt.left, rt.bottom - rt.top);
-      p.clip_x = rt.left;
-      p.clip_y = rt.top;
-      p.clip_w = rt.right - rt.left;
-      p.clip_h = rt.bottom - rt.top;
+      pw->buffer = new image(view_w,view_h);
+      ri = rt;
+      pw->dirty_area = agg::rect_i(rt.left, rt.top, rt.right, rt.bottom);
     }
-    else
-    {
-      p.clip_x = ri.left;
-      p.clip_y = ri.top;
-      p.clip_w = ri.right - ri.left;
-      p.clip_h = ri.bottom - ri.top;
-    }
-    p.surface = pw->surface; 
-    pw->notify(WINDOW_ON_PAINT, &p);
-    image_blit(hdc,p.clip_x,p.clip_y,pw->surface.ptr(),p.clip_x,p.clip_y,p.clip_w,p.clip_h, false);  
+
+    w_validate_buffer(pw,view_w,view_h);
+    
+    image_blit(hdc,ri.left, ri.top, pw->buffer.ptr(), ri.left, ri.top, ri.right - ri.left, ri.bottom - ri.top, false);  
   }
 
   static LRESULT CALLBACK wnd_proc( HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
@@ -168,7 +182,7 @@
           PAINTSTRUCT ps;
           HDC hdc = BeginPaint(hwnd, &ps);
           RECT ri; ::GetClipBox(hdc,&ri);
-          wpaint(pw, hwnd, hdc, ri);
+          w_paint(pw, hwnd, hdc, ri);
           EndPaint(hwnd, &ps);
           return 0;
         } 
@@ -176,7 +190,7 @@
         {
           HDC hdc = (HDC) wParam;
           RECT ri; ::GetClipBox(hdc,&ri);
-          wpaint(pw, hwnd, hdc, ri);
+          w_paint(pw, hwnd, hdc, ri);
           return 0;
         }
       case WM_LBUTTONDOWN:
@@ -324,7 +338,7 @@ GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
     }
     window* pw = new window();
     pw->pf = pf;
-    pw->surface = new image(1,1);
+    pw->buffer = new image(1,1);
     pw->tag = tag;
     HWND hwnd = ::CreateWindowExW(wflagsex, WINDOW_CLASS_NAME, L"", wflags, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, 0, 0, 0, pw);
     if( !hwnd )
@@ -462,6 +476,41 @@ GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
   }
   return GRAPHIN_FAILURE;
 }
+
+// invalidates rect - set dirty area
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL 
+        window_invalidate(HWINDOW hw, int x, int y, int w, int h)
+{
+  if( window_is_valid(hw) )
+  {
+    if(w > 0 && h > 0)
+    {
+      agg::rect_i r( x, y, x + w, y + h );
+      hw->dirty_area = hw->dirty_area.is_valid() ? agg::unite_rectangles(hw->dirty_area, r ):r;
+      RECT rw;
+      rw.left   = hw->dirty_area.x1;
+      rw.right  = hw->dirty_area.x2;
+      rw.top    = hw->dirty_area.y1;
+      rw.bottom = hw->dirty_area.y2;
+      ::InvalidateRect(hw->hwnd,&rw,FALSE);
+    }
+    return GRAPHIN_OK;
+  }
+  return GRAPHIN_FAILURE;
+}
+
+// updates the window
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL 
+        window_update(HWINDOW hw)
+{
+  if( window_is_valid(hw) )
+  {
+    ::UpdateWindow(hw->hwnd);
+    return GRAPHIN_OK;
+  }
+  return GRAPHIN_FAILURE;
+}
+
 
 
 GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL 

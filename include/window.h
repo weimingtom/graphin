@@ -25,7 +25,7 @@ enum WINDOW_MESSAGE
   WINDOW_ON_PAINT,
 };
 
-struct WINDOW_ON_PAINT_PARAMS     { HIMG surface;  int  clip_x;  int  clip_y;  int  clip_w;  int  clip_h; };
+struct WINDOW_ON_PAINT_PARAMS     { HGFX surface;  int  clip_x;  int  clip_y;  int  clip_w;  int  clip_h; int view_w; int view_h; };
 struct WINDOW_ON_SIZE_PARAMS      { int width;  int height; };
 struct WINDOW_ON_MOVE_PARAMS      { int x; int y; };
 
@@ -134,6 +134,15 @@ GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
 
 GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL 
         window_get_caption(HWINDOW hwnd, wchar_t* buf, unsigned buf_size);
+
+// invalidates rect - set dirty area
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL 
+        window_invalidate(HWINDOW hwnd, int x, int y, int w, int h);
+
+// updates the window
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL 
+        window_update(HWINDOW hwnd);
+
 
 // SECTION: GUI application functions
 

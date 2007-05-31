@@ -251,7 +251,11 @@ void Agg2D::attach(Image& img)
 //------------------------------------------------------------------------
 void Agg2D::clipBox(double x1, double y1, double x2, double y2)
 {
+    m_viewport.transform(&x1, &y1); // 
+    m_viewport.transform(&x2, &y2); // see: http://article.gmane.org/gmane.comp.graphics.agg/3543
+
     m_clipBox = RectD(x1, y1, x2, y2);
+
     int rx1 = int(x1);
     int ry1 = int(y1);
     int rx2 = int(x2);
@@ -262,7 +266,10 @@ void Agg2D::clipBox(double x1, double y1, double x2, double y2)
     m_renBasePre.clip_box(rx1, ry1, rx2, ry2);
     m_renBaseCompPre.clip_box(rx1, ry1, rx2, ry2);
 
-    m_rasterizer.clip_box(x1, y1, x2, y2);
+    // m_rasterizer.clip_box(x1, y1, x2, y2);
+    m_rasterizer.clip_box(m_renBase.xmin(),   m_renBase.ymin(), 
+                          m_renBase.xmax()+1, m_renBase.ymax()+1); // see link above
+
 }
 
 //------------------------------------------------------------------------
