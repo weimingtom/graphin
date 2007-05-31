@@ -326,16 +326,16 @@ namespace agg
                 dvc_width,       // source rectangle width
                 dvc_height,      // source rectangle height
                 bmp_x,           // x-coordinate of lower-left corner of 
-                bmp_y,           // y-coordinate of lower-left corner of 
+                height() - bmp_y - bmp_height, // y-coordinate of lower-left corner of , Andrew F. fix.
                 0,               // first scan line in array
-                bmp_height,      // number of scan lines
+                height(),        // number of scan lines
                 m_buf,           // address of array with DIB bits
                 m_bmp,           // address of structure with bitmap info.
                 DIB_RGB_COLORS   // RGB or palette indexes
             );
         }
     }
-
+    //sz.y - src.top() - src.height()
 
     //------------------------------------------------------------------------
     void pixel_map::draw(HDC h_dc, int x, int y, double scale) const
