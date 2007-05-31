@@ -20,7 +20,7 @@
     T* ptr () const         { return _ptr; }
 
     operator T* () const    { return _ptr; }
-    
+
     bool is_null () const   { return _ptr == 0; }
 
     bool operator == ( T *p ) const  { return _ptr == p;  }
@@ -46,8 +46,8 @@
     resource ()             {  _ref_cntr = 0; }
     virtual ~resource ()    {  assert ( _ref_cntr == 0 ); }
     long release()
-    { 
-        assert(_ref_cntr > 0); 
+    {
+        assert(_ref_cntr > 0);
         long t = --_ref_cntr;
         if(t == 0)
           delete this;
@@ -55,7 +55,6 @@
     }
     void add_ref() { ++_ref_cntr; }
   };
-   
   template <class T>
   inline T
     limit ( T v, T minv, T maxv )
@@ -67,4 +66,6 @@
     return v;
   }
 
+
 #endif
+

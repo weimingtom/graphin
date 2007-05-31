@@ -8,11 +8,11 @@
 
 #ifdef _WINDOWS
   #include "platform/win32/agg_win32_bmp.h"
-#else  
-  
-#endif 
+#else
+  #include "platform/X11/agg_pixel_map.h"
+#endif
 
-#include "agg2d.h"
+#include "agg2D.h"
 #include "primitives.h"
 
 struct image:
@@ -20,16 +20,20 @@ struct image:
   public Agg2D::Image
 {
     agg::pixel_map pmap;
-    
+
     image(unsigned int width, unsigned int height)
     {
       pmap.create(width, height, agg::org_color32);
       attach(pmap.buf(),width,height,pmap.stride());
     }
+    ~image()
+    {
+
+    }
 };
 
 
-struct graphics: 
+struct graphics:
   public resource,
   public Agg2D
 {
@@ -53,8 +57,8 @@ struct graphics:
     Agg2D::blendMode(Agg2D::BlendAlpha);
     Agg2D::imageFilter(Agg2D::Bilinear);
 
-    Agg2D::viewport(0, 0, p->width(), p->height(), 
-                 0, p->height(), p->width(), 0, 
+    Agg2D::viewport(0, 0, p->width(), p->height(),
+                 0, p->height(), p->width(), 0,
                  Agg2D::Anisotropic);
 
     Agg2D::flipText(true);
@@ -69,12 +73,12 @@ struct graphics:
 
   void save_state()
   {
-    saved_states = new state(saved_states); 
+    saved_states = new state(saved_states);
     saveStateTo(*saved_states);
   }
   bool restore_state()
   {
-    if(!saved_states) 
+    if(!saved_states)
       return false;
     restoreStateFrom(*saved_states);
     saved_states = saved_states->next;
