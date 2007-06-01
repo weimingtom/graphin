@@ -161,6 +161,14 @@ SOURCE=.\src\platform\win32\agg_win32_bmp.cpp
 
 SOURCE=.\include\agg2D.h
 # End Source File
+# Begin Source File
+
+SOURCE=.\include\platform\agg_platform_support.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\include\platform\win32\agg_win32_bmp.h
+# End Source File
 # End Group
 # End Target
 # End Project
