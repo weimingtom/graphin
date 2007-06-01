@@ -3,8 +3,8 @@
 // Based on Anti-Grain Geometry
 // Copyright (C) 2005 Maxim Shemanarev (http://www.antigrain.com)
 //
-// Permission to copy, use, modify, sell and distribute this software 
-// is granted provided this copyright notice appears in all copies. 
+// Permission to copy, use, modify, sell and distribute this software
+// is granted provided this copyright notice appears in all copies.
 // This software is provided "as is" without express or implied
 // warranty, and with no claim as to its suitability for any purpose.
 //
@@ -32,6 +32,7 @@
 
 // JME
 #include "agg_basics.h"
+#include "agg_math_stroke.h"
 #include "agg_trans_affine.h"
 #include "agg_trans_viewport.h"
 #include "agg_path_storage.h"
@@ -44,6 +45,7 @@
 #include "agg_span_gradient.h"
 #include "agg_span_image_filter_rgba.h"
 //#include "agg_span_image_resample_rgba.h"
+
 //+ JME
 #include "agg_span_allocator.h"
 #include "agg_span_converter.h"
@@ -132,21 +134,21 @@ public:
     typedef agg::rect_i       Rect;
     typedef agg::rect_d       RectD;
     typedef agg::trans_affine Affine;
-    
+
     enum LineJoin
     {
-        JoinMiter = agg::miter_join,
-        JoinRound = agg::round_join,
-        JoinBevel = agg::bevel_join
+        JOIN_MITER = agg::miter_join,
+        JOIN_ROUND = agg::round_join,
+        JOIN_BEVEL = agg::bevel_join
     };
-    
+
     enum LineCap
     {
-        CapButt   = agg::butt_cap,
-        CapSquare = agg::square_cap,
-        CapRound  = agg::round_cap
+        CAP_BUTT    = agg::butt_cap,
+        CAP_SQUARE  = agg::square_cap,
+        CAP_ROUND   = agg::round_cap
     };
-    
+
     enum TextAlignment
     {
         AlignLeft,
@@ -156,8 +158,8 @@ public:
         AlignTop = AlignRight,
         AlignBottom = AlignLeft
     };
-    
-    
+
+
     enum DrawPathFlag
     {
         FillOnly,
@@ -197,7 +199,7 @@ public:
         agg::rendering_buffer renBuf;
 
         Image() {}
-        Image(unsigned char* buf, unsigned width, unsigned height, int stride) : 
+        Image(unsigned char* buf, unsigned width, unsigned height, int stride) :
             renBuf(buf, width, height, stride) {}
         void attach(unsigned char* buf, unsigned width, unsigned height, int stride)
         {
@@ -272,8 +274,8 @@ public:
         CW, CCW
     };
 
-    struct State 
-    {   
+    struct State
+    {
       RectD                           m_clipBox;
 
       BlendMode                       m_blendMode;
@@ -316,7 +318,7 @@ public:
       agg::trans_affine               m_affine;
 
     };
-    
+
 
     ~Agg2D();
     Agg2D();
@@ -429,7 +431,7 @@ public:
     void rectangle(double x1, double y1, double x2, double y2);
     void roundedRect(double x1, double y1, double x2, double y2, double r);
     void roundedRect(double x1, double y1, double x2, double y2, double rx, double ry);
-    void roundedRect(double x1, double y1, double x2, double y2, 
+    void roundedRect(double x1, double y1, double x2, double y2,
                      double rxBottom, double ryBottom,
                      double rxTop,    double ryTop);
     void ellipse(double cx, double cy, double rx, double ry);
@@ -444,10 +446,10 @@ public:
     // Text
     //-----------------------
     void   flipText(bool flip);
-    void   font(const char* fileName, double height, 
+    void   font(const char* fileName, double height,
                 bool bold = false,
                 bool italic = false,
-                FontCacheType ch = RasterFontCache, 
+                FontCacheType ch = RasterFontCache,
                 double angle = 0.0);
     double fontHeight() const;
     double fontAscent() const;
@@ -491,25 +493,25 @@ public:
                 bool sweepFlag,
                 double dx, double dy);
 
-    void quadricCurveTo(double xCtrl, double yCtrl, 
+    void quadricCurveTo(double xCtrl, double yCtrl,
                          double xTo,   double yTo);
-    void quadricCurveRel(double dxCtrl, double dyCtrl, 
+    void quadricCurveRel(double dxCtrl, double dyCtrl,
                          double dxTo,   double dyTo);
     void quadricCurveTo(double xTo, double yTo);
     void quadricCurveRel(double dxTo, double dyTo);
 
-    void cubicCurveTo(double xCtrl1, double yCtrl1, 
-                      double xCtrl2, double yCtrl2, 
+    void cubicCurveTo(double xCtrl1, double yCtrl1,
+                      double xCtrl2, double yCtrl2,
                       double xTo,    double yTo);
 
-    void cubicCurveRel(double dxCtrl1, double dyCtrl1, 
-                       double dxCtrl2, double dyCtrl2, 
+    void cubicCurveRel(double dxCtrl1, double dyCtrl1,
+                       double dxCtrl2, double dyCtrl2,
                        double dxTo,    double dyTo);
 
-    void cubicCurveTo(double xCtrl2, double yCtrl2, 
+    void cubicCurveTo(double xCtrl2, double yCtrl2,
                       double xTo,    double yTo);
 
-    void cubicCurveRel(double xCtrl2, double yCtrl2, 
+    void cubicCurveRel(double xCtrl2, double yCtrl2,
                        double xTo,    double yTo);
 
     void addEllipse(double cx, double cy, double rx, double ry, Direction dir);
@@ -527,28 +529,28 @@ public:
     void imageResample(ImageResample f);
     ImageResample imageResample() const;
 
-    void transformImage(const Image& img,    
+    void transformImage(const Image& img,
                            int imgX1,    int imgY1,    int imgX2,    int imgY2,
                         double dstX1, double dstY1, double dstX2, double dstY2);
 
-    void transformImage(const Image& img, 
+    void transformImage(const Image& img,
                         double dstX1, double dstY1, double dstX2, double dstY2);
 
-    void transformImage(const Image& img, 
+    void transformImage(const Image& img,
                         int imgX1, int imgY1, int imgX2, int imgY2,
                         const double* parallelogram);
 
     void transformImage(const Image& img, const double* parallelogram);
 
 
-    void transformImagePath(const Image& img, 
+    void transformImagePath(const Image& img,
                             int imgX1,    int imgY1,    int imgX2,    int imgY2,
                             double dstX1, double dstY1, double dstX2, double dstY2);
 
-    void transformImagePath(const Image& img, 
+    void transformImagePath(const Image& img,
                             double dstX1, double dstY1, double dstX2, double dstY2);
 
-    void transformImagePath(const Image& img, 
+    void transformImagePath(const Image& img,
                             int imgX1, int imgY1, int imgX2, int imgY2,
                             const double* parallelogram);
 
@@ -568,7 +570,7 @@ public:
                    double dstX, double dstY);
     void copyImage(Image& img, double dstX, double dstY);
 
-    // State 
+    // State
     //-----------------------
 
     void saveStateTo(State& st);

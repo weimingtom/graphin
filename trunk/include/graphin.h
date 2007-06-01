@@ -1,27 +1,47 @@
 #ifndef __graphinius_h__
 #define __graphinius_h__
 
-#ifdef _WINDOWS
+#if defined(_WINDOWS)
   #define WIN32_LEAN_AND_MEAN		// exclude unused stuff from Windows headers
   #include <windows.h>
   typedef HDC HPLATFORMGFX;
+#elif defined(XWINDOW)
+  #include <X11/Xlib.h>
+  typedef struct _HDC_tipa
+  {
+    Display* d;
+    Window   w;
+    int      gc;
+  } *HPLATFORMGFX;
 #endif
 
 
 
-// The following ifdef block is the standard way of creating macros which make exporting 
+// The following ifdef block is the standard way of creating macros which make exporting
 // from a DLL simpler. All files within this DLL are compiled with the GRAPHIN_EXPORTS
 // symbol defined on the command line. this symbol should not be defined on any project
-// that uses this DLL. This way any other project whose source files include this file see 
+// that uses this DLL. This way any other project whose source files include this file see
 // GRAPHIN_API functions as being imported from a DLL, wheras this DLL sees symbols
 // defined with this macro as being exported.
 #ifdef GRAPHIN_EXPORTS
-#define GRAPHIN_API extern "C" __declspec(dllexport)
+  #if defined(__GNUC__)
+    #define GRAPHIN_API extern "C" //__attribute__((dllexport))
+    #define GRAPHIN_CALL
+  #elif defined( _MSVC_VER)
+    #define GRAPHIN_API extern "C" __declspec(dllexport)
+    #define GRAPHIN_CALL __stdcall
+  #endif
 #else
-#define GRAPHIN_API extern "C" __declspec(dllimport)
+  #if defined(__GNUC__)
+     #define GRAPHIN_API extern "C" //__attribute__((dllimport))
+     #define GRAPHIN_CALL
+  #elif defined( _MSVC_VER)
+     #define GRAPHIN_API extern "C" __declspec(dllimport)
+     #define GRAPHIN_CALL __stdcall
+  #endif
 #endif
 
-#define GRAPHIN_CALL __stdcall 
+
 
 struct graphics;
 struct image;
@@ -31,55 +51,57 @@ typedef image*    HIMG;
 
 #ifndef BYTE
   typedef unsigned char   BYTE;
-#endif 
-typedef double POS;         // position 
+#endif
+typedef double POS;         // position
 typedef double DIM;         // dimention
 typedef double ANGLE;       // angle (radians)
 typedef unsigned int COLOR; // guess what?
 
-enum GRAPHIN_RESULT
+typedef enum
 {
   GRAPHIN_PANIC = -1, // e.g. not enough memory
   GRAPHIN_OK = 0,
   GRAPHIN_BAD_PARAM = 1,  // bad parameter
   GRAPHIN_FAILURE = 2,    // operation failed, e.g. restore() without save()
-};
+} GRAPHIN_RESULT;
 
 // image primitives
 
-GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL  
+//GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
         image_create( unsigned int width, unsigned int height, HIMG* poutImg );
 
-GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL 
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
         image_release( HIMG himg );
 
-GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL 
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
         image_get_info( HIMG himg,
-             BYTE** data, 
+             BYTE** data,
              unsigned int* width,
              unsigned int* height,
              int* stride,
              unsigned int* pixel_format);
 
-GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL 
-        image_blit( HPLATFORMGFX dst, int dst_x, int dst_y, 
-                            HIMG src, int src_x, int src_y, 
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+        image_blit( HPLATFORMGFX dst, int dst_x, int dst_y,
+                            HIMG src, int src_x, int src_y,
                             int width, int height, bool blend );
 
-GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL 
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
         image_load( const BYTE* bytes, unsigned int num_bytes, HIMG* pout_img ); // load png/jpeg/etc. image from stream of bytes
 
 // SECTION: graphics primitives and drawing operations
 
 // create color value
-GRAPHIN_API COLOR GRAPHIN_CALL 
+GRAPHIN_API COLOR GRAPHIN_CALL
         graphics_rgbt(unsigned int red, unsigned int green, unsigned int blue, unsigned int transparency = 0);
 // Note: transparent color (no-color value) is rgba(?, ?, ?, 0xff);
 
-GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL 
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
         graphics_create(HIMG img, HGFX* pout_gfx );
 
-GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL 
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
         graphics_release(HGFX gfx);
 
 // Set line color
@@ -156,7 +178,7 @@ GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
 
 enum DRAW_PATH_MODE
 {
-    FILL_ONLY, 
+    FILL_ONLY,
     STROKE_ONLY,
     FILL_AND_STROKE,
     FILL_BY_LINE_COLOR
@@ -197,13 +219,13 @@ GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
 
 // end of state save/restore
 
-// SECTION: drawing attributes 
+// SECTION: drawing attributes
 
 // set line width for subsequent drawings.
 GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
-      graphics_line_width ( HGFX hgfx, DIM width );  	
+      graphics_line_width ( HGFX hgfx, DIM width );
 
-inline void 
+inline void
       graphics_no_line ( HGFX hgfx ) { graphics_line_width(hgfx,0.0); }
 
 // color for solid lines/strokes
@@ -214,7 +236,7 @@ GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
 GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
       graphics_fill_color ( HGFX hgfx, COLOR color );
 
-inline void 
+inline void
       graphics_no_fill ( HGFX hgfx ) { graphics_fill_color(hgfx, graphics_rgbt(0,0,0,0xFF)); }
 
 // setup parameters of linear gradient of lines.
@@ -227,7 +249,7 @@ GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
 
 // setup parameters of line gradient radial fills.
 GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
-      graphics_line_radial_gradient( HGFX hgfx, POS x, POS y, DIM r, COLOR color1, COLOR color2, double profile = 1.0 );  	
+      graphics_line_radial_gradient( HGFX hgfx, POS x, POS y, DIM r, COLOR color1, COLOR color2, double profile = 1.0 );
 
 // setup parameters of gradient radial fills.
 GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
@@ -236,7 +258,7 @@ GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
 GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
       graphics_fill_mode( HGFX hgfx, bool even_odd /* false - fill_non_zero */ );
 
-// SECTION: text 
+// SECTION: text
 
 // define font attributes for all subsequent text operations.
 GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
@@ -262,7 +284,7 @@ enum TEXT_ALIGNMENT
   ALIGN_BASELINE,
   ALIGN_RIGHT = ALIGN_TOP,
   ALIGN_LEFT = ALIGN_BOTTOM
-  
+
 };
 
 // calculates width of the text string
@@ -271,16 +293,16 @@ GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
 
 // SECTION: image rendering
 
-// draws img onto the graphics surface with current transformation applied (scale, rotation). 
+// draws img onto the graphics surface with current transformation applied (scale, rotation).
 GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
-      graphics_draw_image ( HGFX hgfx, HIMG himg, POS x, POS y, 
+      graphics_draw_image ( HGFX hgfx, HIMG himg, POS x, POS y,
                             DIM* w = 0, DIM* h = 0, unsigned* ix = 0, unsigned* iy = 0, unsigned* iw = 0, unsigned* ih = 0 );
 
-// blits image bits onto underlying pixel buffer. no affine transformations.  
+// blits image bits onto underlying pixel buffer. no affine transformations.
 GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
       graphics_blit_image ( HGFX hgfx, HIMG himg, POS x, POS y, unsigned* ix = 0, unsigned* iy = 0, unsigned* iw = 0, unsigned* ih = 0 );
 
-// blends image bits with bits of the buffer. no affine transformations.  
+// blends image bits with bits of the buffer. no affine transformations.
 GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
       graphics_blend_image ( HGFX hgfx, HIMG himg, POS x, POS y, unsigned opacity = 0xFF, unsigned* ix = 0, unsigned* iy = 0, unsigned* iw = 0, unsigned* ih = 0 );
 
