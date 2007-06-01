@@ -1,8 +1,11 @@
 #ifndef AGG_PIXEL_MAP_H_INCLUDED
 #define AGG_PIXEL_MAP_H_INCLUDED
 
+#include <X11/Xlib.h>
 #include <stdlib.h>
 #include <memory.h>
+#include "agg_basics.h"
+
 
 namespace agg
 {
@@ -32,13 +35,13 @@ namespace agg
      {
        size_t sz = w*h*(z/8);
        _data = new unsigned char[ sz ];
-       if(_data)
-       {
-         _width = w;
-         _height = h;
-         _bpp = z;
-         if( clear_val < 256 ) memset( _data, 0, sz );
-       }
+       if(!_data)
+         return false;
+       _width = w;
+       _height = h;
+       _bpp = z;
+       if( clear_val < 256 ) memset( _data, 0, sz );
+       return true;
      }
 
      unsigned int width() const { return _width; }
@@ -48,6 +51,8 @@ namespace agg
               int   stride() const { return (_bpp / 8) * _width; }
      unsigned int   bpp() const { return _bpp; }
 
+     void draw(Display* d, Window w, int gc, agg::rect_i* dst, agg::rect_i* src );
+     void blend(Display* d, Window w, int gc, agg::rect_i* dst, agg::rect_i* src );
    };
 
 }

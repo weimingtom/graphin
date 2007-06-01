@@ -61,8 +61,8 @@ Agg2D::Agg2D() :
     m_fillGradient(),
     m_lineGradient(),
 
-    m_lineCap(CapRound),
-    m_lineJoin(JoinRound),
+    m_lineCap(CAP_ROUND),
+    m_lineJoin(JOIN_ROUND),
 
     m_fillGradientFlag(Solid),
     m_lineGradientFlag(Solid),
@@ -230,8 +230,8 @@ void Agg2D::attach(unsigned char* buf, unsigned width, unsigned height, int stri
     fillColor(255,255,255);
     textAlignment(AlignLeft, AlignBottom);
     clipBox(0, 0, width, height);
-    lineCap(CapRound);
-    lineJoin(JoinRound);
+    lineCap(CAP_ROUND);
+    lineJoin(JOIN_ROUND);
     flipText(false);
     imageFilter(Bilinear);
     imageResample(NoResample);

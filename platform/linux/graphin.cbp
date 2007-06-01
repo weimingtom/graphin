@@ -15,7 +15,9 @@
 				<Option createStaticLib="1" />
 				<Compiler>
 					<Add option="-g" />
+					<Add option="-DGRAPHIN_EXPORTS" />
 					<Add option="-DAGG2D_USE_FREETYPE" />
+					<Add option="-DXWINDOW" />
 					<Add directory="../../include" />
 					<Add directory="../../src/agg/include" />
 					<Add directory="../../src/zlib" />
@@ -35,7 +37,9 @@
 				<Option createStaticLib="1" />
 				<Compiler>
 					<Add option="-O2" />
+					<Add option="-DGRAPHIN_EXPORTS" />
 					<Add option="-DAGG2D_USE_FREETYPE" />
+					<Add option="-DXWINDOW" />
 					<Add directory="../../include" />
 					<Add directory="../../src/agg/include" />
 					<Add directory="../../src/zlib" />
@@ -52,7 +56,9 @@
 		</Build>
 		<Compiler>
 			<Add option="-Wall" />
+			<Add option="-DGRAPHIN_EXPORTS" />
 			<Add option="-DAGG2D_USE_FREETYPE" />
+			<Add option="-DXWINDOW" />
 			<Add directory="../../include" />
 			<Add directory="../../src/agg/include" />
 			<Add directory="../../src/zlib" />

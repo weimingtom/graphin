@@ -1,5 +1,6 @@
 #include "imageio.h"
 #include <malloc.h>
+#include <alloca.h>
 
 int DecodePNGImage(ImageCtor* pctor, void* pctorPrm, unsigned char* src, unsigned int srclength);
 int DecodeJPGImage(ImageCtor* pctor, void* pctorPrm, unsigned char* src, unsigned int srclength);
@@ -21,7 +22,7 @@ typedef struct _imginput
 
 #include "png.h"
 
-static void PNGAPI png_read_data(png_structp png_ptr,png_bytep data, png_size_t length) 
+static void PNGAPI png_read_data(png_structp png_ptr,png_bytep data, png_size_t length)
 {
   imginput *pio = (imginput *)png_get_io_ptr(png_ptr);
   if(pio->pos + length > pio->end)
@@ -47,7 +48,7 @@ int DecodePNGImage(ImageCtor* pctor, void* pctorPrm, unsigned char* src, unsigne
     imginput ioc;
     ioc.pos = src;
     ioc.end = src + srclength;
-    
+
     png_set_read_fn(png_ptr,&ioc,png_read_data);
 
     // init jmpbuf
@@ -61,7 +62,7 @@ int DecodePNGImage(ImageCtor* pctor, void* pctorPrm, unsigned char* src, unsigne
     int		bit_depth, color_type, interlace_type;
     png_get_IHDR(png_ptr,info_ptr,&width,&height,&bit_depth,&color_type,
 		 &interlace_type,NULL,NULL);
-     
+
     // configure transformations, we always want RGB data in the end
     if (color_type == PNG_COLOR_TYPE_GRAY ||
         color_type == PNG_COLOR_TYPE_GRAY_ALPHA)
@@ -78,7 +79,7 @@ int DecodePNGImage(ImageCtor* pctor, void* pctorPrm, unsigned char* src, unsigne
       png_set_packing(png_ptr);
 
 //#ifdef PNG_FLOATING_POINT_SUPPORTED
-    png_color_16  my_background={0,0,0,0,0};
+    //png_color_16  my_background={0,0,0,0,0};
     png_color_16p dib_background;
     if (png_get_bKGD(png_ptr, info_ptr, &dib_background))
       png_set_background(png_ptr, dib_background,
@@ -106,10 +107,10 @@ int DecodePNGImage(ImageCtor* pctor, void* pctorPrm, unsigned char* src, unsigne
       png_set_add_alpha(png_ptr,0xff,1);
     else
       png_set_invert_alpha(png_ptr);
-   
+
     png_byte** rowPtrs = (png_byte**)malloc(sizeof(png_byte*)*height);
     rowPtrs[0] = 0;
-    void* retval = 0;
+    //void* retval = 0;
     if(rowPtrs && height && width)
     {
       if(pctor(pctorPrm, width,height,rowPtrs))
@@ -120,9 +121,9 @@ int DecodePNGImage(ImageCtor* pctor, void* pctorPrm, unsigned char* src, unsigne
 
     if( rowPtrs )
       free(rowPtrs);
-  
+
     return 1;
-  
+
 }
 
 // JPEG
@@ -149,7 +150,7 @@ extern "C"
   }
 
   int DecodeJPGImage(ImageCtor* pctor, void* pctorPrm, unsigned char* src, unsigned int srclength)
-  { 
+  {
 
 	// load a JPEG compressed image
 	// gray scale image will be keeped.
@@ -157,10 +158,10 @@ extern "C"
 
     struct jpeg_decompress_struct cinfo;
     struct my_error_mgr __jerr;
-        
+
     JSAMPROW row_pointer[1];
     int isgray;
-    
+
 
     /* Step 1: allocate and initialize JPEG decompression object */
     cinfo.err = jpeg_std_error(&__jerr.pub);
@@ -186,12 +187,12 @@ extern "C"
     /* Step 3: read file parameters with jpeg_read_header() */
 
     (void) jpeg_read_header(&cinfo, (unsigned char)TRUE);
-    
-    if(cinfo.num_components == 3 && cinfo.out_color_space == JCS_RGB) 
+
+    if(cinfo.num_components == 3 && cinfo.out_color_space == JCS_RGB)
     {
        isgray = 0;
     }
-    else if(cinfo.num_components == 1 && cinfo.out_color_space == JCS_GRAYSCALE) 
+    else if(cinfo.num_components == 1 && cinfo.out_color_space == JCS_GRAYSCALE)
     {
        isgray = 1;
     }
@@ -205,10 +206,10 @@ extern "C"
     /* Step 5: Start decompressor */
 
     (void) jpeg_start_decompress(&cinfo);
-	
+
 	  unsigned char** rowPtrs = (unsigned char**)malloc(sizeof(unsigned char*)*cinfo.image_height);
     rowPtrs[0] = 0;
-    void* retval = 0;
+    //void* retval = 0;
     if(rowPtrs && cinfo.image_height && cinfo.image_width)
     {
       if(!pctor(pctorPrm, cinfo.image_width ,cinfo.image_height,rowPtrs))
@@ -218,9 +219,9 @@ extern "C"
     /* Step 6: while (scan lines remain to be read) */
     /*           jpeg_read_scanlines(...); */
     if(isgray) {
-       unsigned char* row = (unsigned char*) alloca (cinfo.image_width); 
+       unsigned char* row = (unsigned char*) alloca (cinfo.image_width);
        row_pointer[0] = &row[0];
-       while (cinfo.output_scanline < cinfo.output_height) 
+       while (cinfo.output_scanline < cinfo.output_height)
        {
 	     int scan = cinfo.output_scanline;
          (void) jpeg_read_scanlines(&cinfo, row_pointer , 1);
@@ -233,9 +234,9 @@ extern "C"
        }
     }
     else {
-       unsigned char* row = (unsigned char*) alloca (3 * cinfo.image_width); 
+       unsigned char* row = (unsigned char*) alloca (3 * cinfo.image_width);
        row_pointer[0] = &row[0];
-       while (cinfo.output_scanline < cinfo.output_height) 
+       while (cinfo.output_scanline < cinfo.output_height)
        {
 	     int scan = cinfo.output_scanline;
          (void) jpeg_read_scanlines(&cinfo, row_pointer , 1);
@@ -244,14 +245,14 @@ extern "C"
          for(size_t i = 0; i < cinfo.image_width; i++, src += 3, rgba += 4)
 		     {
            rgba[0] = src[2];
-		       rgba[1] = src[1]; 
+		       rgba[1] = src[1];
 		       rgba[2] = src[0];
            rgba[3] = 0xff;
 		     }
        }
     }
-   
-FAIL:	
+
+FAIL:
     if( rowPtrs )
       free(rowPtrs);
 

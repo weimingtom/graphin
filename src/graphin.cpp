@@ -31,7 +31,7 @@ GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL image_release( HIMG himg )
 
 GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL image_get_info(
    HIMG himg,
-   BYTE** data, 
+   BYTE** data,
    unsigned int* width,
    unsigned int* height,
    int* stride,
@@ -41,22 +41,32 @@ GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL image_get_info(
   if( data ) *data = himg->pmap.buf();
   if( width ) *width = himg->pmap.width();
   if( height ) *height = himg->pmap.height();
-  if( stride ) *stride = himg->pmap.stride(); 
+  if( stride ) *stride = himg->pmap.stride();
   if( pixel_format ) *pixel_format = 0; // TODODODODO
   return GRAPHIN_OK;
 }
 
-GRAPHIN_API GRAPHIN_RESULT  GRAPHIN_CALL image_blit( HPLATFORMGFX dst, int dst_x, int dst_y, 
-    HIMG src, int src_x, int src_y, 
+GRAPHIN_API GRAPHIN_RESULT  GRAPHIN_CALL image_blit( HPLATFORMGFX dst, int dst_x, int dst_y,
+    HIMG src, int src_x, int src_y,
     int width, int height, bool blend )
 {
   if( !src || !dst) return GRAPHIN_BAD_PARAM;
+#if defined(_WINDOWS)
   RECT dstr = { dst_x, dst_y, dst_x + width, dst_y + height };
   RECT srcr = { src_x, src_y, src_x + width, src_y + height };
   if( blend )
     src->pmap.blend(dst, &dstr, &srcr);
-  else 
+  else
     src->pmap.draw(dst, &dstr, &srcr);
+#elif defined(XWINDOW)
+  agg::rect_i dstr( dst_x, dst_y, dst_x + width, dst_y + height );
+  agg::rect_i srcr( src_x, src_y, src_x + width, src_y + height );
+  if( blend )
+    src->pmap.blend(dst->d, dst->w, dst->gc, &dstr, &srcr);
+  else
+    src->pmap.draw(dst->d, dst->w, dst->gc, &dstr, &srcr);
+#endif
+
   return GRAPHIN_OK;
 }
 
@@ -65,7 +75,7 @@ GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL graphics_create(HIMG img, HGFX* pout_gfx
   if( !pout_gfx )
     return GRAPHIN_BAD_PARAM;
   graphics* p = new graphics(img);
-  if(p) 
+  if(p)
   {
     p->add_ref();
     *pout_gfx = p;
@@ -113,7 +123,7 @@ GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
 {
   if(!hgfx)
     return GRAPHIN_BAD_PARAM;
-  hgfx->roundedRect(x1,y1,x2,y2,rx,ry); 
+  hgfx->roundedRect(x1,y1,x2,y2,rx,ry);
   return GRAPHIN_OK;
 }
 
@@ -142,7 +152,7 @@ GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
 {
   if(!hgfx)
     return GRAPHIN_BAD_PARAM;
-  hgfx->ellipse(x,y,rx,ry); 
+  hgfx->ellipse(x,y,rx,ry);
   return GRAPHIN_OK;
 }
 
@@ -350,7 +360,7 @@ GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
     return GRAPHIN_BAD_PARAM;
 
   Agg2D::Affine m(m11, m12, m21, m22, dx, dy);
-  hgfx->matrix(m); 
+  hgfx->matrix(m);
   return GRAPHIN_OK;
 }
 
@@ -368,8 +378,8 @@ GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
 {
   if(!hgfx)
     return GRAPHIN_BAD_PARAM;
-  return hgfx->restore_state()? 
-    GRAPHIN_OK: 
+  return hgfx->restore_state()?
+    GRAPHIN_OK:
     GRAPHIN_FAILURE;
 }
 
@@ -391,7 +401,7 @@ GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
     return GRAPHIN_BAD_PARAM;
   //if( t(c) == 0xFF000000 )
   //  hgfx->noLine();
-  //else 
+  //else
   //  hgfx->lineColor(AGG_COLOR(c));
   hgfx->lineColor(AGG_COLOR(color));
   return GRAPHIN_OK;
@@ -404,13 +414,13 @@ GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
     return GRAPHIN_BAD_PARAM;
   if( t(color) == 0xFF )
     hgfx->noFill();
-  else 
+  else
     hgfx->fillColor(AGG_COLOR(color));
   return GRAPHIN_OK;
 }
 
 GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
-      graphics_line_linear_gradient( HGFX hgfx,  	
+      graphics_line_linear_gradient( HGFX hgfx,
        POS x1, POS y1, POS x2, POS y2, COLOR color1, COLOR color2, POS profile )
 {
   if(!hgfx)
@@ -422,7 +432,7 @@ GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
 }
 
 GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
-      graphics_fill_linear_gradient( HGFX hgfx,  	
+      graphics_fill_linear_gradient( HGFX hgfx,
        POS x1, POS y1, POS x2, POS y2, COLOR color1, COLOR color2, POS profile )
 {
   if(!hgfx)
@@ -473,7 +483,7 @@ GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
 {
   if(!hgfx)
     return GRAPHIN_BAD_PARAM;
-  hgfx->font( name, size, bold, italic, Agg2D::VectorFontCache, angle); 
+  hgfx->font( name, size, bold, italic, Agg2D::VectorFontCache, angle);
   return GRAPHIN_OK;
 
 }
@@ -483,7 +493,7 @@ GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
 {
   if(!hgfx)
     return GRAPHIN_BAD_PARAM;
-  hgfx->text( x, y, text, text_length ); 
+  hgfx->text( x, y, text, text_length );
   return GRAPHIN_OK;
 }
 
@@ -492,7 +502,7 @@ GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
 {
   if(!hgfx || !out_width)
     return GRAPHIN_BAD_PARAM;
-  *out_width = hgfx->textWidth( text, text_length ); 
+  *out_width = hgfx->textWidth( text, text_length );
   return GRAPHIN_OK;
 }
 
@@ -501,7 +511,7 @@ GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
 {
   if(!hgfx)
     return GRAPHIN_BAD_PARAM;
-  hgfx->textAlignment( Agg2D::TextAlignment(x), Agg2D::TextAlignment(y) ); 
+  hgfx->textAlignment( Agg2D::TextAlignment(x), Agg2D::TextAlignment(y) );
   return GRAPHIN_OK;
 }
 
@@ -562,7 +572,7 @@ bool image_ctor(void* pctorPrm, unsigned int width, unsigned int height, BYTE** 
   return true;
 }
 
-GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL 
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
         image_load( const BYTE* bytes, unsigned int num_bytes, HIMG* pout_img ) // load png/jpeg/etc. image from stream of bytes
 {
   handle<image> img;
@@ -575,7 +585,7 @@ GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
 }
 
 GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
-      graphics_draw_image ( HGFX hgfx, HIMG himg, POS x, POS y, 
+      graphics_draw_image ( HGFX hgfx, HIMG himg, POS x, POS y,
                             DIM* w, DIM* h, unsigned* ix, unsigned* iy, unsigned* iw, unsigned* ih )
 {
   if(!hgfx || !himg)
@@ -591,13 +601,13 @@ GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
   unsigned src_x2 = src_x1 + iw? *iw : himg->pmap.width();
   unsigned src_y2 = src_y1 + ih? *ih : himg->pmap.height();
 
-  DIM dst_width = w? *w : unit * (src_x2 - src_x1);  
+  DIM dst_width = w? *w : unit * (src_x2 - src_x1);
   DIM dst_height = h? *h : unit * (src_y2 - src_y1);
 
-  hgfx->transformImage(*himg, 
-                   limit(src_x1, (unsigned)0, (unsigned)himg->pmap.width()), 
+  hgfx->transformImage(*himg,
+                   limit(src_x1, (unsigned)0, (unsigned)himg->pmap.width()),
                    limit(src_y1, (unsigned)0, (unsigned)himg->pmap.height()),
-                   limit(src_x2, (unsigned)0, (unsigned)himg->pmap.width()), 
+                   limit(src_x2, (unsigned)0, (unsigned)himg->pmap.width()),
                    limit(src_y2, (unsigned)0, (unsigned)himg->pmap.height()),
                    x,y, x + dst_width, y + dst_height);
 
@@ -605,7 +615,7 @@ GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
 
 }
 
-// blits image bits onto underlying pixel buffer. 
+// blits image bits onto underlying pixel buffer.
 GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
       graphics_blit_image ( HGFX hgfx, HIMG himg, POS x, POS y, unsigned* ix, unsigned* iy, unsigned* iw, unsigned* ih )
 {
@@ -618,16 +628,16 @@ GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
   unsigned src_y2 = src_y1 + ih? *ih : himg->pmap.height();
 
   hgfx->copyImage(*himg,
-                   limit(src_x1, (unsigned)0, (unsigned)himg->pmap.width()), 
+                   limit(src_x1, (unsigned)0, (unsigned)himg->pmap.width()),
                    limit(src_y1, (unsigned)0, (unsigned)himg->pmap.height()),
-                   limit(src_x2, (unsigned)0, (unsigned)himg->pmap.width()), 
+                   limit(src_x2, (unsigned)0, (unsigned)himg->pmap.width()),
                    limit(src_y2, (unsigned)0, (unsigned)himg->pmap.height()),
                    x, y);
 
   return GRAPHIN_OK;
 }
 
-// blits image bits onto underlying pixel buffer. 
+// blits image bits onto underlying pixel buffer.
 GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
       graphics_blend_image ( HGFX hgfx, HIMG himg, POS x, POS y, unsigned opacity, unsigned* ix, unsigned* iy, unsigned* iw, unsigned* ih)
 {
@@ -640,9 +650,9 @@ GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
   unsigned src_y2 = src_y1 + ih? *ih : himg->pmap.height();
 
   hgfx->blendImage(*himg,
-                   limit(src_x1, (unsigned)0, (unsigned)himg->pmap.width()), 
+                   limit(src_x1, (unsigned)0, (unsigned)himg->pmap.width()),
                    limit(src_y1, (unsigned)0, (unsigned)himg->pmap.height()),
-                   limit(src_x2, (unsigned)0, (unsigned)himg->pmap.width()), 
+                   limit(src_x2, (unsigned)0, (unsigned)himg->pmap.width()),
                    limit(src_y2, (unsigned)0, (unsigned)himg->pmap.height()),
                    x, y, opacity);
 
@@ -700,8 +710,8 @@ GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
 
   Agg2D::RectD rr(x1,y1,x2,y2);
 
-  *out_yes = 
-        ( max( rr.x1, rc.x1 ) <= min( rr.x2, rc.x2 ) ) 
+  *out_yes =
+        ( max( rr.x1, rc.x1 ) <= min( rr.x2, rc.x2 ) )
      && ( max( rr.y1, rc.y1 ) <= min( rr.y2, rc.y2 ) );
 
   return GRAPHIN_OK;
