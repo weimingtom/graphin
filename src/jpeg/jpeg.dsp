@@ -8,12 +8,12 @@ CFG=Jpeg - Win32 Debug
 !MESSAGE This is not a valid makefile. To build this project using NMAKE,
 !MESSAGE use the Export Makefile command and run
 !MESSAGE 
-!MESSAGE NMAKE /f "Jpeg.mak".
+!MESSAGE NMAKE /f "jpeg.mak".
 !MESSAGE 
 !MESSAGE You can specify a configuration when running NMAKE
 !MESSAGE by defining the macro CFG on the command line. For example:
 !MESSAGE 
-!MESSAGE NMAKE /f "Jpeg.mak" CFG="Jpeg - Win32 Debug"
+!MESSAGE NMAKE /f "jpeg.mak" CFG="Jpeg - Win32 Debug"
 !MESSAGE 
 !MESSAGE Possible choices for configuration are:
 !MESSAGE 
@@ -41,7 +41,7 @@ RSC=rc.exe
 # PROP Intermediate_Dir "Release"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_AFXDLL" /FD /c
+# ADD CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_AFXDLL" /FD /c
 # SUBTRACT CPP /YX
 # ADD BASE RSC /l 0x410
 # ADD RSC /l 0x410 /d "_AFXDLL"
@@ -65,7 +65,7 @@ LIB32=link.exe -lib
 # PROP Intermediate_Dir "Debug"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /Z7 /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /YX /FD /c
-# ADD CPP /nologo /MDd /W3 /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_AFXDLL" /FD /c
+# ADD CPP /nologo /MTd /W3 /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_AFXDLL" /FD /c
 # SUBTRACT CPP /YX
 # ADD BASE RSC /l 0x410
 # ADD RSC /l 0x410 /d "_AFXDLL"
@@ -277,6 +277,10 @@ SOURCE=.\Jmemmgr.c
 # Begin Source File
 
 SOURCE=.\Jmemnobs.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\jmemsrc.c
 # End Source File
 # Begin Source File
 
