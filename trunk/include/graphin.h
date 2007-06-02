@@ -27,7 +27,7 @@
   #if defined(__GNUC__)
     #define GRAPHIN_API extern "C" //__attribute__((dllexport))
     #define GRAPHIN_CALL
-  #elif defined( _MSVC_VER)
+  #elif defined( _MSC_VER )
     #define GRAPHIN_API extern "C" __declspec(dllexport)
     #define GRAPHIN_CALL __stdcall
   #endif
@@ -35,7 +35,7 @@
   #if defined(__GNUC__)
      #define GRAPHIN_API extern "C" //__attribute__((dllimport))
      #define GRAPHIN_CALL
-  #elif defined( _MSVC_VER)
+  #elif defined( _MSC_VER )
      #define GRAPHIN_API extern "C" __declspec(dllimport)
      #define GRAPHIN_CALL __stdcall
   #endif
@@ -57,17 +57,15 @@ typedef double DIM;         // dimention
 typedef double ANGLE;       // angle (radians)
 typedef unsigned int COLOR; // guess what?
 
-typedef enum
+enum GRAPHIN_RESULT
 {
   GRAPHIN_PANIC = -1, // e.g. not enough memory
   GRAPHIN_OK = 0,
   GRAPHIN_BAD_PARAM = 1,  // bad parameter
   GRAPHIN_FAILURE = 2,    // operation failed, e.g. restore() without save()
-} GRAPHIN_RESULT;
+};
 
 // image primitives
-
-//GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
 
 GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
         image_create( unsigned int width, unsigned int height, HIMG* poutImg );
