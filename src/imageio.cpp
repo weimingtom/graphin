@@ -1,6 +1,9 @@
 #include "imageio.h"
 #include <malloc.h>
-#include <alloca.h>
+
+#if defined(__GNUC__)
+  #include <alloca.h>
+#endif
 
 int DecodePNGImage(ImageCtor* pctor, void* pctorPrm, unsigned char* src, unsigned int srclength);
 int DecodeJPGImage(ImageCtor* pctor, void* pctorPrm, unsigned char* src, unsigned int srclength);

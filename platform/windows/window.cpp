@@ -167,13 +167,31 @@
         break;
 
       case WM_TIMER:
+        if( wParam )
         {
           WINDOW_ON_TIMER_PARAMS p;
           p.id = wParam;
           if(!pw->notify(WINDOW_ON_TIMER, &p))
             ::KillTimer(hwnd, wParam);
-          return 0;
         } 
+        else // mouse tick timer
+        {
+          WINDOW_ON_MOUSE_PARAMS p;
+          p.event = MOUSE_TICK;
+          p.buttons = MAIN_BUTTON;
+          POINT pt;
+          ::GetCursorPos(&pt);
+          p.screen_x = pt.x; 
+          p.screen_y = pt.y; 
+          ::MapWindowPoints(HWND_DESKTOP,hwnd,&pt,1);
+          p.x = pt.x; 
+          p.y = pt.y; 
+          p.alts = get_alts();
+          if(pw->notify(WINDOW_ON_MOUSE, &p))
+            return 0;
+          break;
+        }
+        return 0;
       case WM_ERASEBKGND:
         return TRUE;
 
@@ -204,6 +222,10 @@
           p.screen_y = p.y; 
           ::MapWindowPoints(hwnd,HWND_DESKTOP,(LPPOINT)&p.screen_x, 1);
           p.alts = get_alts(wParam);
+
+          ::SetTimer(hwnd,0,::GetDoubleClickTime()/4,0); // start MOUSE_TICK timer
+          ::SetCapture(hwnd);
+
           if(pw->notify(WINDOW_ON_MOUSE, &p))
             return 0;
           break;
@@ -225,6 +247,10 @@
       }
       case WM_LBUTTONUP:
       {
+          ::KillTimer(hwnd,0); // stop MOUSE_TICK timer
+          if(::GetCapture() == hwnd)
+            ::ReleaseCapture();
+
           WINDOW_ON_MOUSE_PARAMS p;
           p.event = MOUSE_UP;
           p.buttons = MAIN_BUTTON;
@@ -305,6 +331,61 @@
             return 0;
           break;
       }
+
+      case WM_MOUSEHOVER:
+      {
+          WINDOW_ON_MOUSE_PARAMS p;
+          p.event = MOUSE_IDLE;
+          p.buttons = get_buttons(wParam);
+          p.x = GET_X_LPARAM(lParam); 
+          p.y = GET_Y_LPARAM(lParam); 
+          p.screen_x = p.x; 
+          p.screen_y = p.y; 
+          ::MapWindowPoints(hwnd,HWND_DESKTOP,(LPPOINT)&p.screen_x, 1);
+          p.alts = get_alts(wParam);
+
+          TRACKMOUSEEVENT tme;
+          tme.cbSize = sizeof(tme);
+          tme.dwFlags = TME_HOVER | TME_LEAVE;
+          tme.hwndTrack = hwnd;
+          tme.dwHoverTime = HOVER_DEFAULT;
+          _TrackMouseEvent(&tme);
+
+          if(pw->notify(WINDOW_ON_MOUSE, &p))
+            return 0;
+          break;
+      }
+      case WM_KEYDOWN:
+      {
+          WINDOW_ON_KEY_PARAMS p;
+          p.event = KEY_DOWN;
+          p.code = wParam;
+          p.alts = get_alts();
+          if(pw->notify(WINDOW_ON_KEY, &p))
+            return 0;
+          break;
+      }
+      case WM_KEYUP:
+      {
+          WINDOW_ON_KEY_PARAMS p;
+          p.event = KEY_UP;
+          p.code = wParam;
+          p.alts = get_alts();
+          if(pw->notify(WINDOW_ON_KEY, &p))
+            return 0;
+          break;
+      }
+      case WM_CHAR:
+      {
+          WINDOW_ON_KEY_PARAMS p;
+          p.event = KEY_CHAR;
+          p.code = wParam;
+          p.alts = get_alts();
+          if(pw->notify(WINDOW_ON_KEY, &p))
+            return 0;
+          break;
+      }
+
     }
     return DefWindowProc(hwnd, msg, wParam, lParam);
   }
