@@ -1,7 +1,5 @@
-// stdafx.h : include file for standard system include files,
-//  or project specific include files that are used frequently, but
-//      are changed infrequently
-//
+
+// structures that represent "handled" objects.
 
 #if !defined(__objects_h__)
 #define __objects_h__
@@ -31,7 +29,6 @@ struct image:
 
     }
 };
-
 
 struct graphics:
   public resource,
