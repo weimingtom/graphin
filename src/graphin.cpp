@@ -5,6 +5,12 @@
 #include "objects.h"
 #include "graphin.h"
 
+#include <malloc.h>
+
+#if defined(__GNUC__)
+  #include <alloca.h>
+#endif
+
 #undef GRAPHIN_API
 #define GRAPHIN_API
 
@@ -553,7 +559,6 @@ GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
 }
 
 
-
 #include "imageio.h"
 
 bool image_ctor(void* pctorPrm, unsigned int width, unsigned int height, BYTE** rowPtrs)
@@ -583,6 +588,33 @@ GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
 
   return GRAPHIN_OK;
 }
+
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL // save png/jpeg/etc. image to stream of bytes
+        image_save( HIMG himg, 
+        image_write_function* pfn, void* prm, /* function and its param passed "as is" */
+        unsigned bpp /*24,32 if alpha needed*/,  
+        unsigned type /* 0 - png, 1 - jpg*/,
+        unsigned quality /*  only for jpeg, 10 - 100 */ )
+{
+  if(!himg || !pfn)
+    return GRAPHIN_BAD_PARAM;
+
+  int   stride = himg->pmap.stride();
+  BYTE* ptr    = himg->pmap.buf();
+  unsigned width = himg->pmap.width();
+  unsigned height = himg->pmap.height();
+
+  BYTE** rows = (BYTE**)alloca( sizeof(BYTE*) * height );
+  if( !rows )
+    return GRAPHIN_FAILURE;
+
+  for(unsigned n = 0; n < height; ++n, ptr += stride)
+    rows[n] = ptr;
+
+  return EncodeImage(pfn,prm,width,height,rows,bpp,quality,type)?
+    GRAPHIN_OK: GRAPHIN_FAILURE;
+}
+
 
 GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
       graphics_draw_image ( HGFX hgfx, HIMG himg, POS x, POS y,
