@@ -89,6 +89,16 @@ GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
 GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
         image_load( const BYTE* bytes, unsigned int num_bytes, HIMG* pout_img ); // load png/jpeg/etc. image from stream of bytes
 
+typedef bool GRAPHIN_CALL image_write_function(void* prm, unsigned char* data, unsigned int data_length);
+
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL // save png/jpeg/etc. image to stream of bytes
+        image_save( HIMG himg, 
+        image_write_function* pfn, void* prm, /* function and its param passed "as is" */
+        unsigned bpp /*24,32 if alpha needed*/,  
+        unsigned type /* 0 - png, 1 - jpg*/,
+        unsigned quality /*  only for jpeg, 10 - 100 */ ); 
+
+
 // SECTION: graphics primitives and drawing operations
 
 // create color value

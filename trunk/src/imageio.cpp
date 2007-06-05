@@ -269,4 +269,187 @@ FAIL:
   }
 
 
+bool EncodePNGImage(image_write_function* pstreamFn, void* streamPrm, unsigned width, unsigned height, unsigned char** rows, unsigned bpp, unsigned compression);
+bool EncodeJPGImage(image_write_function* pstreamFn, void* streamPrm, unsigned width, unsigned height, unsigned char** rows, unsigned bpp, unsigned compression);
+
+bool EncodeImage(image_write_function* pfn, void* fnPrm, 
+                 unsigned width, unsigned height, 
+                 unsigned char** rows, unsigned bpp, unsigned compression, 
+                 unsigned type) // 0 - png, 1, - jpg
+{
+  if( type == 0 )
+    return EncodePNGImage(pfn, fnPrm, width, height, rows, bpp, compression);
+  else if( type == 1 )
+    return EncodeJPGImage(pfn, fnPrm, width, height, rows, bpp, compression);
+  return 0;
+}
+
+struct write_io
+{
+  image_write_function* pctl;
+  void*           streamPrm;
+};
+
+static void PNGAPI png_write_data(png_structp png_ptr, png_bytep data, png_size_t length)
+{
+   write_io *pio = (write_io *)png_get_io_ptr(png_ptr);
+   pio->pctl( pio->streamPrm, data, length );
+}
+
+static void PNGAPI png_flush_data(png_structp png_ptr)
+{
+   ;// does nothing
+}
+
+bool EncodePNGImage(image_write_function* pctl, void* streamPrm, unsigned width, unsigned height, unsigned char** rows, unsigned bpp, unsigned compression)
+{ 
+
+  png_structp png = 0;
+  png_infop pngInfo = 0;
+  
+  png = png_create_write_struct(PNG_LIBPNG_VER_STRING, 0, 0, 0);
+  if (!png)
+  {
+    return false;
+  }
+
+  pngInfo = png_create_info_struct(png);
+  if (!pngInfo)
+  {
+    png_destroy_write_struct(&png, &pngInfo);
+  }
+
+	if (setjmp(png->jmpbuf))
+	{
+    png_destroy_write_struct(&png, &pngInfo);
+    return false;
+  }
+
+  // setup i/o routine
+
+  write_io pio; pio.pctl = pctl; pio.streamPrm = streamPrm;
+
+  png_set_write_fn(png,&pio,png_write_data,png_flush_data);
+
+  unsigned fmt = bpp == 32? PNG_COLOR_TYPE_RGB_ALPHA : PNG_COLOR_TYPE_RGB;
+
+  png_set_IHDR(png, pngInfo, width, height, 8, fmt, 
+    PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_DEFAULT, 
+    PNG_FILTER_TYPE_DEFAULT);
+  
+  png_write_info(png, pngInfo);
+  png_set_bgr(png);
+  //png_write_png (png, pngInfo, PNG_TRANSFORM_BGR, NULL);
+
+  png_write_image(png, rows);
+
+  png_write_end(png, pngInfo);
+  //png_write_flush(png);
+  
+  png_destroy_write_struct(&png, &pngInfo);
+
+  return true;
+}
+
+// JPG store
+
+typedef struct my_jpeg_out_mgr {
+  struct jpeg_destination_mgr pub;
+  unsigned char buffer[256]; 
+  image_write_function* pctl;
+  void*           streamPrm;
+} my_jpeg_out_mgr;
+
+inline void rgba2bgr(unsigned char* rgba, unsigned char* bgr, unsigned int num_pixels)
+{
+  for(unsigned n = 0; n < num_pixels; ++n)
+  {
+    bgr[0] = rgba[2];
+    bgr[1] = rgba[1];
+    bgr[2] = rgba[0];
+    rgba += 4;
+    bgr += 3;
+  }
+}
+
+/* this routine is called to initiate the jpeg writing process */
+
+  void my_init_destination(
+    j_compress_ptr cinfo
+  )
+  {
+    struct my_jpeg_out_mgr *dest = (struct my_jpeg_out_mgr *) cinfo->dest;
+    dest->pub.next_output_byte = dest->buffer;
+    memset(dest->buffer, 0, 256);
+    dest->pub.free_in_buffer = 256;
+  }
+
+  /* this routine is called each time the buffer gets full */
+
+  boolean my_empty_output_buffer(
+    j_compress_ptr cinfo
+  )
+  {
+    struct my_jpeg_out_mgr *dest = (struct my_jpeg_out_mgr *) cinfo->dest;
+    dest->pctl(dest->streamPrm,dest->buffer,256);
+    memset(dest->buffer, 0, 256);
+    dest->pub.next_output_byte = dest->buffer;
+    dest->pub.free_in_buffer = 256;
+    return TRUE;
+  }
+
+  /* and this routine gets called when the writing process is finished */
+
+  void my_term_destination(
+    j_compress_ptr cinfo
+  )
+  {
+    struct my_jpeg_out_mgr *dest = (struct my_jpeg_out_mgr *) cinfo->dest;
+    int n = 256 - int(dest->pub.free_in_buffer);
+    dest->pctl(dest->streamPrm,dest->buffer,n);
+  }
+
+  bool EncodeJPGImage(image_write_function* pctl, void* streamPrm, unsigned width, unsigned height, unsigned char** rows, unsigned bpp, unsigned quality)
+  { 
+    unsigned char* rowbuf = (unsigned char*)alloca(  width * 3 );
+    if(!rowbuf) return false;
+
+    struct my_jpeg_out_mgr dest;
+    struct jpeg_compress_struct cinfo;
+    struct jpeg_error_mgr jerr;
+    JSAMPROW row_pointer[1];
+
+    cinfo.err = jpeg_std_error(&jerr);
+    jpeg_create_compress(&cinfo);
+    cinfo.dest = (struct jpeg_destination_mgr *) &dest;
+
+    dest.pctl = pctl;
+    dest.streamPrm = streamPrm;
+
+    dest.pub.init_destination = my_init_destination;
+    dest.pub.empty_output_buffer = my_empty_output_buffer;
+    dest.pub.term_destination = my_term_destination;
+
+    cinfo.image_width = width;
+    cinfo.image_height = height;
+    cinfo.input_components = 3; 
+    cinfo.in_color_space = JCS_RGB;
+    jpeg_set_defaults(&cinfo);
+    jpeg_set_quality(&cinfo, quality, TRUE);
+    jpeg_start_compress(&cinfo, TRUE);
+
+    while(cinfo.next_scanline < cinfo.image_height) 
+    {
+      rgba2bgr(rows[cinfo.next_scanline], rowbuf, cinfo.image_width);
+      row_pointer[0] = rowbuf;
+      jpeg_write_scanlines(&cinfo, row_pointer, 1);
+    }
+  
+    jpeg_finish_compress(&cinfo);
+    jpeg_destroy_compress(&cinfo);
+
+    return true;
+
+  }
+
 

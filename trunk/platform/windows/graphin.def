@@ -5,6 +5,7 @@ EXPORTS
 	image_get_info				@3
 	image_blit					@4
 	image_load					@5
+	image_save					@6
 
 	graphics_create					@10
 	graphics_release				@11
