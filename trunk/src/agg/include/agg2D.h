@@ -3,8 +3,8 @@
 // Based on Anti-Grain Geometry
 // Copyright (C) 2005 Maxim Shemanarev (http://www.antigrain.com)
 //
-// Permission to copy, use, modify, sell and distribute this software 
-// is granted provided this copyright notice appears in all copies. 
+// Permission to copy, use, modify, sell and distribute this software
+// is granted provided this copyright notice appears in all copies.
 // This software is provided "as is" without express or implied
 // warranty, and with no claim as to its suitability for any purpose.
 //
@@ -24,7 +24,7 @@
 
 // With this define uncommented you can use FreeType font engine
 
-#if defined(UNDER_CE) 
+#if defined(UNDER_CE)
 #define AGG2D_USE_FREETYPE 1
 #endif
 
@@ -54,6 +54,7 @@
 #include "agg_bezier_arc.h"
 #include "agg_rounded_rect.h"
 #include "agg_font_cache_manager.h"
+#include "agg_math_stroke.h"
 
 #ifdef AGG2D_USE_FREETYPE
 #include "../font_freetype/agg_font_freetype.h"
@@ -135,13 +136,13 @@ public:
     typedef agg::rect_i       Rect;
     typedef agg::rect_d       RectD;
     typedef agg::trans_affine Affine;
-    
+
     enum gradientUnits_e
     {
       gradientUnits_userSpaceOnUse,
       gradientUnits_objectBoundingBox
     };
-  
+
     enum spreadMethod_e
     {
       spreadMethod_pad,
@@ -149,20 +150,26 @@ public:
       spreadMethod_repeat,
     };
 
+    /*miter_join         = 0,
+    miter_join_revert  = 1,
+    round_join         = 2,
+    bevel_join         = 3,
+    miter_join_round   = 4*/
+
     enum LineJoin
     {
-        JoinMiter = agg::miter_join,
-        JoinRound = agg::round_join,
-        JoinBevel = agg::bevel_join
+        MiterJoin = agg::miter_join,
+        RoundJoin = agg::round_join,
+        BevelJoin = agg::bevel_join
     };
-    
+
     enum LineCap
     {
-        CapButt   = agg::butt_cap,
-        CapSquare = agg::square_cap,
-        CapRound  = agg::round_cap
+        LineCapButt   = agg::butt_cap,
+        LineCapSquare = agg::square_cap,
+        LineCapRound  = agg::round_cap
     };
-    
+
     enum TextAlignment
     {
         AlignLeft,
@@ -171,8 +178,8 @@ public:
         AlignTop = AlignRight,
         AlignBottom = AlignLeft
     };
-    
-    
+
+
     enum DrawPathFlag
     {
         FillOnly,
@@ -212,7 +219,7 @@ public:
         agg::rendering_buffer renBuf;
 
         Image() {}
-        Image(unsigned char* buf, unsigned width, unsigned height, int stride) : 
+        Image(unsigned char* buf, unsigned width, unsigned height, int stride) :
             renBuf(buf, width, height, stride) {}
         void attach(unsigned char* buf, unsigned width, unsigned height, int stride)
         {
@@ -288,8 +295,8 @@ public:
         CW, CCW
     };
 
-    struct State 
-    {   
+    struct State
+    {
       RectD                           m_clipBox;
 
       BlendMode                       m_blendMode;
@@ -332,14 +339,14 @@ public:
       agg::trans_affine               m_affine;
 
     };
-    
+
     class gradient
     {
     public:
         gradient();
         //---------------------------------------------------------------------
         void reset();
-      
+
         void type(Gradient gt);
         void gradientUnits(gradientUnits_e);
         void spreadMethod(spreadMethod_e);
@@ -410,7 +417,7 @@ public:
         {
             real     offset;
             Color      color;
-      
+
             color_stop() {}
             color_stop(real offset, const Color& color) : offset(offset), color(color) {}
         };
@@ -439,8 +446,8 @@ public:
         struct color_interpolator
         {
         //---------------------------------------------------------------------
-            color_interpolator(const Color& c1, 
-                               const Color& c2, 
+            color_interpolator(const Color& c1,
+                               const Color& c2,
                                unsigned len) :
                 r(c1.r, c2.r, len),
                 g(c1.g, c2.g, len),
@@ -522,21 +529,21 @@ public:
     Color fillColor() const;
     Color lineColor() const;
     //-------------------------------------------------------------------------
-  void fillLinearGradient(const gradient_lut_type&, 
+  void fillLinearGradient(const gradient_lut_type&,
                 real x1, real y1, real x2, real y2,
               const agg::trans_affine& gradientTransform,
               spreadMethod_e,
               gradientUnits_e units,
               real opacity);
     //-------------------------------------------------------------------------
-  void lineLinearGradient(const gradient_lut_type&, 
+  void lineLinearGradient(const gradient_lut_type&,
                 real x1, real y1, real x2, real y2,
               const agg::trans_affine& gradientTransform,
               spreadMethod_e,
               gradientUnits_e units,
               real opacity);
     //-------------------------------------------------------------------------
-  void fillRadialGradient(const gradient_lut_type&, 
+  void fillRadialGradient(const gradient_lut_type&,
                 real cx, real cy, real r,
               real fx, real fy,
               const agg::trans_affine& gradientTransform,
@@ -544,7 +551,7 @@ public:
               gradientUnits_e units,
               real opacity);
     //-------------------------------------------------------------------------
-  void lineRadialGradient(const gradient_lut_type&, 
+  void lineRadialGradient(const gradient_lut_type&,
                 real cx, real cy, real r,
               real fx, real fy,
               const agg::trans_affine& gradientTransform,
@@ -605,11 +612,11 @@ public:
     void rectangle(real x1, real y1, real x2, real y2);
     void roundedRect(real x1, real y1, real x2, real y2, real r);
     void roundedRect(real x1, real y1, real x2, real y2, real rx, real ry);
-    void roundedRect(real x1, real y1, real x2, real y2, 
+    void roundedRect(real x1, real y1, real x2, real y2,
                      real rxBottom, real ryBottom,
                      real rxTop,    real ryTop);
-    void roundedRect(real x1, real y1, real x2, real y2, 
-                     real rx1, real ry1, real rx2, real ry2, 
+    void roundedRect(real x1, real y1, real x2, real y2,
+                     real rx1, real ry1, real rx2, real ry2,
                      real rx3, real ry3, real rx4, real ry4);
 
     void ellipse(real cx, real cy, real rx, real ry);
@@ -624,10 +631,10 @@ public:
     // Text
     //-----------------------
     void   flipText(bool flip);
-    void   font(const char* fileName, real height, 
+    void   font(const char* fileName, real height,
                 bool bold = false,
                 bool italic = false,
-                FontCacheType ch = RasterFontCache, 
+                FontCacheType ch = RasterFontCache,
                 real angle = 0.0f);
     real fontHeight() const;
     real fontAscent() const;
@@ -672,31 +679,31 @@ public:
                 bool sweepFlag,
                 real dx, real dy);
 
-    void quadricCurveTo(real xCtrl, real yCtrl, 
+    void quadricCurveTo(real xCtrl, real yCtrl,
                          real xTo,   real yTo);
-    void quadricCurveRel(real dxCtrl, real dyCtrl, 
+    void quadricCurveRel(real dxCtrl, real dyCtrl,
                          real dxTo,   real dyTo);
     void quadricCurveTo(real xTo, real yTo);
     void quadricCurveRel(real dxTo, real dyTo);
 
-    void cubicCurveTo(real xCtrl1, real yCtrl1, 
-                      real xCtrl2, real yCtrl2, 
+    void cubicCurveTo(real xCtrl1, real yCtrl1,
+                      real xCtrl2, real yCtrl2,
                       real xTo,    real yTo);
 
-    void cubicCurveRel(real dxCtrl1, real dyCtrl1, 
-                       real dxCtrl2, real dyCtrl2, 
+    void cubicCurveRel(real dxCtrl1, real dyCtrl1,
+                       real dxCtrl2, real dyCtrl2,
                        real dxTo,    real dyTo);
 
-    void cubicCurveTo(real xCtrl2, real yCtrl2, 
+    void cubicCurveTo(real xCtrl2, real yCtrl2,
                       real xTo,    real yTo);
 
-    void cubicCurveRel(real xCtrl2, real yCtrl2, 
+    void cubicCurveRel(real xCtrl2, real yCtrl2,
                        real xTo,    real yTo);
 
     void addEllipse(real cx, real cy, real rx, real ry, Direction dir);
     void closePolygon();
 
-    template <class VertexSource> 
+    template <class VertexSource>
     void addPath(VertexSource& vs, unsigned path_id = 0)
     {
         m_path.concat_path(vs, path_id);
@@ -717,28 +724,28 @@ public:
     void imageResample(ImageResample f);
     ImageResample imageResample() const;
 
-    void transformImage(const Image& img,    
+    void transformImage(const Image& img,
                            int imgX1,    int imgY1,    int imgX2,    int imgY2,
                         real dstX1, real dstY1, real dstX2, real dstY2);
 
-    void transformImage(const Image& img, 
+    void transformImage(const Image& img,
                         real dstX1, real dstY1, real dstX2, real dstY2);
 
-    void transformImage(const Image& img, 
+    void transformImage(const Image& img,
                         int imgX1, int imgY1, int imgX2, int imgY2,
                         const real* parallelogram);
 
     void transformImage(const Image& img, const real* parallelogram);
 
 
-    void transformImagePath(const Image& img, 
+    void transformImagePath(const Image& img,
                             int imgX1,    int imgY1,    int imgX2,    int imgY2,
                             real dstX1, real dstY1, real dstX2, real dstY2);
 
-    void transformImagePath(const Image& img, 
+    void transformImagePath(const Image& img,
                             real dstX1, real dstY1, real dstX2, real dstY2);
 
-    void transformImagePath(const Image& img, 
+    void transformImagePath(const Image& img,
                             int imgX1, int imgY1, int imgX2, int imgY2,
                             const real* parallelogram);
 
@@ -758,7 +765,7 @@ public:
                    real dstX, real dstY);
     void copyImage(Image& img, real dstX, real dstY);
 
-    // State 
+    // State
     //-----------------------
 
     void saveStateTo(State& st);
@@ -903,31 +910,31 @@ inline bool operator != (const Agg2D::Color& c1, const Agg2D::Color& c2)
       m_spreadMethod = m;
   }
   //-------------------------------------------------------------------------
-  inline void Agg2D::gradient::linear(real x1, real y1, real x2, real y2) 
-  { 
+  inline void Agg2D::gradient::linear(real x1, real y1, real x2, real y2)
+  {
       m_type = Linear;
-      m_x1 = x1; 
-      m_y1 = y1; 
-      m_x2 = x2; 
-      m_y2 = y2; 
+      m_x1 = x1;
+      m_y1 = y1;
+      m_x2 = x2;
+      m_y2 = y2;
   }
   //-------------------------------------------------------------------------
-  inline void Agg2D::gradient::radial(real cx, real cy, real r) 
-  { 
+  inline void Agg2D::gradient::radial(real cx, real cy, real r)
+  {
       m_type = Radial;
-      m_cx = m_fx = cx; 
-      m_cy = m_fy = cy; 
+      m_cx = m_fx = cx;
+      m_cy = m_fy = cy;
       m_r = r;
   }
   //-------------------------------------------------------------------------
-  inline void Agg2D::gradient::focus(real fx, real fy)  
-  { 
-      m_fx = fx; 
-      m_fy = fy; 
+  inline void Agg2D::gradient::focus(real fx, real fy)
+  {
+      m_fx = fx;
+      m_fy = fy;
   }
   //-------------------------------------------------------------------------
-  inline void Agg2D::gradient::add_stop(real            offset, 
-                                 const Color& color, 
+  inline void Agg2D::gradient::add_stop(real            offset,
+                                 const Color& color,
                                  real            opacity)
   {
       if(offset < 0.0) offset = 0.0;
@@ -1034,15 +1041,15 @@ inline bool operator != (const Agg2D::Color& c1, const Agg2D::Color& c2)
           unsigned start = agg::uround(m_colors[0].offset * color_lut_size);
           unsigned end;
           Color c = m_colors[0].color;
-          for(i = 0; i < start; i++) 
+          for(i = 0; i < start; i++)
           {
               m_color_lut[i] = c;
           }
           for(i = 1; i < m_colors.size(); i++)
           {
               end  = agg::uround(m_colors[i].offset * color_lut_size);
-              interpolator_type ci(m_colors[i-1].color, 
-                                   m_colors[i  ].color, 
+              interpolator_type ci(m_colors[i-1].color,
+                                   m_colors[i  ].color,
                                    end - start + 1);
               while(start < end)
               {
@@ -1056,9 +1063,9 @@ inline bool operator != (const Agg2D::Color& c1, const Agg2D::Color& c2)
           {
               m_color_lut[end] = c;
           }
-      }        
+      }
   }
-  
+
 
 #endif
 
