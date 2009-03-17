@@ -171,7 +171,8 @@
         {
           WINDOW_ON_TIMER_PARAMS p;
           p.id = wParam;
-          if(!pw->notify(WINDOW_ON_TIMER, &p))
+          p.cancel = false;
+          if(!pw->notify(WINDOW_ON_TIMER, &p) || p.cancel)
             ::KillTimer(hwnd, wParam);
         } 
         else // mouse tick timer
