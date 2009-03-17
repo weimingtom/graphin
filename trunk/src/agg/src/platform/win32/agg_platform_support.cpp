@@ -599,13 +599,13 @@ namespace agg
     }
 
     //------------------------------------------------------------------------
-    double platform_support::elapsed_time() const
+    real platform_support::elapsed_time() const
     {
         LARGE_INTEGER stop;
         ::QueryPerformanceCounter(&stop);
-        return double(stop.QuadPart - 
-                      m_specific->m_sw_start.QuadPart) * 1000.0 / 
-                      double(m_specific->m_sw_freq.QuadPart);
+        return real(stop.QuadPart - 
+                      m_specific->m_sw_start.QuadPart) * 1000.0f / 
+                      real(m_specific->m_sw_freq.QuadPart);
     }
 
 
@@ -635,7 +635,7 @@ namespace agg
         HDC paintDC;
 
 
-        void* user_data = reinterpret_cast<void*>(::GetWindowLong(hWnd, GWL_USERDATA));
+        void* user_data = reinterpret_cast<void*>(::GetWindowLong(hWnd, GWLP_USERDATA));
         platform_support* app = 0;
 
         if(user_data)
@@ -1062,7 +1062,7 @@ namespace agg
                      height + (height - (rct.bottom - rct.top)),
                      FALSE);
    
-        ::SetWindowLong(m_specific->m_hwnd, GWL_USERDATA, (LONG)this);
+        ::SetWindowLong(m_specific->m_hwnd, GWLP_USERDATA, (LONG)this);
         m_specific->create_pmap(width, height, &m_rbuf_window);
         m_initial_width = width;
         m_initial_height = height;
@@ -1476,6 +1476,7 @@ int PASCAL WinMain(HINSTANCE hInstance,
 
     return ret;
 }
+
 
 
 
