@@ -7,9 +7,9 @@
 #include "window.hpp"
 #include "mm_file.h"
 
-class frame : public graphin::window<frame>
+class frame : public graphin::window
 {
-  typedef graphin::window<frame> super;
+  typedef graphin::window super;
 public:
   frame(WINDOW_TYPE type): super(type) {}
   void on_paint(PAINT_EVT& evt);

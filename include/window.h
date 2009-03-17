@@ -30,7 +30,7 @@ struct WINDOW_ON_SIZE_PARAMS      { int width;  int height; };
 struct WINDOW_ON_MOVE_PARAMS      { int x; int y; };
 
 struct WINDOW_ON_ACTIVATE_PARAMS  { int manner; };
-struct WINDOW_ON_TIMER_PARAMS     { unsigned long id; };
+struct WINDOW_ON_TIMER_PARAMS     { unsigned long id; bool cancel; };
 
 enum ALT_FLAGS
 {
