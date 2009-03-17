@@ -84,36 +84,36 @@ namespace agg
                                       const rect_base<T>& clip_box,
                                       T* x, T* y)
     {
-        const double nearzero = 1e-30;
+        const real nearzero = 1e-30;
 
-        double deltax = x2 - x1;
-        double deltay = y2 - y1; 
-        double xin;
-        double xout;
-        double yin;
-        double yout;
-        double tinx;
-        double tiny;
-        double toutx;
-        double touty;  
-        double tin1;
-        double tin2;
-        double tout1;
+        real deltax = x2 - x1;
+        real deltay = y2 - y1; 
+        real xin;
+        real xout;
+        real yin;
+        real yout;
+        real tinx;
+        real tiny;
+        real toutx;
+        real touty;  
+        real tin1;
+        real tin2;
+        real tout1;
         unsigned np = 0;
 
-        if(deltax == 0.0) 
+        if(deltax == 0.0f) 
         {   
             // bump off of the vertical
             deltax = (x1 > clip_box.x1) ? -nearzero : nearzero;
         }
 
-        if(deltay == 0.0) 
+        if(deltay == 0.0f) 
         { 
             // bump off of the horizontal 
             deltay = (y1 > clip_box.y1) ? -nearzero : nearzero;
         }
         
-        if(deltax > 0.0) 
+        if(deltax > 0.0f) 
         {                
             // points to right
             xin  = clip_box.x1;
@@ -125,7 +125,7 @@ namespace agg
             xout = clip_box.x1;
         }
 
-        if(deltay > 0.0) 
+        if(deltay > 0.0f) 
         {
             // points up
             yin  = clip_box.y1;
@@ -153,27 +153,27 @@ namespace agg
             tin2 = tinx;
         }
         
-        if(tin1 <= 1.0) 
+        if(tin1 <= 1.0f) 
         {
-            if(0.0 < tin1) 
+            if(0.0f < tin1) 
             {
                 *x++ = (T)xin;
                 *y++ = (T)yin;
                 ++np;
             }
 
-            if(tin2 <= 1.0)
+            if(tin2 <= 1.0f)
             {
                 toutx = (xout - x1) / deltax;
                 touty = (yout - y1) / deltay;
                 
                 tout1 = (toutx < touty) ? toutx : touty;
                 
-                if(tin2 > 0.0 || tout1 > 0.0) 
+                if(tin2 > 0.0f || tout1 > 0.0f) 
                 {
                     if(tin2 <= tout1) 
                     {
-                        if(tin2 > 0.0) 
+                        if(tin2 > 0.0f) 
                         {
                             if(tinx > tiny) 
                             {
@@ -188,7 +188,7 @@ namespace agg
                             ++np;
                         }
 
-                        if(tout1 < 1.0) 
+                        if(tout1 < 1.0f) 
                         {
                             if(toutx < touty) 
                             {
@@ -244,7 +244,7 @@ namespace agg
                return false;
            }
            bound = (flags & clipping_flags_x1_clipped) ? clip_box.x1 : clip_box.x2;
-           *y = (T)(double(bound - x1) * (y2 - y1) / (x2 - x1) + y1);
+           *y = (T)(real(bound - x1) * (y2 - y1) / (x2 - x1) + y1);
            *x = bound;
        }
 
@@ -256,7 +256,7 @@ namespace agg
                return false;
            }
            bound = (flags & clipping_flags_y1_clipped) ? clip_box.y1 : clip_box.y2;
-           *x = (T)(double(bound - y1) * (x2 - x1) / (y2 - y1) + x1);
+           *x = (T)(real(bound - y1) * (x2 - x1) / (y2 - y1) + x1);
            *y = bound;
        }
        return true;

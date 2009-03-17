@@ -25,13 +25,13 @@ namespace agg
 {
 
     //------------------------------------------------------------------------
-    cbox_ctrl_impl::cbox_ctrl_impl(double x, double y, 
+    cbox_ctrl_impl::cbox_ctrl_impl(real x, real y, 
                                    const char* l, 
                                    bool flip_y) :
-        ctrl(x, y, x + 9.0 * 1.5, y + 9.0 * 1.5, flip_y),
+        ctrl(x, y, x + 9.0f * 1.5, y + 9.0f * 1.5, flip_y),
         m_text_thickness(1.5),
-        m_text_height(9.0),
-        m_text_width(0.0),
+        m_text_height(9.0f),
+        m_text_width(0.0f),
         m_status(false),
         m_text_poly(m_text)
     {
@@ -40,7 +40,7 @@ namespace agg
 
 
     //------------------------------------------------------------------------
-    void cbox_ctrl_impl::text_size(double h, double w)
+    void cbox_ctrl_impl::text_size(real h, real w)
     {
         m_text_width = w; 
         m_text_height = h; 
@@ -57,7 +57,7 @@ namespace agg
 
 
     //------------------------------------------------------------------------
-    bool cbox_ctrl_impl::on_mouse_button_down(double x, double y)
+    bool cbox_ctrl_impl::on_mouse_button_down(real x, real y)
     {
         inverse_transform_xy(&x, &y);
         if(x >= m_x1 && y >= m_y1 && x <= m_x2 && y <= m_y2)
@@ -70,20 +70,20 @@ namespace agg
 
 
     //------------------------------------------------------------------------
-    bool cbox_ctrl_impl::on_mouse_move(double, double, bool)
+    bool cbox_ctrl_impl::on_mouse_move(real, real, bool)
     {
         return false;
     }
 
     //------------------------------------------------------------------------
-    bool cbox_ctrl_impl::in_rect(double x, double y) const
+    bool cbox_ctrl_impl::in_rect(real x, real y) const
     {
         inverse_transform_xy(&x, &y);
         return x >= m_x1 && y >= m_y1 && x <= m_x2 && y <= m_y2;
     }
 
     //------------------------------------------------------------------------
-    bool cbox_ctrl_impl::on_mouse_button_up(double, double)
+    bool cbox_ctrl_impl::on_mouse_button_up(real, real)
     {
         return false;
     }
@@ -100,8 +100,8 @@ namespace agg
     {
         m_idx = idx;
 
-        double d2;
-        double t;
+        real d2;
+        real t;
 
         switch(idx)
         {
@@ -128,7 +128,7 @@ namespace agg
 
         case 1:                 // Text
             m_text.text(m_label);
-            m_text.start_point(m_x1 + m_text_height * 2.0, m_y1 + m_text_height / 5.0);
+            m_text.start_point(m_x1 + m_text_height * 2.0, m_y1 + m_text_height / 5.0f);
             m_text.size(m_text_height, m_text_width);
             m_text_poly.width(m_text_thickness);
             m_text_poly.line_join(round_join);
@@ -138,7 +138,7 @@ namespace agg
 
         case 2:                 // Active item
             m_vertex = 0;
-            d2 = (m_y2 - m_y1) / 2.0;
+            d2 = (m_y2 - m_y1) / 2.0f;
             t = m_text_thickness * 1.5;
             m_vx[0] = m_x1 + m_text_thickness;
             m_vy[0] = m_y1 + m_text_thickness;
@@ -165,7 +165,7 @@ namespace agg
 
 
     //------------------------------------------------------------------------
-    unsigned cbox_ctrl_impl::vertex(double* x, double* y)
+    unsigned cbox_ctrl_impl::vertex(real* x, real* y)
     {
         unsigned cmd = path_cmd_line_to;
         switch(m_idx)
@@ -209,6 +209,7 @@ namespace agg
         return cmd;
     }
 }
+
 
 
 

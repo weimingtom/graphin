@@ -41,22 +41,22 @@ namespace agg
     //====================================================================rgba
     struct rgba
     {
-        typedef double value_type;
+        typedef real value_type;
 
-        double r;
-        double g;
-        double b;
-        double a;
+        real r;
+        real g;
+        real b;
+        real a;
 
         //--------------------------------------------------------------------
         rgba() {}
 
         //--------------------------------------------------------------------
-        rgba(double r_, double g_, double b_, double a_=1.0) :
+        rgba(real r_, real g_, real b_, real a_=1.0f) :
             r(r_), g(g_), b(b_), a(a_) {}
 
         //--------------------------------------------------------------------
-        rgba(const rgba& c, double a_) : r(c.r), g(c.g), b(c.b), a(a_) {}
+        rgba(const rgba& c, real a_) : r(c.r), g(c.g), b(c.b), a(a_) {}
 
         //--------------------------------------------------------------------
         void clear()
@@ -67,21 +67,21 @@ namespace agg
         //--------------------------------------------------------------------
         const rgba& transparent()
         {
-            a = 0.0;
+            a = 0.0f;
             return *this;
         }
 
         //--------------------------------------------------------------------
-        const rgba& opacity(double a_)
+        const rgba& opacity(real a_)
         {
-            if(a_ < 0.0) a_ = 0.0;
-            if(a_ > 1.0) a_ = 1.0;
+            if(a_ < 0.0f) a_ = 0.0f;
+            if(a_ > 1.0f) a_ = 1.0f;
             a = a_;
             return *this;
         }
 
         //--------------------------------------------------------------------
-        double opacity() const
+        real opacity() const
         {
             return a;
         }
@@ -96,11 +96,11 @@ namespace agg
         }
 
         //--------------------------------------------------------------------
-        const rgba& premultiply(double a_)
+        const rgba& premultiply(real a_)
         {
-            if(a <= 0.0 || a_ <= 0.0)
+            if(a <= 0.0f || a_ <= 0.0f)
             {
-                r = g = b = a = 0.0;
+                r = g = b = a = 0.0f;
                 return *this;
             }
             a_ /= a;
@@ -119,7 +119,7 @@ namespace agg
                 r = g = b = 0;
                 return *this;
             }
-            double a_ = 1.0 / a;
+            real a_ = 1.0f / a;
             r *= a_;
             g *= a_;
             b *= a_;
@@ -128,7 +128,7 @@ namespace agg
 
 
         //--------------------------------------------------------------------
-        rgba gradient(rgba c, double k) const
+        rgba gradient(rgba c, real k) const
         {
             rgba ret;
             ret.r = r + (c.r - r) * k;
@@ -142,10 +142,10 @@ namespace agg
         static rgba no_color() { return rgba(0,0,0,0); }
 
         //--------------------------------------------------------------------
-        static rgba from_wavelength(double wl, double gamma = 1.0);
-	
+        static rgba from_wavelength(real wl, real gamma = 1.0f);
+  
         //--------------------------------------------------------------------
-        explicit rgba(double wavelen, double gamma=1.0)
+        explicit rgba(real wavelen, real gamma=1.0f)
         {
             *this = from_wavelength(wavelen, gamma);
         }
@@ -153,7 +153,7 @@ namespace agg
     };
 
     //----------------------------------------------------------------rgba_pre
-    inline rgba rgba_pre(double r, double g, double b, double a=1.0)
+    inline rgba rgba_pre(real r, real g, real b, real a=1.0f)
     {
         return rgba(r, g, b, a).premultiply();
     }
@@ -161,58 +161,58 @@ namespace agg
     {
         return rgba(c).premultiply();
     }
-    inline rgba rgba_pre(const rgba& c, double a)
+    inline rgba rgba_pre(const rgba& c, real a)
     {
         return rgba(c, a).premultiply();
     }
 
     //------------------------------------------------------------------------
-    inline rgba rgba::from_wavelength(double wl, double gamma)
+    inline rgba rgba::from_wavelength(real wl, real gamma)
     {
-        rgba t(0.0, 0.0, 0.0);
+        rgba t(0.0f, 0.0f, 0.0f);
 
-        if(wl >= 380.0 && wl <= 440.0)
+        if(wl >= 380.0f && wl <= 440.0f)
         {
-            t.r = -1.0 * (wl - 440.0) / (440.0 - 380.0);
-            t.b = 1.0;
+            t.r = -1.0f * (wl - 440.0f) / (440.0f - 380.0f);
+            t.b = 1.0f;
         }
         else 
-        if(wl >= 440.0 && wl <= 490.0)
+        if(wl >= 440.0f && wl <= 490.0f)
         {
-            t.g = (wl - 440.0) / (490.0 - 440.0);
-            t.b = 1.0;
+            t.g = (wl - 440.0f) / (490.0f - 440.0f);
+            t.b = 1.0f;
         }
         else
-        if(wl >= 490.0 && wl <= 510.0)
+        if(wl >= 490.0f && wl <= 510.0f)
         {
-            t.g = 1.0;
-            t.b = -1.0 * (wl - 510.0) / (510.0 - 490.0);
+            t.g = 1.0f;
+            t.b = -1.0f * (wl - 510.0f) / (510.0f - 490.0f);
         }
         else
-        if(wl >= 510.0 && wl <= 580.0)
+        if(wl >= 510.0f && wl <= 580.0f)
         {
-            t.r = (wl - 510.0) / (580.0 - 510.0);
-            t.g = 1.0;
+            t.r = (wl - 510.0f) / (580.0f - 510.0f);
+            t.g = 1.0f;
         }
         else
-        if(wl >= 580.0 && wl <= 645.0)
+        if(wl >= 580.0f && wl <= 645.0f)
         {
-            t.r = 1.0;
-            t.g = -1.0 * (wl - 645.0) / (645.0 - 580.0);
+            t.r = 1.0f;
+            t.g = -1.0f * (wl - 645.0f) / (645.0f - 580.0f);
         }
         else
-        if(wl >= 645.0 && wl <= 780.0)
+        if(wl >= 645.0f && wl <= 780.0f)
         {
-            t.r = 1.0;
+            t.r = 1.0f;
         }
 
-        double s = 1.0;
-        if(wl > 700.0)       s = 0.3 + 0.7 * (780.0 - wl) / (780.0 - 700.0);
-        else if(wl <  420.0) s = 0.3 + 0.7 * (wl - 380.0) / (420.0 - 380.0);
+        real s = 1.0f;
+        if(wl > 700.0f)       s = 0.3f + 0.7f * (780.0f - wl) / (780.0f - 700.0f);
+        else if(wl <  420.0f) s = 0.3f + 0.7f * (wl - 380.0f) / (420.0f - 380.0f);
 
-        t.r = pow(t.r * s, gamma);
-        t.g = pow(t.g * s, gamma);
-        t.b = pow(t.b * s, gamma);
+        t.r = (real)pow(t.r * s, gamma);
+        t.g = (real)pow(t.g * s, gamma);
+        t.b = (real)pow(t.b * s, gamma);
         return t;
     }
 
@@ -250,11 +250,11 @@ namespace agg
             a(value_type(a_)) {}
 
         //--------------------------------------------------------------------
-        rgba8(const rgba& c, double a_) :
-            r((value_type)uround(c.r * double(base_mask))), 
-            g((value_type)uround(c.g * double(base_mask))), 
-            b((value_type)uround(c.b * double(base_mask))), 
-            a((value_type)uround(a_  * double(base_mask))) {}
+        rgba8(const rgba& c, real a_) :
+            r((value_type)uround(c.r * real(base_mask))), 
+            g((value_type)uround(c.g * real(base_mask))), 
+            b((value_type)uround(c.b * real(base_mask))), 
+            a((value_type)uround(a_  * real(base_mask))) {}
 
         //--------------------------------------------------------------------
         rgba8(const self_type& c, unsigned a_) :
@@ -262,10 +262,10 @@ namespace agg
 
         //--------------------------------------------------------------------
         rgba8(const rgba& c) :
-            r((value_type)uround(c.r * double(base_mask))), 
-            g((value_type)uround(c.g * double(base_mask))), 
-            b((value_type)uround(c.b * double(base_mask))), 
-            a((value_type)uround(c.a * double(base_mask))) {}
+            r((value_type)uround(c.r * real(base_mask))), 
+            g((value_type)uround(c.g * real(base_mask))), 
+            b((value_type)uround(c.b * real(base_mask))), 
+            a((value_type)uround(c.a * real(base_mask))) {}
 
         //--------------------------------------------------------------------
         void clear()
@@ -281,18 +281,18 @@ namespace agg
         }
 
         //--------------------------------------------------------------------
-        const self_type& opacity(double a_)
+        const self_type& opacity(real a_)
         {
-            if(a_ < 0.0) a_ = 0.0;
-            if(a_ > 1.0) a_ = 1.0;
-            a = (value_type)uround(a_ * double(base_mask));
+            if(a_ < 0.0f) a_ = 0.0f;
+            if(a_ > 1.0f) a_ = 1.0f;
+            a = (value_type)uround(a_ * real(base_mask));
             return *this;
         }
 
         //--------------------------------------------------------------------
-        double opacity() const
+        real opacity() const
         {
-            return double(a) / double(base_mask);
+            return real(a) / real(base_mask);
         }
 
         //--------------------------------------------------------------------
@@ -348,7 +348,7 @@ namespace agg
         }
 
         //--------------------------------------------------------------------
-        AGG_INLINE self_type gradient(const self_type& c, double k) const
+        AGG_INLINE self_type gradient(const self_type& c, real k) const
         {
             self_type ret;
             calc_type ik = uround(k * base_scale);
@@ -412,7 +412,7 @@ namespace agg
         static self_type no_color() { return self_type(0,0,0,0); }
 
         //--------------------------------------------------------------------
-        static self_type from_wavelength(double wl, double gamma = 1.0)
+        static self_type from_wavelength(real wl, real gamma = 1.0f)
         {
             return self_type(rgba::from_wavelength(wl, gamma));
         }
@@ -437,7 +437,7 @@ namespace agg
     {
         return rgba8(c).premultiply();
     }
-    inline rgba8 rgba8_pre(const rgba& c, double a)
+    inline rgba8 rgba8_pre(const rgba& c, real a)
     {
         return rgba8(c,a).premultiply();
     }
@@ -514,17 +514,17 @@ namespace agg
 
         //--------------------------------------------------------------------
         rgba16(const rgba& c) :
-            r((value_type)uround(c.r * double(base_mask))), 
-            g((value_type)uround(c.g * double(base_mask))), 
-            b((value_type)uround(c.b * double(base_mask))), 
-            a((value_type)uround(c.a * double(base_mask))) {}
+            r((value_type)uround(c.r * real(base_mask))), 
+            g((value_type)uround(c.g * real(base_mask))), 
+            b((value_type)uround(c.b * real(base_mask))), 
+            a((value_type)uround(c.a * real(base_mask))) {}
 
         //--------------------------------------------------------------------
-        rgba16(const rgba& c, double a_) :
-            r((value_type)uround(c.r * double(base_mask))), 
-            g((value_type)uround(c.g * double(base_mask))), 
-            b((value_type)uround(c.b * double(base_mask))), 
-            a((value_type)uround(a_  * double(base_mask))) {}
+        rgba16(const rgba& c, real a_) :
+            r((value_type)uround(c.r * real(base_mask))), 
+            g((value_type)uround(c.g * real(base_mask))), 
+            b((value_type)uround(c.b * real(base_mask))), 
+            a((value_type)uround(a_  * real(base_mask))) {}
 
         //--------------------------------------------------------------------
         rgba16(const rgba8& c) :
@@ -554,18 +554,18 @@ namespace agg
         }
 
         //--------------------------------------------------------------------
-        AGG_INLINE const self_type& opacity(double a_)
+        AGG_INLINE const self_type& opacity(real a_)
         {
-            if(a_ < 0.0) a_ = 0.0;
-            if(a_ > 1.0) a_ = 1.0;
-            a = (value_type)uround(a_ * double(base_mask));
+            if(a_ < 0.0f) a_ = 0.0f;
+            if(a_ > 1.0f) a_ = 1.0f;
+            a = (value_type)uround(a_ * real(base_mask));
             return *this;
         }
 
         //--------------------------------------------------------------------
-        double opacity() const
+        real opacity() const
         {
-            return double(a) / double(base_mask);
+            return real(a) / real(base_mask);
         }
 
         //--------------------------------------------------------------------
@@ -621,7 +621,7 @@ namespace agg
         }
 
         //--------------------------------------------------------------------
-        AGG_INLINE self_type gradient(const self_type& c, double k) const
+        AGG_INLINE self_type gradient(const self_type& c, real k) const
         {
             self_type ret;
             calc_type ik = uround(k * base_scale);
@@ -685,7 +685,7 @@ namespace agg
         static self_type no_color() { return self_type(0,0,0,0); }
 
         //--------------------------------------------------------------------
-        static self_type from_wavelength(double wl, double gamma = 1.0)
+        static self_type from_wavelength(real wl, real gamma = 1.0f)
         {
             return self_type(rgba::from_wavelength(wl, gamma));
         }
@@ -707,7 +707,7 @@ namespace agg
     {
         return rgba16(c).premultiply();
     }
-    inline rgba16 rgba16_pre(const rgba& c, double a)
+    inline rgba16 rgba16_pre(const rgba& c, real a)
     {
         return rgba16(c,a).premultiply();
     }

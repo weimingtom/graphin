@@ -28,7 +28,7 @@ namespace agg
         m_stroker(),
         m_src_vertices(),
         m_out_vertices(),
-        m_shorten(0.0),
+        m_shorten(0.0f),
         m_closed(0),
         m_status(initial),
         m_src_vertex(0),
@@ -46,7 +46,7 @@ namespace agg
 
 
     //------------------------------------------------------------------------
-    void vcgen_stroke::add_vertex(double x, double y, unsigned cmd)
+    void vcgen_stroke::add_vertex(real x, real y, unsigned cmd)
     {
         m_status = initial;
         if(is_move_to(cmd))
@@ -82,7 +82,7 @@ namespace agg
 
 
     //------------------------------------------------------------------------
-    unsigned vcgen_stroke::vertex(double* x, double* y)
+    unsigned vcgen_stroke::vertex(real* x, real* y)
     {
         unsigned cmd = path_cmd_line_to;
         while(!is_stop(cmd))
@@ -187,7 +187,7 @@ namespace agg
                 }
                 else
                 {
-                    const point_d& c = m_out_vertices[m_out_vertex++];
+                    const point_r& c = m_out_vertices[m_out_vertex++];
                     *x = c.x;
                     *y = c.y;
                     return cmd;

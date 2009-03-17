@@ -51,21 +51,21 @@ namespace agg
         void remove_all();
         void free_all();
 
-        void add_vertex(double x, double y, unsigned cmd);
-        void modify_vertex(unsigned idx, double x, double y);
-        void modify_vertex(unsigned idx, double x, double y, unsigned cmd);
+        void add_vertex(real x, real y, unsigned cmd);
+        void modify_vertex(unsigned idx, real x, real y);
+        void modify_vertex(unsigned idx, real x, real y, unsigned cmd);
         void modify_command(unsigned idx, unsigned cmd);
         void swap_vertices(unsigned v1, unsigned v2);
 
         unsigned last_command() const;
-        unsigned last_vertex(double* x, double* y) const;
-        unsigned prev_vertex(double* x, double* y) const;
+        unsigned last_vertex(real* x, real* y) const;
+        unsigned prev_vertex(real* x, real* y) const;
 
-        double last_x() const;
-        double last_y() const;
+        real last_x() const;
+        real last_y() const;
 
         unsigned total_vertices() const;
-        unsigned vertex(unsigned idx, double* x, double* y) const;
+        unsigned vertex(unsigned idx, real* x, real* y) const;
         unsigned command(unsigned idx) const;
 
     private:
@@ -144,11 +144,11 @@ namespace agg
         unsigned i;
         for(i = 0; i < v.total_vertices(); i++)
         {
-            double x, y;
+            real x, y;
             unsigned cmd = v.vertex(i, &x, &y);
             add_vertex(x, y, cmd);
         }
-	    return *this;
+      return *this;
     }
 
     //------------------------------------------------------------------------
@@ -160,7 +160,7 @@ namespace agg
 
     //------------------------------------------------------------------------
     template<class T, unsigned S, unsigned P>
-    inline void vertex_block_storage<T,S,P>::add_vertex(double x, double y, 
+    inline void vertex_block_storage<T,S,P>::add_vertex(real x, real y, 
                                                         unsigned cmd)
     {
         T* coord_ptr = 0;
@@ -173,7 +173,7 @@ namespace agg
     //------------------------------------------------------------------------
     template<class T, unsigned S, unsigned P>
     inline void vertex_block_storage<T,S,P>::modify_vertex(unsigned idx, 
-                                                           double x, double y)
+                                                           real x, real y)
     {
         T* pv = m_coord_blocks[idx >> block_shift] + ((idx & block_mask) << 1);
         pv[0] = T(x);
@@ -183,7 +183,7 @@ namespace agg
     //------------------------------------------------------------------------
     template<class T, unsigned S, unsigned P>
     inline void vertex_block_storage<T,S,P>::modify_vertex(unsigned idx, 
-                                                           double x, double y, 
+                                                           real x, real y, 
                                                            unsigned cmd)
     {
         unsigned block = idx >> block_shift;
@@ -230,7 +230,7 @@ namespace agg
 
     //------------------------------------------------------------------------
     template<class T, unsigned S, unsigned P>
-    inline unsigned vertex_block_storage<T,S,P>::last_vertex(double* x, double* y) const
+    inline unsigned vertex_block_storage<T,S,P>::last_vertex(real* x, real* y) const
     {
         if(m_total_vertices) return vertex(m_total_vertices - 1, x, y);
         return path_cmd_stop;
@@ -238,7 +238,7 @@ namespace agg
 
     //------------------------------------------------------------------------
     template<class T, unsigned S, unsigned P>
-    inline unsigned vertex_block_storage<T,S,P>::prev_vertex(double* x, double* y) const
+    inline unsigned vertex_block_storage<T,S,P>::prev_vertex(real* x, real* y) const
     {
         if(m_total_vertices > 1) return vertex(m_total_vertices - 2, x, y);
         return path_cmd_stop;
@@ -246,26 +246,26 @@ namespace agg
 
     //------------------------------------------------------------------------
     template<class T, unsigned S, unsigned P>
-    inline double vertex_block_storage<T,S,P>::last_x() const
+    inline real vertex_block_storage<T,S,P>::last_x() const
     {
         if(m_total_vertices)
         {
             unsigned idx = m_total_vertices - 1;
             return m_coord_blocks[idx >> block_shift][(idx & block_mask) << 1];
         }
-        return 0.0;
+        return 0.0f;
     }
 
     //------------------------------------------------------------------------
     template<class T, unsigned S, unsigned P>
-    inline double vertex_block_storage<T,S,P>::last_y() const
+    inline real vertex_block_storage<T,S,P>::last_y() const
     {
         if(m_total_vertices)
         {
             unsigned idx = m_total_vertices - 1;
             return m_coord_blocks[idx >> block_shift][((idx & block_mask) << 1) + 1];
         }
-        return 0.0;
+        return 0.0f;
     }
 
     //------------------------------------------------------------------------
@@ -278,7 +278,7 @@ namespace agg
     //------------------------------------------------------------------------
     template<class T, unsigned S, unsigned P>
     inline unsigned vertex_block_storage<T,S,P>::vertex(unsigned idx, 
-                                                        double* x, double* y) const
+                                                        real* x, real* y) const
     {
         unsigned nb = idx >> block_shift;
         const T* pv = m_coord_blocks[nb] + ((idx & block_mask) << 1);
@@ -385,7 +385,7 @@ namespace agg
             m_stop = false;
         }
 
-        unsigned vertex(double* x, double* y)
+        unsigned vertex(real* x, real* y)
         {
             if(m_ptr < m_end)
             {
@@ -394,7 +394,7 @@ namespace agg
                 *y = *m_ptr++;
                 return first ? path_cmd_move_to : path_cmd_line_to;
             }
-            *x = *y = 0.0;
+            *x = *y = 0.0f;
             if(m_closed && !m_stop)
             {
                 m_stop = true;
@@ -449,7 +449,7 @@ namespace agg
             m_stop = false;
         }
 
-        unsigned vertex(double* x, double* y)
+        unsigned vertex(real* x, real* y)
         {
             if(m_index < m_container->size())
             {
@@ -459,7 +459,7 @@ namespace agg
                 *y = v.y;
                 return first ? path_cmd_move_to : path_cmd_line_to;
             }
-            *x = *y = 0.0;
+            *x = *y = 0.0f;
             if(m_closed && !m_stop)
             {
                 m_stop = true;
@@ -511,7 +511,7 @@ namespace agg
             m_stop = false;
         }
 
-        unsigned vertex(double* x, double* y)
+        unsigned vertex(real* x, real* y)
         {
             if(m_index >= 0)
             {
@@ -521,7 +521,7 @@ namespace agg
                 *y = v.y;
                 return first ? path_cmd_move_to : path_cmd_line_to;
             }
-            *x = *y = 0.0;
+            *x = *y = 0.0f;
             if(m_closed && !m_stop)
             {
                 m_stop = true;
@@ -545,10 +545,10 @@ namespace agg
     class line_adaptor
     {
     public:
-        typedef double value_type;
+        typedef real value_type;
 
         line_adaptor() : m_line(m_coord, 2, false) {}
-        line_adaptor(double x1, double y1, double x2, double y2) :
+        line_adaptor(real x1, real y1, real x2, real y2) :
             m_line(m_coord, 2, false)
         {
             m_coord[0] = x1;
@@ -557,7 +557,7 @@ namespace agg
             m_coord[3] = y2;
         }
         
-        void init(double x1, double y1, double x2, double y2)
+        void init(real x1, real y1, real x2, real y2)
         {
             m_coord[0] = x1;
             m_coord[1] = y1;
@@ -571,14 +571,14 @@ namespace agg
             m_line.rewind(0);
         }
 
-        unsigned vertex(double* x, double* y)
+        unsigned vertex(real* x, real* y)
         {
             return m_line.vertex(x, y);
         }
 
     private:
-        double                     m_coord[4];
-        poly_plain_adaptor<double> m_line;
+        real                     m_coord[4];
+        poly_plain_adaptor<real> m_line;
     };
 
 
@@ -620,53 +620,53 @@ namespace agg
         //--------------------------------------------------------------------
         unsigned start_new_path();
 
-        void move_to(double x, double y);
-        void move_rel(double dx, double dy);
+        void move_to(real x, real y);
+        void move_rel(real dx, real dy);
 
-        void line_to(double x, double y);
-        void line_rel(double dx, double dy);
+        void line_to(real x, real y);
+        void line_rel(real dx, real dy);
 
-        void hline_to(double x);
-        void hline_rel(double dx);
+        void hline_to(real x);
+        void hline_rel(real dx);
 
-        void vline_to(double y);
-        void vline_rel(double dy);
+        void vline_to(real y);
+        void vline_rel(real dy);
 
-        void arc_to(double rx, double ry,
-                    double angle,
+        void arc_to(real rx, real ry,
+                    real angle,
                     bool large_arc_flag,
                     bool sweep_flag,
-                    double x, double y);
+                    real x, real y);
 
-        void arc_rel(double rx, double ry,
-                     double angle,
+        void arc_rel(real rx, real ry,
+                     real angle,
                      bool large_arc_flag,
                      bool sweep_flag,
-                     double dx, double dy);
+                     real dx, real dy);
 
-        void curve3(double x_ctrl, double y_ctrl, 
-                    double x_to,   double y_to);
+        void curve3(real x_ctrl, real y_ctrl, 
+                    real x_to,   real y_to);
 
-        void curve3_rel(double dx_ctrl, double dy_ctrl, 
-                        double dx_to,   double dy_to);
+        void curve3_rel(real dx_ctrl, real dy_ctrl, 
+                        real dx_to,   real dy_to);
 
-        void curve3(double x_to, double y_to);
+        void curve3(real x_to, real y_to);
 
-        void curve3_rel(double dx_to, double dy_to);
+        void curve3_rel(real dx_to, real dy_to);
 
-        void curve4(double x_ctrl1, double y_ctrl1, 
-                    double x_ctrl2, double y_ctrl2, 
-                    double x_to,    double y_to);
+        void curve4(real x_ctrl1, real y_ctrl1, 
+                    real x_ctrl2, real y_ctrl2, 
+                    real x_to,    real y_to);
 
-        void curve4_rel(double dx_ctrl1, double dy_ctrl1, 
-                        double dx_ctrl2, double dy_ctrl2, 
-                        double dx_to,    double dy_to);
+        void curve4_rel(real dx_ctrl1, real dy_ctrl1, 
+                        real dx_ctrl2, real dy_ctrl2, 
+                        real dx_to,    real dy_to);
 
-        void curve4(double x_ctrl2, double y_ctrl2, 
-                    double x_to,    double y_to);
+        void curve4(real x_ctrl2, real y_ctrl2, 
+                    real x_to,    real y_to);
 
-        void curve4_rel(double x_ctrl2, double y_ctrl2, 
-                        double x_to,    double y_to);
+        void curve4_rel(real x_ctrl2, real y_ctrl2, 
+                        real x_to,    real y_to);
 
 
         void end_poly(unsigned flags = path_flags_close);
@@ -679,25 +679,25 @@ namespace agg
 
         unsigned total_vertices() const;
 
-        void rel_to_abs(double* x, double* y) const;
+        void rel_to_abs(real* x, real* y) const;
 
-        unsigned last_vertex(double* x, double* y) const;
-        unsigned prev_vertex(double* x, double* y) const;
+        unsigned last_vertex(real* x, real* y) const;
+        unsigned prev_vertex(real* x, real* y) const;
 
-        double last_x() const;
-        double last_y() const;
+        real last_x() const;
+        real last_y() const;
 
-        unsigned vertex(unsigned idx, double* x, double* y) const;
+        unsigned vertex(unsigned idx, real* x, real* y) const;
         unsigned command(unsigned idx) const;
 
-        void modify_vertex(unsigned idx, double x, double y);
-        void modify_vertex(unsigned idx, double x, double y, unsigned cmd);
+        void modify_vertex(unsigned idx, real x, real y);
+        void modify_vertex(unsigned idx, real x, real y, unsigned cmd);
         void modify_command(unsigned idx, unsigned cmd);
 
         // VertexSource interface
         //--------------------------------------------------------------------
         void     rewind(unsigned path_id);
-        unsigned vertex(double* x, double* y);
+        unsigned vertex(real* x, real* y);
 
         // Arrange the orientation of a polygon, all polygons in a path, 
         // or in all paths. After calling arrange_orientations() or 
@@ -712,15 +712,15 @@ namespace agg
         // Flip all vertices horizontally or vertically, 
         // between x1 and x2, or between y1 and y2 respectively
         //--------------------------------------------------------------------
-        void flip_x(double x1, double x2);
-        void flip_y(double y1, double y2);
+        void flip_x(real x1, real x2);
+        void flip_y(real y1, real y2);
 
         // Concatenate path. The path is added as is.
         //--------------------------------------------------------------------
         template<class VertexSource> 
         void concat_path(VertexSource& vs, unsigned path_id = 0)
         {
-            double x, y;
+            real x, y;
             unsigned cmd;
             vs.rewind(path_id);
             while(!is_stop(cmd = vs.vertex(&x, &y)))
@@ -735,7 +735,7 @@ namespace agg
         template<class VertexSource> 
         void join_path(VertexSource& vs, unsigned path_id = 0)
         {
-            double x, y;
+            real x, y;
             unsigned cmd;
             vs.rewind(path_id);
             cmd = vs.vertex(&x, &y);
@@ -743,7 +743,7 @@ namespace agg
             {
                 if(is_vertex(cmd))
                 {
-                    double x0, y0;
+                    real x0, y0;
                     unsigned cmd0 = last_vertex(&x0, &y0);
                     if(is_vertex(cmd0))
                     {
@@ -796,8 +796,8 @@ namespace agg
         }
 
         //--------------------------------------------------------------------
-        void translate(double dx, double dy, unsigned path_id=0);
-        void translate_all_paths(double dx, double dy);
+        void translate(real dx, real dy, unsigned path_id=0);
+        void translate_all_paths(real dx, real dy);
 
         //--------------------------------------------------------------------
         template<class Trans>
@@ -806,7 +806,7 @@ namespace agg
             unsigned num_ver = m_vertices.total_vertices();
             for(; path_id < num_ver; path_id++)
             {
-                double x, y;
+                real x, y;
                 unsigned cmd = m_vertices.vertex(path_id, &x, &y);
                 if(is_stop(cmd)) break;
                 if(is_vertex(cmd))
@@ -825,7 +825,7 @@ namespace agg
             unsigned num_ver = m_vertices.total_vertices();
             for(idx = 0; idx < num_ver; idx++)
             {
-                double x, y;
+                real x, y;
                 if(is_vertex(m_vertices.vertex(idx, &x, &y)))
                 {
                     trans.transform(&x, &y);
@@ -850,7 +850,7 @@ namespace agg
     {
         if(!is_stop(m_vertices.last_command()))
         {
-            m_vertices.add_vertex(0.0, 0.0, path_cmd_stop);
+            m_vertices.add_vertex(0.0f, 0.0f, path_cmd_stop);
         }
         return m_vertices.total_vertices();
     }
@@ -858,12 +858,12 @@ namespace agg
 
     //------------------------------------------------------------------------
     template<class VC> 
-    inline void path_base<VC>::rel_to_abs(double* x, double* y) const
+    inline void path_base<VC>::rel_to_abs(real* x, real* y) const
     {
         if(m_vertices.total_vertices())
         {
-            double x2;
-            double y2;
+            real x2;
+            real y2;
             if(is_vertex(m_vertices.last_vertex(&x2, &y2)))
             {
                 *x += x2;
@@ -874,14 +874,14 @@ namespace agg
 
     //------------------------------------------------------------------------
     template<class VC> 
-    inline void path_base<VC>::move_to(double x, double y)
+    inline void path_base<VC>::move_to(real x, real y)
     {
         m_vertices.add_vertex(x, y, path_cmd_move_to);
     }
 
     //------------------------------------------------------------------------
     template<class VC> 
-    inline void path_base<VC>::move_rel(double dx, double dy)
+    inline void path_base<VC>::move_rel(real dx, real dy)
     {
         rel_to_abs(&dx, &dy);
         m_vertices.add_vertex(dx, dy, path_cmd_move_to);
@@ -889,14 +889,14 @@ namespace agg
 
     //------------------------------------------------------------------------
     template<class VC> 
-    inline void path_base<VC>::line_to(double x, double y)
+    inline void path_base<VC>::line_to(real x, real y)
     {
         m_vertices.add_vertex(x, y, path_cmd_line_to);
     }
 
     //------------------------------------------------------------------------
     template<class VC> 
-    inline void path_base<VC>::line_rel(double dx, double dy)
+    inline void path_base<VC>::line_rel(real dx, real dy)
     {
         rel_to_abs(&dx, &dy);
         m_vertices.add_vertex(dx, dy, path_cmd_line_to);
@@ -904,53 +904,53 @@ namespace agg
 
     //------------------------------------------------------------------------
     template<class VC> 
-    inline void path_base<VC>::hline_to(double x)
+    inline void path_base<VC>::hline_to(real x)
     {
         m_vertices.add_vertex(x, last_y(), path_cmd_line_to);
     }
 
     //------------------------------------------------------------------------
     template<class VC> 
-    inline void path_base<VC>::hline_rel(double dx)
+    inline void path_base<VC>::hline_rel(real dx)
     {
-        double dy = 0;
+        real dy = 0;
         rel_to_abs(&dx, &dy);
         m_vertices.add_vertex(dx, dy, path_cmd_line_to);
     }
 
     //------------------------------------------------------------------------
     template<class VC> 
-    inline void path_base<VC>::vline_to(double y)
+    inline void path_base<VC>::vline_to(real y)
     {
         m_vertices.add_vertex(last_x(), y, path_cmd_line_to);
     }
 
     //------------------------------------------------------------------------
     template<class VC> 
-    inline void path_base<VC>::vline_rel(double dy)
+    inline void path_base<VC>::vline_rel(real dy)
     {
-        double dx = 0;
+        real dx = 0;
         rel_to_abs(&dx, &dy);
         m_vertices.add_vertex(dx, dy, path_cmd_line_to);
     }
 
     //------------------------------------------------------------------------
     template<class VC> 
-    void path_base<VC>::arc_to(double rx, double ry,
-                               double angle,
+    void path_base<VC>::arc_to(real rx, real ry,
+                               real angle,
                                bool large_arc_flag,
                                bool sweep_flag,
-                               double x, double y)
+                               real x, real y)
     {
         if(m_vertices.total_vertices() && is_vertex(m_vertices.last_command()))
         {
-            const double epsilon = 1e-30;
-            double x0 = 0.0;
-            double y0 = 0.0;
+            const real epsilon = 1e-30;
+            real x0 = 0.0f;
+            real y0 = 0.0f;
             m_vertices.last_vertex(&x0, &y0);
 
-            rx = fabs(rx);
-            ry = fabs(ry);
+            rx = FABS(rx);
+            ry = FABS(ry);
 
             // Ensure radii are valid
             //-------------------------
@@ -984,11 +984,11 @@ namespace agg
 
     //------------------------------------------------------------------------
     template<class VC> 
-    void path_base<VC>::arc_rel(double rx, double ry,
-                                double angle,
+    void path_base<VC>::arc_rel(real rx, real ry,
+                                real angle,
                                 bool large_arc_flag,
                                 bool sweep_flag,
-                                double dx, double dy)
+                                real dx, real dy)
     {
         rel_to_abs(&dx, &dy);
         arc_to(rx, ry, angle, large_arc_flag, sweep_flag, dx, dy);
@@ -996,8 +996,8 @@ namespace agg
 
     //------------------------------------------------------------------------
     template<class VC> 
-    void path_base<VC>::curve3(double x_ctrl, double y_ctrl, 
-                               double x_to,   double y_to)
+    void path_base<VC>::curve3(real x_ctrl, real y_ctrl, 
+                               real x_to,   real y_to)
     {
         m_vertices.add_vertex(x_ctrl, y_ctrl, path_cmd_curve3);
         m_vertices.add_vertex(x_to,   y_to,   path_cmd_curve3);
@@ -1005,8 +1005,8 @@ namespace agg
 
     //------------------------------------------------------------------------
     template<class VC> 
-    void path_base<VC>::curve3_rel(double dx_ctrl, double dy_ctrl, 
-                                   double dx_to,   double dy_to)
+    void path_base<VC>::curve3_rel(real dx_ctrl, real dy_ctrl, 
+                                   real dx_to,   real dy_to)
     {
         rel_to_abs(&dx_ctrl, &dy_ctrl);
         rel_to_abs(&dx_to,   &dy_to);
@@ -1016,14 +1016,14 @@ namespace agg
 
     //------------------------------------------------------------------------
     template<class VC> 
-    void path_base<VC>::curve3(double x_to, double y_to)
+    void path_base<VC>::curve3(real x_to, real y_to)
     {
-        double x0;
-        double y0;
+        real x0;
+        real y0;
         if(is_vertex(m_vertices.last_vertex(&x0, &y0)))
         {
-            double x_ctrl;
-            double y_ctrl; 
+            real x_ctrl;
+            real y_ctrl; 
             unsigned cmd = m_vertices.prev_vertex(&x_ctrl, &y_ctrl);
             if(is_curve(cmd))
             {
@@ -1041,7 +1041,7 @@ namespace agg
 
     //------------------------------------------------------------------------
     template<class VC> 
-    void path_base<VC>::curve3_rel(double dx_to, double dy_to)
+    void path_base<VC>::curve3_rel(real dx_to, real dy_to)
     {
         rel_to_abs(&dx_to, &dy_to);
         curve3(dx_to, dy_to);
@@ -1049,9 +1049,9 @@ namespace agg
 
     //------------------------------------------------------------------------
     template<class VC> 
-    void path_base<VC>::curve4(double x_ctrl1, double y_ctrl1, 
-                               double x_ctrl2, double y_ctrl2, 
-                               double x_to,    double y_to)
+    void path_base<VC>::curve4(real x_ctrl1, real y_ctrl1, 
+                               real x_ctrl2, real y_ctrl2, 
+                               real x_to,    real y_to)
     {
         m_vertices.add_vertex(x_ctrl1, y_ctrl1, path_cmd_curve4);
         m_vertices.add_vertex(x_ctrl2, y_ctrl2, path_cmd_curve4);
@@ -1060,9 +1060,9 @@ namespace agg
 
     //------------------------------------------------------------------------
     template<class VC> 
-    void path_base<VC>::curve4_rel(double dx_ctrl1, double dy_ctrl1, 
-                                   double dx_ctrl2, double dy_ctrl2, 
-                                   double dx_to,    double dy_to)
+    void path_base<VC>::curve4_rel(real dx_ctrl1, real dy_ctrl1, 
+                                   real dx_ctrl2, real dy_ctrl2, 
+                                   real dx_to,    real dy_to)
     {
         rel_to_abs(&dx_ctrl1, &dy_ctrl1);
         rel_to_abs(&dx_ctrl2, &dy_ctrl2);
@@ -1074,15 +1074,15 @@ namespace agg
 
     //------------------------------------------------------------------------
     template<class VC> 
-    void path_base<VC>::curve4(double x_ctrl2, double y_ctrl2, 
-                               double x_to,    double y_to)
+    void path_base<VC>::curve4(real x_ctrl2, real y_ctrl2, 
+                               real x_to,    real y_to)
     {
-        double x0;
-        double y0;
+        real x0;
+        real y0;
         if(is_vertex(last_vertex(&x0, &y0)))
         {
-            double x_ctrl1;
-            double y_ctrl1; 
+            real x_ctrl1;
+            real y_ctrl1; 
             unsigned cmd = prev_vertex(&x_ctrl1, &y_ctrl1);
             if(is_curve(cmd))
             {
@@ -1100,8 +1100,8 @@ namespace agg
 
     //------------------------------------------------------------------------
     template<class VC> 
-    void path_base<VC>::curve4_rel(double dx_ctrl2, double dy_ctrl2, 
-                                   double dx_to,    double dy_to)
+    void path_base<VC>::curve4_rel(real dx_ctrl2, real dy_ctrl2, 
+                                   real dx_to,    real dy_to)
     {
         rel_to_abs(&dx_ctrl2, &dy_ctrl2);
         rel_to_abs(&dx_to,    &dy_to);
@@ -1114,7 +1114,7 @@ namespace agg
     {
         if(is_vertex(m_vertices.last_command()))
         {
-            m_vertices.add_vertex(0.0, 0.0, path_cmd_end_poly | flags);
+            m_vertices.add_vertex(0.0f, 0.0f, path_cmd_end_poly | flags);
         }
     }
 
@@ -1134,35 +1134,35 @@ namespace agg
 
     //------------------------------------------------------------------------
     template<class VC> 
-    inline unsigned path_base<VC>::last_vertex(double* x, double* y) const
+    inline unsigned path_base<VC>::last_vertex(real* x, real* y) const
     {
         return m_vertices.last_vertex(x, y);
     }
 
     //------------------------------------------------------------------------
     template<class VC> 
-    inline unsigned path_base<VC>::prev_vertex(double* x, double* y) const
+    inline unsigned path_base<VC>::prev_vertex(real* x, real* y) const
     {
         return m_vertices.prev_vertex(x, y);
     }
 
     //------------------------------------------------------------------------
     template<class VC> 
-    inline double path_base<VC>::last_x() const
+    inline real path_base<VC>::last_x() const
     {
         return m_vertices.last_x();
     }
 
     //------------------------------------------------------------------------
     template<class VC> 
-    inline double path_base<VC>::last_y() const
+    inline real path_base<VC>::last_y() const
     {
         return m_vertices.last_y();
     }
 
     //------------------------------------------------------------------------
     template<class VC> 
-    inline unsigned path_base<VC>::vertex(unsigned idx, double* x, double* y) const
+    inline unsigned path_base<VC>::vertex(unsigned idx, real* x, real* y) const
     {
         return m_vertices.vertex(idx, x, y);
     }
@@ -1176,14 +1176,14 @@ namespace agg
 
     //------------------------------------------------------------------------
     template<class VC> 
-    void path_base<VC>::modify_vertex(unsigned idx, double x, double y)
+    void path_base<VC>::modify_vertex(unsigned idx, real x, real y)
     {
         m_vertices.modify_vertex(idx, x, y);
     }
 
     //------------------------------------------------------------------------
     template<class VC> 
-    void path_base<VC>::modify_vertex(unsigned idx, double x, double y, unsigned cmd)
+    void path_base<VC>::modify_vertex(unsigned idx, real x, real y, unsigned cmd)
     {
         m_vertices.modify_vertex(idx, x, y, cmd);
     }
@@ -1204,7 +1204,7 @@ namespace agg
 
     //------------------------------------------------------------------------
     template<class VC> 
-    inline unsigned path_base<VC>::vertex(double* x, double* y)
+    inline unsigned path_base<VC>::vertex(real* x, real* y)
     {
         if(m_iterator >= m_vertices.total_vertices()) return path_cmd_stop;
         return m_vertices.vertex(m_iterator++, x, y);
@@ -1215,19 +1215,19 @@ namespace agg
     unsigned path_base<VC>::perceive_polygon_orientation(unsigned start,
                                                          unsigned end)
     {
-        // Calculate signed area (double area to be exact)
+        // Calculate signed area (real area to be exact)
         //---------------------
         unsigned np = end - start;
-        double area = 0.0;
+        real area = 0.0f;
         unsigned i;
         for(i = 0; i < np; i++)
         {
-            double x1, y1, x2, y2;
+            real x1, y1, x2, y2;
             m_vertices.vertex(start + i,            &x1, &y1);
             m_vertices.vertex(start + (i + 1) % np, &x2, &y2);
             area += x1 * y2 - y1 * x2;
         }
-        return (area < 0.0) ? path_flags_cw : path_flags_ccw;
+        return (area < 0.0f) ? path_flags_cw : path_flags_ccw;
     }
 
     //------------------------------------------------------------------------
@@ -1350,10 +1350,10 @@ namespace agg
 
     //------------------------------------------------------------------------
     template<class VC> 
-    void path_base<VC>::flip_x(double x1, double x2)
+    void path_base<VC>::flip_x(real x1, real x2)
     {
         unsigned i;
-        double x, y;
+        real x, y;
         for(i = 0; i < m_vertices.total_vertices(); i++)
         {
             unsigned cmd = m_vertices.vertex(i, &x, &y);
@@ -1366,10 +1366,10 @@ namespace agg
 
     //------------------------------------------------------------------------
     template<class VC> 
-    void path_base<VC>::flip_y(double y1, double y2)
+    void path_base<VC>::flip_y(real y1, real y2)
     {
         unsigned i;
-        double x, y;
+        real x, y;
         for(i = 0; i < m_vertices.total_vertices(); i++)
         {
             unsigned cmd = m_vertices.vertex(i, &x, &y);
@@ -1382,12 +1382,12 @@ namespace agg
 
     //------------------------------------------------------------------------
     template<class VC> 
-    void path_base<VC>::translate(double dx, double dy, unsigned path_id)
+    void path_base<VC>::translate(real dx, real dy, unsigned path_id)
     {
         unsigned num_ver = m_vertices.total_vertices();
         for(; path_id < num_ver; path_id++)
         {
-            double x, y;
+            real x, y;
             unsigned cmd = m_vertices.vertex(path_id, &x, &y);
             if(is_stop(cmd)) break;
             if(is_vertex(cmd))
@@ -1401,13 +1401,13 @@ namespace agg
 
     //------------------------------------------------------------------------
     template<class VC> 
-    void path_base<VC>::translate_all_paths(double dx, double dy)
+    void path_base<VC>::translate_all_paths(real dx, real dy)
     {
         unsigned idx;
         unsigned num_ver = m_vertices.total_vertices();
         for(idx = 0; idx < num_ver; idx++)
         {
-            double x, y;
+            real x, y;
             if(is_vertex(m_vertices.vertex(idx, &x, &y)))
             {
                 x += dx;
@@ -1427,21 +1427,21 @@ namespace agg
         void remove_all() { m_vertices.clear(); }
         void free_all()   { m_vertices.clear(); }
 
-        void add_vertex(double x, double y, unsigned cmd)
+        void add_vertex(real x, real y, unsigned cmd)
         {
             m_vertices.push_back(vertex_type(value_type(x), 
                                              value_type(y), 
                                              int8u(cmd)));
         }
 
-        void modify_vertex(unsigned idx, double x, double y)
+        void modify_vertex(unsigned idx, real x, real y)
         {
             vertex_type& v = m_vertices[idx];
             v.x = value_type(x);
             v.y = value_type(y);
         }
 
-        void modify_vertex(unsigned idx, double x, double y, unsigned cmd)
+        void modify_vertex(unsigned idx, real x, real y, unsigned cmd)
         {
             vertex_type& v = m_vertices[idx];
             v.x   = value_type(x);
@@ -1468,34 +1468,34 @@ namespace agg
                 path_cmd_stop;
         }
 
-        unsigned last_vertex(double* x, double* y) const
+        unsigned last_vertex(real* x, real* y) const
         {
             if(m_vertices.size() == 0)
             {
-                *x = *y = 0.0;
+                *x = *y = 0.0f;
                 return path_cmd_stop;
             }
             return vertex(m_vertices.size() - 1, x, y);
         }
 
-        unsigned prev_vertex(double* x, double* y) const
+        unsigned prev_vertex(real* x, real* y) const
         {
             if(m_vertices.size() < 2)
             {
-                *x = *y = 0.0;
+                *x = *y = 0.0f;
                 return path_cmd_stop;
             }
             return vertex(m_vertices.size() - 2, x, y);
         }
 
-        double last_x() const
+        real last_x() const
         {
-            return m_vertices.size() ? m_vertices[m_vertices.size() - 1].x : 0.0;
+            return m_vertices.size() ? m_vertices[m_vertices.size() - 1].x : 0.0f;
         }
 
-        double last_y() const
+        real last_y() const
         {
-            return m_vertices.size() ? m_vertices[m_vertices.size() - 1].y : 0.0;
+            return m_vertices.size() ? m_vertices[m_vertices.size() - 1].y : 0.0f;
         }
 
         unsigned total_vertices() const
@@ -1503,7 +1503,7 @@ namespace agg
             return m_vertices.size();
         }
 
-        unsigned vertex(unsigned idx, double* x, double* y) const
+        unsigned vertex(unsigned idx, real* x, real* y) const
         {
             const vertex_type& v = m_vertices[idx];
             *x = v.x;
@@ -1521,7 +1521,7 @@ namespace agg
     };
 
     //-----------------------------------------------------------path_storage
-    typedef path_base<vertex_block_storage<double> > path_storage;
+    typedef path_base<vertex_block_storage<real> > path_storage;
 
     // Example of declarations path_storage with pod_bvector as a container
     //-----------------------------------------------------------------------

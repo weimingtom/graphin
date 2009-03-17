@@ -24,7 +24,7 @@
 namespace agg
 {
     //------------------------------------------------------------------------
-    rounded_rect::rounded_rect(double x1, double y1, double x2, double y2, double r) :
+    rounded_rect::rounded_rect(real x1, real y1, real x2, real y2, real r) :
         m_x1(x1), m_y1(y1), m_x2(x2), m_y2(y2),
         m_rx1(r), m_ry1(r), m_rx2(r), m_ry2(r), 
         m_rx3(r), m_ry3(r), m_rx4(r), m_ry4(r)
@@ -34,7 +34,7 @@ namespace agg
     }
 
     //--------------------------------------------------------------------
-    void rounded_rect::rect(double x1, double y1, double x2, double y2)
+    void rounded_rect::rect(real x1, real y1, real x2, real y2)
     {
         m_x1 = x1;
         m_y1 = y1;
@@ -45,21 +45,21 @@ namespace agg
     }
 
     //--------------------------------------------------------------------
-    void rounded_rect::radius(double r)
+    void rounded_rect::radius(real r)
     {
         m_rx1 = m_ry1 = m_rx2 = m_ry2 = m_rx3 = m_ry3 = m_rx4 = m_ry4 = r; 
     }
 
     //--------------------------------------------------------------------
-    void rounded_rect::radius(double rx, double ry)
+    void rounded_rect::radius(real rx, real ry)
     {
         m_rx1 = m_rx2 = m_rx3 = m_rx4 = rx; 
         m_ry1 = m_ry2 = m_ry3 = m_ry4 = ry; 
     }
 
     //--------------------------------------------------------------------
-    void rounded_rect::radius(double rx_bottom, double ry_bottom, 
-                              double rx_top,    double ry_top)
+    void rounded_rect::radius(real rx_bottom, real ry_bottom, 
+                              real rx_top,    real ry_top)
     {
         m_rx1 = m_rx2 = rx_bottom; 
         m_rx3 = m_rx4 = rx_top; 
@@ -68,8 +68,8 @@ namespace agg
     }
 
     //--------------------------------------------------------------------
-    void rounded_rect::radius(double rx1, double ry1, double rx2, double ry2, 
-                              double rx3, double ry3, double rx4, double ry4)
+    void rounded_rect::radius(real rx1, real ry1, real rx2, real ry2, 
+                              real rx3, real ry3, real rx4, real ry4)
     {
         m_rx1 = rx1; m_ry1 = ry1; m_rx2 = rx2; m_ry2 = ry2; 
         m_rx3 = rx3; m_ry3 = ry3; m_rx4 = rx4; m_ry4 = ry4;
@@ -78,17 +78,17 @@ namespace agg
     //--------------------------------------------------------------------
     void rounded_rect::normalize_radius()
     {
-        double dx = fabs(m_y2 - m_y1);
-        double dy = fabs(m_x2 - m_x1);
+        real dx = FABS(m_y2 - m_y1);
+        real dy = FABS(m_x2 - m_x1);
 
-        double k = 1.0;
-        double t;
+        real k = 1.0f;
+        real t;
         t = dx / (m_rx1 + m_rx2); if(t < k) k = t; 
         t = dx / (m_rx3 + m_rx4); if(t < k) k = t; 
         t = dy / (m_ry1 + m_ry2); if(t < k) k = t; 
         t = dy / (m_ry3 + m_ry4); if(t < k) k = t; 
 
-        if(k < 1.0)
+        if(k < 1.0f)
         {
             m_rx1 *= k; m_ry1 *= k; m_rx2 *= k; m_ry2 *= k;
             m_rx3 *= k; m_ry3 *= k; m_rx4 *= k; m_ry4 *= k;
@@ -102,14 +102,14 @@ namespace agg
     }
 
     //--------------------------------------------------------------------
-    unsigned rounded_rect::vertex(double* x, double* y)
+    unsigned rounded_rect::vertex(real* x, real* y)
     {
         unsigned cmd = path_cmd_stop;
         switch(m_status)
         {
         case 0:
             m_arc.init(m_x1 + m_rx1, m_y1 + m_ry1, m_rx1, m_ry1,
-                       pi, pi+pi*0.5);
+                       pi, pi+pi*0.5f);
             m_arc.rewind(0);
             m_status++;
 
@@ -120,7 +120,7 @@ namespace agg
 
         case 2:
             m_arc.init(m_x2 - m_rx2, m_y1 + m_ry2, m_rx2, m_ry2,
-                       pi+pi*0.5, 0.0);
+                       pi+pi*0.5f, 0.0f);
             m_arc.rewind(0);
             m_status++;
 
@@ -131,7 +131,7 @@ namespace agg
 
         case 4:
             m_arc.init(m_x2 - m_rx3, m_y2 - m_ry3, m_rx3, m_ry3,
-                       0.0, pi*0.5);
+                       0.0f, pi*0.5f);
             m_arc.rewind(0);
             m_status++;
 
@@ -142,7 +142,7 @@ namespace agg
 
         case 6:
             m_arc.init(m_x1 + m_rx4, m_y2 - m_ry4, m_rx4, m_ry4,
-                       pi*0.5, pi);
+                       pi*0.5f, pi);
             m_arc.rewind(0);
             m_status++;
 
@@ -161,4 +161,5 @@ namespace agg
 
 
 }
+
 

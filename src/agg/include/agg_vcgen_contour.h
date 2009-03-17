@@ -39,7 +39,7 @@ namespace agg
 
     public:
         typedef vertex_sequence<vertex_dist, 6> vertex_storage;
-        typedef pod_bvector<point_d, 6>         coord_storage;
+        typedef pod_bvector<point_r, 6>         coord_storage;
 
         vcgen_contour();
 
@@ -51,34 +51,34 @@ namespace agg
         line_join_e  line_join()  const { return m_stroker.line_join(); }
         inner_join_e inner_join() const { return m_stroker.inner_join(); }
 
-        void width(double w) { m_stroker.width(m_width = w); }
-        void miter_limit(double ml) { m_stroker.miter_limit(ml); }
-        void miter_limit_theta(double t) { m_stroker.miter_limit_theta(t); }
-        void inner_miter_limit(double ml) { m_stroker.inner_miter_limit(ml); }
-        void approximation_scale(double as) { m_stroker.approximation_scale(as); }
+        void width(real w) { m_stroker.width(m_width = w); }
+        void miter_limit(real ml) { m_stroker.miter_limit(ml); }
+        void miter_limit_theta(real t) { m_stroker.miter_limit_theta(t); }
+        void inner_miter_limit(real ml) { m_stroker.inner_miter_limit(ml); }
+        void approximation_scale(real as) { m_stroker.approximation_scale(as); }
 
-        double width() const { return m_width; }
-        double miter_limit() const { return m_stroker.miter_limit(); }
-        double inner_miter_limit() const { return m_stroker.inner_miter_limit(); }
-        double approximation_scale() const { return m_stroker.approximation_scale(); }
+        real width() const { return m_width; }
+        real miter_limit() const { return m_stroker.miter_limit(); }
+        real inner_miter_limit() const { return m_stroker.inner_miter_limit(); }
+        real approximation_scale() const { return m_stroker.approximation_scale(); }
 
         void auto_detect_orientation(bool v) { m_auto_detect = v; }
         bool auto_detect_orientation() const { return m_auto_detect; }
 
         // Generator interface
         void remove_all();
-        void add_vertex(double x, double y, unsigned cmd);
+        void add_vertex(real x, real y, unsigned cmd);
 
         // Vertex Source Interface
         void     rewind(unsigned path_id);
-        unsigned vertex(double* x, double* y);
+        unsigned vertex(real* x, real* y);
 
     private:
         vcgen_contour(const vcgen_contour&);
         const vcgen_contour& operator = (const vcgen_contour&);
 
         math_stroke<coord_storage> m_stroker;
-        double                     m_width;
+        real                       m_width;
         vertex_storage             m_src_vertices;
         coord_storage              m_out_vertices;
         status_e                   m_status;

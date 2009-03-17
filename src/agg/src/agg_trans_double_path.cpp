@@ -21,10 +21,10 @@ namespace agg
 
     //------------------------------------------------------------------------
     trans_double_path::trans_double_path() :
-        m_kindex1(0.0),
-        m_kindex2(0.0),
-        m_base_length(0.0),
-        m_base_height(1.0),
+        m_kindex1(0.0f),
+        m_kindex2(0.0f),
+        m_base_length(0.0f),
+        m_base_height(1.0f),
         m_status1(initial),
         m_status2(initial),
         m_preserve_x_scale(true)
@@ -37,15 +37,15 @@ namespace agg
     {
         m_src_vertices1.remove_all();
         m_src_vertices2.remove_all();
-        m_kindex1 = 0.0;
-        m_kindex1 = 0.0;
+        m_kindex1 = 0.0f;
+        m_kindex1 = 0.0f;
         m_status1 = initial;
         m_status2 = initial;
     }
 
 
     //------------------------------------------------------------------------
-    void trans_double_path::move_to1(double x, double y)
+    void trans_double_path::move_to1(real x, real y)
     {
         if(m_status1 == initial)
         {
@@ -60,7 +60,7 @@ namespace agg
 
 
     //------------------------------------------------------------------------
-    void trans_double_path::line_to1(double x, double y)
+    void trans_double_path::line_to1(real x, real y)
     {
         if(m_status1 == making_path)
         {
@@ -70,7 +70,7 @@ namespace agg
 
 
     //------------------------------------------------------------------------
-    void trans_double_path::move_to2(double x, double y)
+    void trans_double_path::move_to2(real x, real y)
     {
         if(m_status2 == initial)
         {
@@ -85,7 +85,7 @@ namespace agg
 
 
     //------------------------------------------------------------------------
-    void trans_double_path::line_to2(double x, double y)
+    void trans_double_path::line_to2(real x, real y)
     {
         if(m_status2 == making_path)
         {
@@ -95,16 +95,16 @@ namespace agg
 
 
     //------------------------------------------------------------------------
-    double trans_double_path::finalize_path(vertex_storage& vertices)
+    real trans_double_path::finalize_path(vertex_storage& vertices)
     {
         unsigned i;
-        double dist;
-        double d;
+        real dist;
+        real d;
 
         vertices.close(false);
         if(vertices.size() > 2)
         {
-            if(vertices[vertices.size() - 2].dist * 10.0 < 
+            if(vertices[vertices.size() - 2].dist * 10.0f < 
                vertices[vertices.size() - 3].dist)
             {
                 d = vertices[vertices.size() - 3].dist + 
@@ -146,38 +146,38 @@ namespace agg
 
 
     //------------------------------------------------------------------------
-    double trans_double_path::total_length1() const
+    real trans_double_path::total_length1() const
     {
         if(m_base_length >= 1e-10) return m_base_length;
         return (m_status1 == ready) ? 
             m_src_vertices1[m_src_vertices1.size() - 1].dist :
-            0.0;
+            0.0f;
     }
 
 
     //------------------------------------------------------------------------
-    double trans_double_path::total_length2() const
+    real trans_double_path::total_length2() const
     {
         if(m_base_length >= 1e-10) return m_base_length;
         return (m_status2 == ready) ? 
             m_src_vertices2[m_src_vertices2.size() - 1].dist :
-            0.0;
+            0.0f;
     }
 
 
     //------------------------------------------------------------------------
     void trans_double_path::transform1(const vertex_storage& vertices, 
-                                       double kindex, double kx, 
-                                       double *x, double* y) const
+                                       real kindex, real kx, 
+                                       real *x, real* y) const
     {
-        double x1 = 0.0;
-        double y1 = 0.0;
-        double dx = 1.0;
-        double dy = 1.0;
-        double d  = 0.0;
-        double dd = 1.0;
+        real x1 = 0.0f;
+        real y1 = 0.0f;
+        real dx = 1.0f;
+        real dy = 1.0f;
+        real d  = 0.0f;
+        real dd = 1.0f;
         *x *= kx;
-        if(*x < 0.0)
+        if(*x < 0.0f)
         {
             // Extrapolation on the left
             //--------------------------
@@ -244,7 +244,7 @@ namespace agg
 
 
     //------------------------------------------------------------------------
-    void trans_double_path::transform(double *x, double *y) const
+    void trans_double_path::transform(real *x, real *y) const
     {
         if(m_status1 == ready && m_status2 == ready)
         {
@@ -254,14 +254,14 @@ namespace agg
                       m_base_length;
             }
 
-            double x1 = *x;
-            double y1 = *y;
-            double x2 = *x;
-            double y2 = *y;
-            double dd = m_src_vertices2[m_src_vertices2.size() - 1].dist /
+            real x1 = *x;
+            real y1 = *y;
+            real x2 = *x;
+            real y2 = *y;
+            real dd = m_src_vertices2[m_src_vertices2.size() - 1].dist /
                         m_src_vertices1[m_src_vertices1.size() - 1].dist;
 
-            transform1(m_src_vertices1, m_kindex1, 1.0, &x1, &y1);
+            transform1(m_src_vertices1, m_kindex1, 1.0f, &x1, &y1);
             transform1(m_src_vertices2, m_kindex2, dd,  &x2, &y2);
 
             *x = x1 + *y * (x2 - x1) / m_base_height;
@@ -270,4 +270,5 @@ namespace agg
     }
 
 }
+
 

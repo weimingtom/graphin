@@ -42,15 +42,15 @@ namespace agg
     //
     //    struct vertex_dist
     //    {
-    //        double   x;
-    //        double   y;
-    //        double   dist;
+    //        real   x;
+    //        real   y;
+    //        real   dist;
     //
     //        vertex_dist() {}
-    //        vertex_dist(double x_, double y_) :
+    //        vertex_dist(real x_, real y_) :
     //            x(x_),
     //            y(y_),
-    //            dist(0.0)
+    //            dist(0.0f)
     //        {
     //        }
     //
@@ -127,25 +127,25 @@ namespace agg
     //-------------------------------------------------------------vertex_dist
     // Vertex (x, y) with the distance to the next one. The last vertex has 
     // distance between the last and the first points if the polygon is closed
-    // and 0.0 if it's a polyline.
+    // and 0.0f if it's a polyline.
     struct vertex_dist
     {
-        double   x;
-        double   y;
-        double   dist;
+        real   x;
+        real   y;
+        real   dist;
 
         vertex_dist() {}
-        vertex_dist(double x_, double y_) :
+        vertex_dist(real x_, real y_) :
             x(x_),
             y(y_),
-            dist(0.0)
+            dist(0.0f)
         {
         }
 
         bool operator () (const vertex_dist& val)
         {
             bool ret = (dist = calc_distance(x, y, val.x, val.y)) > vertex_dist_epsilon;
-            if(!ret) dist = 1.0 / vertex_dist_epsilon;
+            if(!ret) dist = 1.0f / vertex_dist_epsilon;
             return ret;
         }
     };
@@ -159,7 +159,7 @@ namespace agg
         unsigned cmd;
 
         vertex_dist_cmd() {}
-        vertex_dist_cmd(double x_, double y_, unsigned cmd_) :
+        vertex_dist_cmd(real x_, real y_, unsigned cmd_) :
             vertex_dist(x_, y_),
             cmd(cmd_)
         {

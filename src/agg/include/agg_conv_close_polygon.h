@@ -29,7 +29,7 @@ namespace agg
         void attach(VertexSource& source) { m_source = &source; }
 
         void rewind(unsigned path_id);
-        unsigned vertex(double* x, double* y);
+        unsigned vertex(real* x, real* y);
 
     private:
         conv_close_polygon(const conv_close_polygon<VertexSource>&);
@@ -38,8 +38,8 @@ namespace agg
 
         VertexSource* m_source;
         unsigned      m_cmd[2];
-        double        m_x[2];
-        double        m_y[2];
+        real        m_x[2];
+        real        m_y[2];
         unsigned      m_vertex;
         bool          m_line_to;
     };
@@ -59,7 +59,7 @@ namespace agg
     
     //------------------------------------------------------------------------
     template<class VertexSource> 
-    unsigned conv_close_polygon<VertexSource>::vertex(double* x, double* y)
+    unsigned conv_close_polygon<VertexSource>::vertex(real* x, real* y)
     {
         unsigned cmd = path_cmd_stop;
         for(;;)
@@ -98,8 +98,8 @@ namespace agg
             {
                 if(m_line_to)
                 {
-                    m_x[0]    = 0.0;
-                    m_y[0]    = 0.0;
+                    m_x[0]    = 0.0f;
+                    m_y[0]    = 0.0f;
                     m_cmd[0]  = path_cmd_end_poly | path_flags_close;
                     m_x[1]    = *x;
                     m_y[1]    = *y;

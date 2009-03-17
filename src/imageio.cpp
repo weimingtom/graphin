@@ -210,7 +210,7 @@ extern "C"
 
     (void) jpeg_start_decompress(&cinfo);
 
-	  unsigned char** rowPtrs = (unsigned char**)malloc(sizeof(unsigned char*)*cinfo.image_height);
+	  unsigned char** rowPtrs = (unsigned char**)malloc( sizeof(unsigned char*) * cinfo.image_height);
     rowPtrs[0] = 0;
     //void* retval = 0;
     if(rowPtrs && cinfo.image_height && cinfo.image_width)
@@ -241,7 +241,7 @@ extern "C"
        row_pointer[0] = &row[0];
        while (cinfo.output_scanline < cinfo.output_height)
        {
-	     int scan = cinfo.output_scanline;
+	       int scan = cinfo.output_scanline;
          (void) jpeg_read_scanlines(&cinfo, row_pointer , 1);
          unsigned char* rgba = rowPtrs[scan];
 		     unsigned char* src = row;
@@ -272,9 +272,9 @@ FAIL:
 bool EncodePNGImage(image_write_function* pstreamFn, void* streamPrm, unsigned width, unsigned height, unsigned char** rows, unsigned bpp, unsigned compression);
 bool EncodeJPGImage(image_write_function* pstreamFn, void* streamPrm, unsigned width, unsigned height, unsigned char** rows, unsigned bpp, unsigned compression);
 
-bool EncodeImage(image_write_function* pfn, void* fnPrm, 
-                 unsigned width, unsigned height, 
-                 unsigned char** rows, unsigned bpp, unsigned compression, 
+bool EncodeImage(image_write_function* pfn, void* fnPrm,
+                 unsigned width, unsigned height,
+                 unsigned char** rows, unsigned bpp, unsigned compression,
                  unsigned type) // 0 - png, 1, - jpg
 {
   if( type == 0 )
@@ -302,11 +302,11 @@ static void PNGAPI png_flush_data(png_structp png_ptr)
 }
 
 bool EncodePNGImage(image_write_function* pctl, void* streamPrm, unsigned width, unsigned height, unsigned char** rows, unsigned bpp, unsigned compression)
-{ 
+{
 
   png_structp png = 0;
   png_infop pngInfo = 0;
-  
+
   png = png_create_write_struct(PNG_LIBPNG_VER_STRING, 0, 0, 0);
   if (!png)
   {
@@ -333,10 +333,10 @@ bool EncodePNGImage(image_write_function* pctl, void* streamPrm, unsigned width,
 
   unsigned fmt = bpp == 32? PNG_COLOR_TYPE_RGB_ALPHA : PNG_COLOR_TYPE_RGB;
 
-  png_set_IHDR(png, pngInfo, width, height, 8, fmt, 
-    PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_DEFAULT, 
+  png_set_IHDR(png, pngInfo, width, height, 8, fmt,
+    PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_DEFAULT,
     PNG_FILTER_TYPE_DEFAULT);
-  
+
   png_write_info(png, pngInfo);
   png_set_bgr(png);
   //png_write_png (png, pngInfo, PNG_TRANSFORM_BGR, NULL);
@@ -345,7 +345,7 @@ bool EncodePNGImage(image_write_function* pctl, void* streamPrm, unsigned width,
 
   png_write_end(png, pngInfo);
   //png_write_flush(png);
-  
+
   png_destroy_write_struct(&png, &pngInfo);
 
   return true;
@@ -355,7 +355,7 @@ bool EncodePNGImage(image_write_function* pctl, void* streamPrm, unsigned width,
 
 typedef struct my_jpeg_out_mgr {
   struct jpeg_destination_mgr pub;
-  unsigned char buffer[256]; 
+  unsigned char buffer[256];
   image_write_function* pctl;
   void*           streamPrm;
 } my_jpeg_out_mgr;
@@ -410,7 +410,7 @@ inline void rgba2bgr(unsigned char* rgba, unsigned char* bgr, unsigned int num_p
   }
 
   bool EncodeJPGImage(image_write_function* pctl, void* streamPrm, unsigned width, unsigned height, unsigned char** rows, unsigned bpp, unsigned quality)
-  { 
+  {
     unsigned char* rowbuf = (unsigned char*)alloca(  width * 3 );
     if(!rowbuf) return false;
 
@@ -432,19 +432,19 @@ inline void rgba2bgr(unsigned char* rgba, unsigned char* bgr, unsigned int num_p
 
     cinfo.image_width = width;
     cinfo.image_height = height;
-    cinfo.input_components = 3; 
+    cinfo.input_components = 3;
     cinfo.in_color_space = JCS_RGB;
     jpeg_set_defaults(&cinfo);
     jpeg_set_quality(&cinfo, quality, TRUE);
     jpeg_start_compress(&cinfo, TRUE);
 
-    while(cinfo.next_scanline < cinfo.image_height) 
+    while(cinfo.next_scanline < cinfo.image_height)
     {
       rgba2bgr(rows[cinfo.next_scanline], rowbuf, cinfo.image_width);
       row_pointer[0] = rowbuf;
       jpeg_write_scanlines(&cinfo, row_pointer, 1);
     }
-  
+
     jpeg_finish_compress(&cinfo);
     jpeg_destroy_compress(&cinfo);
 

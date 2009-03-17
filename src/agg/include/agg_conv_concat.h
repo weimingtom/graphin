@@ -39,7 +39,7 @@ namespace agg
             m_status = 0;
         }
 
-        unsigned vertex(double* x, double* y)
+        unsigned vertex(real* x, real* y)
         {
             unsigned cmd;
             if(m_status == 0)

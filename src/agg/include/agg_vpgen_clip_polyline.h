@@ -38,7 +38,7 @@ namespace agg
         {
         }
 
-        void clip_box(double x1, double y1, double x2, double y2)
+        void clip_box(real x1, real y1, real x2, real y2)
         {
             m_clip_box.x1 = x1;
             m_clip_box.y1 = y1;
@@ -47,25 +47,25 @@ namespace agg
             m_clip_box.normalize();
         }
 
-        double x1() const { return m_clip_box.x1; }
-        double y1() const { return m_clip_box.y1; }
-        double x2() const { return m_clip_box.x2; }
-        double y2() const { return m_clip_box.y2; }
+        real x1() const { return m_clip_box.x1; }
+        real y1() const { return m_clip_box.y1; }
+        real x2() const { return m_clip_box.x2; }
+        real y2() const { return m_clip_box.y2; }
 
         static bool auto_close()   { return false; }
         static bool auto_unclose() { return true; }
 
         void     reset();
-        void     move_to(double x, double y);
-        void     line_to(double x, double y);
-        unsigned vertex(double* x, double* y);
+        void     move_to(real x, real y);
+        void     line_to(real x, real y);
+        unsigned vertex(real* x, real* y);
 
     private:
         rect_d        m_clip_box;
-        double        m_x1;
-        double        m_y1;
-        double        m_x[2];
-        double        m_y[2];
+        real        m_x1;
+        real        m_y1;
+        real        m_x[2];
+        real        m_y[2];
         unsigned      m_cmd[2];
         unsigned      m_num_vertices;
         unsigned      m_vertex;

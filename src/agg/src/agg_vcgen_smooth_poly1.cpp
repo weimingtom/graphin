@@ -25,7 +25,7 @@ namespace agg
     //------------------------------------------------------------------------
     vcgen_smooth_poly1::vcgen_smooth_poly1() :
         m_src_vertices(),
-        m_smooth_value(0.5),
+        m_smooth_value(0.5f),
         m_closed(0),
         m_status(initial),
         m_src_vertex(0)
@@ -43,7 +43,7 @@ namespace agg
 
 
     //------------------------------------------------------------------------
-    void vcgen_smooth_poly1::add_vertex(double x, double y, unsigned cmd)
+    void vcgen_smooth_poly1::add_vertex(real x, real y, unsigned cmd)
     {
         m_status = initial;
         if(is_move_to(cmd))
@@ -83,13 +83,13 @@ namespace agg
                                        const vertex_dist& v3)
     {
 
-        double k1 = v0.dist / (v0.dist + v1.dist);
-        double k2 = v1.dist / (v1.dist + v2.dist);
+        real k1 = v0.dist / (v0.dist + v1.dist);
+        real k2 = v1.dist / (v1.dist + v2.dist);
 
-        double xm1 = v0.x + (v2.x - v0.x) * k1;
-        double ym1 = v0.y + (v2.y - v0.y) * k1;
-        double xm2 = v1.x + (v3.x - v1.x) * k2;
-        double ym2 = v1.y + (v3.y - v1.y) * k2;
+        real xm1 = v0.x + (v2.x - v0.x) * k1;
+        real ym1 = v0.y + (v2.y - v0.y) * k1;
+        real xm2 = v1.x + (v3.x - v1.x) * k2;
+        real ym2 = v1.y + (v3.y - v1.y) * k2;
 
         m_ctrl1_x = v1.x + m_smooth_value * (v2.x - xm1);
         m_ctrl1_y = v1.y + m_smooth_value * (v2.y - ym1);
@@ -99,7 +99,7 @@ namespace agg
 
 
     //------------------------------------------------------------------------
-    unsigned vcgen_smooth_poly1::vertex(double* x, double* y)
+    unsigned vcgen_smooth_poly1::vertex(real* x, real* y)
     {
         unsigned cmd = path_cmd_line_to;
         while(!is_stop(cmd))
@@ -222,4 +222,5 @@ namespace agg
     }
 
 }
+
 

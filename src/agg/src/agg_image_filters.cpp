@@ -24,10 +24,10 @@
 namespace agg
 {
     //--------------------------------------------------------------------
-    void image_filter_lut::realloc_lut(double radius)
+    void image_filter_lut::realloc_lut(real radius)
     {
         m_radius = radius;
-        m_diameter = uceil(radius) * 2;
+        m_diameter = uceilf(radius) * 2;
         m_start = -int(m_diameter / 2 - 1);
         unsigned size = m_diameter << image_subpixel_shift;
         if(size > m_weight_array.size())
@@ -42,7 +42,7 @@ namespace agg
     // This function normalizes integer values and corrects the rounding 
     // errors. It doesn't do anything with the source floating point values
     // (m_weight_array_dbl), it corrects only integers according to the rule 
-    // of 1.0 which means that any sum of pixel weights must be equal to 1.0.
+    // of 1.0f which means that any sum of pixel weights must be equal to 1.0.
     // So, the filter function must produce a graph of the proper shape.
     //--------------------------------------------------------------------
     void image_filter_lut::normalize()
@@ -63,7 +63,7 @@ namespace agg
 
                 if(sum == image_filter_scale) break;
 
-                double k = double(image_filter_scale) / double(sum);
+                real k = real(image_filter_scale) / real(sum);
                 sum = 0;
                 for(j = 0; j < m_diameter; j++)
                 {
@@ -100,4 +100,5 @@ namespace agg
 
 
 }
+
 

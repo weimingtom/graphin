@@ -28,26 +28,26 @@ namespace agg
     bezier_ctrl_impl::bezier_ctrl_impl() :
         ctrl(0,0,1,1,false),
         m_stroke(m_curve),
-        m_poly(4, 5.0),
+        m_poly(4, 5.0f),
         m_idx(0)
     {
         m_poly.in_polygon_check(false);
-        m_poly.xn(0) = 100.0;
-        m_poly.yn(0) =   0.0;
-        m_poly.xn(1) = 100.0;
-        m_poly.yn(1) =  50.0;
-        m_poly.xn(2) =  50.0;
-        m_poly.yn(2) = 100.0;
-        m_poly.xn(3) =   0.0;
-        m_poly.yn(3) = 100.0;
+        m_poly.xn(0) = 100.0f;
+        m_poly.yn(0) =   0.0f;
+        m_poly.xn(1) = 100.0f;
+        m_poly.yn(1) =  50.0f;
+        m_poly.xn(2) =  50.0f;
+        m_poly.yn(2) = 100.0f;
+        m_poly.xn(3) =   0.0f;
+        m_poly.yn(3) = 100.0f;
     }
 
 
     //------------------------------------------------------------------------
-    void bezier_ctrl_impl::curve(double x1, double y1, 
-                                 double x2, double y2, 
-                                 double x3, double y3,
-                                 double x4, double y4)
+    void bezier_ctrl_impl::curve(real x1, real y1, 
+                                 real x2, real y2, 
+                                 real x3, real y3,
+                                 real x4, real y4)
     {
         m_poly.xn(0) = x1;
         m_poly.yn(0) = y1;
@@ -81,20 +81,20 @@ namespace agg
         default:
         case 0:                 // Control line 1
             m_curve.init(m_poly.xn(0),  m_poly.yn(0), 
-                        (m_poly.xn(0) + m_poly.xn(1)) * 0.5,
-                        (m_poly.yn(0) + m_poly.yn(1)) * 0.5,
-                        (m_poly.xn(0) + m_poly.xn(1)) * 0.5,
-                        (m_poly.yn(0) + m_poly.yn(1)) * 0.5,
+                        (m_poly.xn(0) + m_poly.xn(1)) * 0.5f,
+                        (m_poly.yn(0) + m_poly.yn(1)) * 0.5f,
+                        (m_poly.xn(0) + m_poly.xn(1)) * 0.5f,
+                        (m_poly.yn(0) + m_poly.yn(1)) * 0.5f,
                          m_poly.xn(1),  m_poly.yn(1));
             m_stroke.rewind(0);
             break;
 
         case 1:                 // Control line 2
             m_curve.init(m_poly.xn(2),  m_poly.yn(2), 
-                        (m_poly.xn(2) + m_poly.xn(3)) * 0.5,
-                        (m_poly.yn(2) + m_poly.yn(3)) * 0.5,
-                        (m_poly.xn(2) + m_poly.xn(3)) * 0.5,
-                        (m_poly.yn(2) + m_poly.yn(3)) * 0.5,
+                        (m_poly.xn(2) + m_poly.xn(3)) * 0.5f,
+                        (m_poly.yn(2) + m_poly.yn(3)) * 0.5f,
+                        (m_poly.xn(2) + m_poly.xn(3)) * 0.5f,
+                        (m_poly.yn(2) + m_poly.yn(3)) * 0.5f,
                          m_poly.xn(3),  m_poly.yn(3));
             m_stroke.rewind(0);
             break;
@@ -131,7 +131,7 @@ namespace agg
 
 
     //------------------------------------------------------------------------
-    unsigned bezier_ctrl_impl::vertex(double* x, double* y)
+    unsigned bezier_ctrl_impl::vertex(real* x, real* y)
     {
         unsigned cmd = path_cmd_stop;
         switch(m_idx)
@@ -161,14 +161,14 @@ namespace agg
 
 
     //------------------------------------------------------------------------
-    bool bezier_ctrl_impl::in_rect(double x, double y) const
+    bool bezier_ctrl_impl::in_rect(real x, real y) const
     {
         return false;
     }
 
 
     //------------------------------------------------------------------------
-    bool bezier_ctrl_impl::on_mouse_button_down(double x, double y)
+    bool bezier_ctrl_impl::on_mouse_button_down(real x, real y)
     {
         inverse_transform_xy(&x, &y);
         return m_poly.on_mouse_button_down(x, y);
@@ -176,7 +176,7 @@ namespace agg
 
 
     //------------------------------------------------------------------------
-    bool bezier_ctrl_impl::on_mouse_move(double x, double y, bool button_flag)
+    bool bezier_ctrl_impl::on_mouse_move(real x, real y, bool button_flag)
     {
         inverse_transform_xy(&x, &y);
         return m_poly.on_mouse_move(x, y, button_flag);
@@ -184,7 +184,7 @@ namespace agg
 
 
     //------------------------------------------------------------------------
-    bool bezier_ctrl_impl::on_mouse_button_up(double x, double y)
+    bool bezier_ctrl_impl::on_mouse_button_up(real x, real y)
     {
         return m_poly.on_mouse_button_up(x, y);
     }
@@ -205,23 +205,23 @@ namespace agg
     curve3_ctrl_impl::curve3_ctrl_impl() :
         ctrl(0,0,1,1,false),
         m_stroke(m_curve),
-        m_poly(3, 5.0),
+        m_poly(3, 5.0f),
         m_idx(0)
     {
         m_poly.in_polygon_check(false);
-        m_poly.xn(0) = 100.0;
-        m_poly.yn(0) =   0.0;
-        m_poly.xn(1) = 100.0;
-        m_poly.yn(1) =  50.0;
-        m_poly.xn(2) =  50.0;
-        m_poly.yn(2) = 100.0;
+        m_poly.xn(0) = 100.0f;
+        m_poly.yn(0) =   0.0f;
+        m_poly.xn(1) = 100.0f;
+        m_poly.yn(1) =  50.0f;
+        m_poly.xn(2) =  50.0f;
+        m_poly.yn(2) = 100.0f;
     }
 
 
     //------------------------------------------------------------------------
-    void curve3_ctrl_impl::curve(double x1, double y1, 
-                                 double x2, double y2, 
-                                 double x3, double y3)
+    void curve3_ctrl_impl::curve(real x1, real y1, 
+                                 real x2, real y2, 
+                                 real x3, real y3)
     {
         m_poly.xn(0) = x1;
         m_poly.yn(0) = y1;
@@ -251,16 +251,16 @@ namespace agg
         default:
         case 0:                 // Control line
             m_curve.init(m_poly.xn(0),  m_poly.yn(0), 
-                        (m_poly.xn(0) + m_poly.xn(1)) * 0.5,
-                        (m_poly.yn(0) + m_poly.yn(1)) * 0.5,
+                        (m_poly.xn(0) + m_poly.xn(1)) * 0.5f,
+                        (m_poly.yn(0) + m_poly.yn(1)) * 0.5f,
                          m_poly.xn(1),  m_poly.yn(1));
             m_stroke.rewind(0);
             break;
 
         case 1:                 // Control line 2
             m_curve.init(m_poly.xn(1),  m_poly.yn(1), 
-                        (m_poly.xn(1) + m_poly.xn(2)) * 0.5,
-                        (m_poly.yn(1) + m_poly.yn(2)) * 0.5,
+                        (m_poly.xn(1) + m_poly.xn(2)) * 0.5f,
+                        (m_poly.yn(1) + m_poly.yn(2)) * 0.5f,
                          m_poly.xn(2),  m_poly.yn(2));
             m_stroke.rewind(0);
             break;
@@ -291,7 +291,7 @@ namespace agg
 
 
     //------------------------------------------------------------------------
-    unsigned curve3_ctrl_impl::vertex(double* x, double* y)
+    unsigned curve3_ctrl_impl::vertex(real* x, real* y)
     {
         unsigned cmd = path_cmd_stop;
         switch(m_idx)
@@ -320,14 +320,14 @@ namespace agg
 
 
     //------------------------------------------------------------------------
-    bool curve3_ctrl_impl::in_rect(double x, double y) const
+    bool curve3_ctrl_impl::in_rect(real x, real y) const
     {
         return false;
     }
 
 
     //------------------------------------------------------------------------
-    bool curve3_ctrl_impl::on_mouse_button_down(double x, double y)
+    bool curve3_ctrl_impl::on_mouse_button_down(real x, real y)
     {
         inverse_transform_xy(&x, &y);
         return m_poly.on_mouse_button_down(x, y);
@@ -335,7 +335,7 @@ namespace agg
 
 
     //------------------------------------------------------------------------
-    bool curve3_ctrl_impl::on_mouse_move(double x, double y, bool button_flag)
+    bool curve3_ctrl_impl::on_mouse_move(real x, real y, bool button_flag)
     {
         inverse_transform_xy(&x, &y);
         return m_poly.on_mouse_move(x, y, button_flag);
@@ -343,7 +343,7 @@ namespace agg
 
 
     //------------------------------------------------------------------------
-    bool curve3_ctrl_impl::on_mouse_button_up(double x, double y)
+    bool curve3_ctrl_impl::on_mouse_button_up(real x, real y)
     {
         return m_poly.on_mouse_button_up(x, y);
     }
@@ -367,4 +367,5 @@ namespace agg
 
 
 }
+
 

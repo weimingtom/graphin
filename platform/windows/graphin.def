@@ -64,7 +64,7 @@ EXPORTS
     window_is_valid				@101	
     window_destroy				@102	
     window_move					@103
-    window_show					@104
+    window_set_state			@104
     window_request_close		@105
     window_request_idle			@106
     window_set_timer			@107
@@ -72,6 +72,7 @@ EXPORTS
     window_get_caption			@109
     window_invalidate			@110
     window_update				@111
+	window_get_state			@112
 
     application_init			@150
     application_do_event		@151	

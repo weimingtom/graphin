@@ -52,7 +52,7 @@ namespace agg
     //        +----------------------------------+
     //            kx1
     // 
-    // Each value can be in range [0...2]. Value 1.0 means one quarter of the
+    // Each value can be in range [0...2]. Value 1.0f means one quarter of the
     // bounding rectangle. Function values() calculates the curve by these
     // 4 values. After calling it one can get the gamma-array with call gamma(). 
     // Class also supports the vertex source interface, i.e rewind() and
@@ -66,25 +66,25 @@ namespace agg
     public:
         gamma_spline();
 
-        void values(double kx1, double ky1, double kx2, double ky2);
+        void values(real kx1, real ky1, real kx2, real ky2);
         const unsigned char* gamma() const { return m_gamma; }
-        double y(double x) const;
-        void values(double* kx1, double* ky1, double* kx2, double* ky2) const;
-        void box(double x1, double y1, double x2, double y2);
+        real y(real x) const;
+        void values(real* kx1, real* ky1, real* kx2, real* ky2) const;
+        void box(real x1, real y1, real x2, real y2);
 
         void     rewind(unsigned);
-        unsigned vertex(double* x, double* y);
+        unsigned vertex(real* x, real* y);
 
     private:
         unsigned char m_gamma[256];
-        double        m_x[4];
-        double        m_y[4];
+        real        m_x[4];
+        real        m_y[4];
         bspline       m_spline;
-        double        m_x1;
-        double        m_y1;
-        double        m_x2;
-        double        m_y2;
-        double        m_cur_x;
+        real        m_x1;
+        real        m_y1;
+        real        m_x2;
+        real        m_y2;
+        real        m_cur_x;
     };
 
 

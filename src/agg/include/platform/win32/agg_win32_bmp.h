@@ -22,7 +22,7 @@
 
 #include <windows.h>
 #include <stdio.h>
-
+#include "agg_config.h"
 
 namespace agg
 {
@@ -56,6 +56,7 @@ namespace agg
 
         void        clear(unsigned clear_val=256);
         void        attach_to_bmp(BITMAPINFO* bmp);
+        void attach_to_dibsection(BITMAPINFO *bmp, void* bits);
         BITMAPINFO* bitmap_info() { return m_bmp; }
         bool        load_from_bmp(FILE* fd);
         bool        save_as_bmp(FILE* fd) const;
@@ -65,12 +66,12 @@ namespace agg
         void        draw(HDC h_dc, 
                          const RECT* device_rect=0, 
                          const RECT* bmp_rect=0) const;
-        void        draw(HDC h_dc, int x, int y, double scale=1.0) const;
+        void        draw(HDC h_dc, int x, int y, real scale=1.0f) const;
 
         void        blend(HDC h_dc, 
                           const RECT* device_rect=0, 
                           const RECT* bmp_rect=0) const;
-        void        blend(HDC h_dc, int x, int y, double scale=1.0) const;
+        void        blend(HDC h_dc, int x, int y, real scale=1.0f) const;
 
 
         unsigned char* buf();
@@ -80,22 +81,23 @@ namespace agg
         unsigned       bpp() const { return m_bpp; }
 
         //Auxiliary static functions
-        static unsigned calc_full_size(BITMAPINFO *bmp);
-        static unsigned calc_header_size(BITMAPINFO *bmp);
+        static unsigned calc_full_size(const BITMAPINFO *bmp);
+        static unsigned calc_header_size(const BITMAPINFO *bmp);
         static unsigned calc_palette_size(unsigned clr_used, 
                                           unsigned bits_per_pixel);
-        static unsigned calc_palette_size(BITMAPINFO *bmp);
-        static unsigned char* calc_img_ptr(BITMAPINFO *bmp);
+        static unsigned calc_palette_size(const BITMAPINFO *bmp);
+        static unsigned char* calc_img_ptr(const BITMAPINFO *bmp);
         static BITMAPINFO* create_bitmap_info(unsigned width, 
                                               unsigned height, 
                                               unsigned bits_per_pixel);
-        static void     create_gray_scale_palette(BITMAPINFO *bmp);
+        static void     create_gray_scale_palette(const BITMAPINFO *bmp);
         static unsigned calc_row_len(unsigned width, unsigned bits_per_pixel);
         
     private:
         pixel_map(const pixel_map&);
         const pixel_map& operator = (const pixel_map&);
         void create_from_bmp(BITMAPINFO *bmp);
+        void create_from_dibsection(BITMAPINFO *bmp, void *bits);
         
         HBITMAP create_dib_section_from_args(HDC h_dc,
                                              unsigned width,

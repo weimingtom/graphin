@@ -216,21 +216,21 @@ namespace svg
     void parser::parse(const char* fname)
     {
         char msg[1024];
-	    XML_Parser p = XML_ParserCreate(NULL);
-	    if(p == 0) 
-	    {
-		    throw exception("Couldn't allocate memory for parser");
-	    }
+      XML_Parser p = XML_ParserCreate(NULL);
+      if(p == 0) 
+      {
+        throw exception("Couldn't allocate memory for parser");
+      }
 
         XML_SetUserData(p, this);
-	    XML_SetElementHandler(p, start_element, end_element);
-	    XML_SetCharacterDataHandler(p, content);
+      XML_SetElementHandler(p, start_element, end_element);
+      XML_SetCharacterDataHandler(p, content);
 
         FILE* fd = fopen(fname, "r");
         if(fd == 0)
         {
             sprintf(msg, "Couldn't open file %s", fname);
-		    throw exception(msg);
+        throw exception(msg);
         }
 
         bool done = false;
@@ -449,7 +449,7 @@ namespace svg
         }
     }
 
-    double parse_double(const char* str)
+    real parse_float(const char* str)
     {
         while(*str == ' ') ++str;
         return atof(str);
@@ -479,7 +479,7 @@ namespace svg
         else
         if(strcmp(name, "fill-opacity") == 0)
         {
-            m_path.fill_opacity(parse_double(value));
+            m_path.fill_opacity(parse_float(value));
         }
         else
         if(strcmp(name, "stroke") == 0)
@@ -496,7 +496,7 @@ namespace svg
         else
         if(strcmp(name, "stroke-width") == 0)
         {
-            m_path.stroke_width(parse_double(value));
+            m_path.stroke_width(parse_float(value));
         }
         else
         if(strcmp(name, "stroke-linecap") == 0)
@@ -515,12 +515,12 @@ namespace svg
         else
         if(strcmp(name, "stroke-miterlimit") == 0)
         {
-            m_path.miter_limit(parse_double(value));
+            m_path.miter_limit(parse_float(value));
         }
         else
         if(strcmp(name, "stroke-opacity") == 0)
         {
-            m_path.stroke_opacity(parse_double(value));
+            m_path.stroke_opacity(parse_float(value));
         }
         else
         if(strcmp(name, "transform") == 0)
@@ -622,30 +622,30 @@ namespace svg
     void parser::parse_rect(const char** attr)
     {
         int i;
-        double x = 0.0;
-        double y = 0.0;
-        double w = 0.0;
-        double h = 0.0;
+        real x = 0.0f;
+        real y = 0.0f;
+        real w = 0.0f;
+        real h = 0.0f;
 
         m_path.begin_path();
         for(i = 0; attr[i]; i += 2)
         {
             if(!parse_attr(attr[i], attr[i + 1]))
             {
-                if(strcmp(attr[i], "x") == 0)      x = parse_double(attr[i + 1]);
-                if(strcmp(attr[i], "y") == 0)      y = parse_double(attr[i + 1]);
-                if(strcmp(attr[i], "width") == 0)  w = parse_double(attr[i + 1]);
-                if(strcmp(attr[i], "height") == 0) h = parse_double(attr[i + 1]);
+                if(strcmp(attr[i], "x") == 0)      x = parse_float(attr[i + 1]);
+                if(strcmp(attr[i], "y") == 0)      y = parse_float(attr[i + 1]);
+                if(strcmp(attr[i], "width") == 0)  w = parse_float(attr[i + 1]);
+                if(strcmp(attr[i], "height") == 0) h = parse_float(attr[i + 1]);
                 // rx - to be implemented 
                 // ry - to be implemented
             }
         }
 
 
-        if(w != 0.0 && h != 0.0)
+        if(w != 0.0f && h != 0.0f)
         {
-            if(w < 0.0) throw exception("parse_rect: Invalid width: %f", w);
-            if(h < 0.0) throw exception("parse_rect: Invalid height: %f", h);
+            if(w < 0.0f) throw exception("parse_rect: Invalid width: %f", w);
+            if(h < 0.0f) throw exception("parse_rect: Invalid height: %f", h);
 
             m_path.move_to(x,     y);
             m_path.line_to(x + w, y);
@@ -661,20 +661,20 @@ namespace svg
     void parser::parse_line(const char** attr)
     {
         int i;
-        double x1 = 0.0;
-        double y1 = 0.0;
-        double x2 = 0.0;
-        double y2 = 0.0;
+        real x1 = 0.0f;
+        real y1 = 0.0f;
+        real x2 = 0.0f;
+        real y2 = 0.0f;
 
         m_path.begin_path();
         for(i = 0; attr[i]; i += 2)
         {
             if(!parse_attr(attr[i], attr[i + 1]))
             {
-                if(strcmp(attr[i], "x1") == 0) x1 = parse_double(attr[i + 1]);
-                if(strcmp(attr[i], "y1") == 0) y1 = parse_double(attr[i + 1]);
-                if(strcmp(attr[i], "x2") == 0) x2 = parse_double(attr[i + 1]);
-                if(strcmp(attr[i], "y2") == 0) y2 = parse_double(attr[i + 1]);
+                if(strcmp(attr[i], "x1") == 0) x1 = parse_float(attr[i + 1]);
+                if(strcmp(attr[i], "y1") == 0) y1 = parse_float(attr[i + 1]);
+                if(strcmp(attr[i], "x2") == 0) x2 = parse_float(attr[i + 1]);
+                if(strcmp(attr[i], "y2") == 0) y2 = parse_float(attr[i + 1]);
             }
         }
 
@@ -688,8 +688,8 @@ namespace svg
     void parser::parse_poly(const char** attr, bool close_flag)
     {
         int i;
-        double x = 0.0;
-        double y = 0.0;
+        real x = 0.0f;
+        real y = 0.0f;
 
         m_path.begin_path();
         for(i = 0; attr[i]; i += 2)
@@ -763,7 +763,7 @@ namespace svg
 
     //-------------------------------------------------------------
     static unsigned parse_transform_args(const char* str, 
-                                         double* args, 
+                                         real* args, 
                                          unsigned max_na, 
                                          unsigned* na)
     {
@@ -803,7 +803,7 @@ namespace svg
     //-------------------------------------------------------------
     unsigned parser::parse_matrix(const char* str)
     {
-        double args[6];
+        real args[6];
         unsigned na = 0;
         unsigned len = parse_transform_args(str, args, 6, &na);
         if(na != 6)
@@ -817,10 +817,10 @@ namespace svg
     //-------------------------------------------------------------
     unsigned parser::parse_translate(const char* str)
     {
-        double args[2];
+        real args[2];
         unsigned na = 0;
         unsigned len = parse_transform_args(str, args, 2, &na);
-        if(na == 1) args[1] = 0.0;
+        if(na == 1) args[1] = 0.0f;
         m_path.transform().premultiply(trans_affine_translation(args[0], args[1]));
         return len;
     }
@@ -828,7 +828,7 @@ namespace svg
     //-------------------------------------------------------------
     unsigned parser::parse_rotate(const char* str)
     {
-        double args[3];
+        real args[3];
         unsigned na = 0;
         unsigned len = parse_transform_args(str, args, 3, &na);
         if(na == 1) 
@@ -852,7 +852,7 @@ namespace svg
     //-------------------------------------------------------------
     unsigned parser::parse_scale(const char* str)
     {
-        double args[2];
+        real args[2];
         unsigned na = 0;
         unsigned len = parse_transform_args(str, args, 2, &na);
         if(na == 1) args[1] = args[0];
@@ -863,24 +863,25 @@ namespace svg
     //-------------------------------------------------------------
     unsigned parser::parse_skew_x(const char* str)
     {
-        double arg;
+        real arg;
         unsigned na = 0;
         unsigned len = parse_transform_args(str, &arg, 1, &na);
-        m_path.transform().premultiply(trans_affine_skewing(deg2rad(arg), 0.0));
+        m_path.transform().premultiply(trans_affine_skewing(deg2rad(arg), 0.0f));
         return len;
     }
 
     //-------------------------------------------------------------
     unsigned parser::parse_skew_y(const char* str)
     {
-        double arg;
+        real arg;
         unsigned na = 0;
         unsigned len = parse_transform_args(str, &arg, 1, &na);
-        m_path.transform().premultiply(trans_affine_skewing(0.0, deg2rad(arg)));
+        m_path.transform().premultiply(trans_affine_skewing(0.0f, deg2rad(arg)));
         return len;
     }
 
 }
 }
+
 
 

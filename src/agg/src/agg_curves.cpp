@@ -21,63 +21,63 @@ namespace agg
 {
 
     //------------------------------------------------------------------------
-    const double curve_distance_epsilon                  = 1e-30;
-    const double curve_collinearity_epsilon              = 1e-30;
-    const double curve_angle_tolerance_epsilon           = 0.01;
+    const real curve_distance_epsilon                  = 1e-30;
+    const real curve_collinearity_epsilon              = 1e-30;
+    const real curve_angle_tolerance_epsilon           = 0.01;
     enum curve_recursion_limit_e { curve_recursion_limit = 32 };
 
 
 
     //------------------------------------------------------------------------
-    void curve3_inc::approximation_scale(double s) 
+    void curve3_inc::approximation_scale(real s) 
     { 
         m_scale = s;
     }
 
     //------------------------------------------------------------------------
-    double curve3_inc::approximation_scale() const 
+    real curve3_inc::approximation_scale() const 
     { 
         return m_scale;
     }
 
     //------------------------------------------------------------------------
-    void curve3_inc::init(double x1, double y1, 
-                          double x2, double y2, 
-                          double x3, double y3)
+    void curve3_inc::init(real x1, real y1, 
+                          real x2, real y2, 
+                          real x3, real y3)
     {
         m_start_x = x1;
         m_start_y = y1;
         m_end_x   = x3;
         m_end_y   = y3;
 
-        double dx1 = x2 - x1;
-        double dy1 = y2 - y1;
-        double dx2 = x3 - x2;
-        double dy2 = y3 - y2;
+        real dx1 = x2 - x1;
+        real dy1 = y2 - y1;
+        real dx2 = x3 - x2;
+        real dy2 = y3 - y2;
 
-        double len = sqrt(dx1 * dx1 + dy1 * dy1) + sqrt(dx2 * dx2 + dy2 * dy2); 
+        real len = SQRT(dx1 * dx1 + dy1 * dy1) + SQRT(dx2 * dx2 + dy2 * dy2); 
 
-        m_num_steps = uround(len * 0.25 * m_scale);
+        m_num_steps = uround(len * 0.25f * m_scale);
 
         if(m_num_steps < 4)
         {
             m_num_steps = 4;   
         }
 
-        double subdivide_step  = 1.0 / m_num_steps;
-        double subdivide_step2 = subdivide_step * subdivide_step;
+        real subdivide_step  = 1.0f / m_num_steps;
+        real subdivide_step2 = subdivide_step * subdivide_step;
 
-        double tmpx = (x1 - x2 * 2.0 + x3) * subdivide_step2;
-        double tmpy = (y1 - y2 * 2.0 + y3) * subdivide_step2;
+        real tmpx = (x1 - x2 * 2.0f + x3) * subdivide_step2;
+        real tmpy = (y1 - y2 * 2.0f + y3) * subdivide_step2;
 
         m_saved_fx = m_fx = x1;
         m_saved_fy = m_fy = y1;
         
-        m_saved_dfx = m_dfx = tmpx + (x2 - x1) * (2.0 * subdivide_step);
-        m_saved_dfy = m_dfy = tmpy + (y2 - y1) * (2.0 * subdivide_step);
+        m_saved_dfx = m_dfx = tmpx + (x2 - x1) * (2.0f * subdivide_step);
+        m_saved_dfy = m_dfy = tmpy + (y2 - y1) * (2.0f * subdivide_step);
 
-        m_ddfx = tmpx * 2.0;
-        m_ddfy = tmpy * 2.0;
+        m_ddfx = tmpx * 2.0f;
+        m_ddfy = tmpy * 2.0f;
 
         m_step = m_num_steps;
     }
@@ -98,7 +98,7 @@ namespace agg
     }
 
     //------------------------------------------------------------------------
-    unsigned curve3_inc::vertex(double* x, double* y)
+    unsigned curve3_inc::vertex(real* x, real* y)
     {
         if(m_step < 0) return path_cmd_stop;
         if(m_step == m_num_steps)
@@ -126,21 +126,21 @@ namespace agg
     }
 
     //------------------------------------------------------------------------
-    void curve3_div::init(double x1, double y1, 
-                          double x2, double y2, 
-                          double x3, double y3)
+    void curve3_div::init(real x1, real y1, 
+                          real x2, real y2, 
+                          real x3, real y3)
     {
         m_points.remove_all();
-        m_distance_tolerance_square = 0.5 / m_approximation_scale;
+        m_distance_tolerance_square = 0.5f / m_approximation_scale;
         m_distance_tolerance_square *= m_distance_tolerance_square;
         bezier(x1, y1, x2, y2, x3, y3);
         m_count = 0;
     }
 
     //------------------------------------------------------------------------
-    void curve3_div::recursive_bezier(double x1, double y1, 
-                                      double x2, double y2, 
-                                      double x3, double y3,
+    void curve3_div::recursive_bezier(real x1, real y1, 
+                                      real x2, real y2, 
+                                      real x3, real y3,
                                       unsigned level)
     {
         if(level > curve_recursion_limit) 
@@ -150,17 +150,17 @@ namespace agg
 
         // Calculate all the mid-points of the line segments
         //----------------------
-        double x12   = (x1 + x2) / 2;                
-        double y12   = (y1 + y2) / 2;
-        double x23   = (x2 + x3) / 2;
-        double y23   = (y2 + y3) / 2;
-        double x123  = (x12 + x23) / 2;
-        double y123  = (y12 + y23) / 2;
+        real x12   = (x1 + x2) / 2;                
+        real y12   = (y1 + y2) / 2;
+        real x23   = (x2 + x3) / 2;
+        real y23   = (y2 + y3) / 2;
+        real x123  = (x12 + x23) / 2;
+        real y123  = (y12 + y23) / 2;
 
-        double dx = x3-x1;
-        double dy = y3-y1;
-        double d = fabs(((x2 - x3) * dy - (y2 - y3) * dx));
-        double da;
+        real dx = x3-x1;
+        real dy = y3-y1;
+        real d = FABS(((x2 - x3) * dy - (y2 - y3) * dx));
+        real da;
 
         if(d > curve_collinearity_epsilon)
         { 
@@ -173,20 +173,20 @@ namespace agg
                 //----------------------
                 if(m_angle_tolerance < curve_angle_tolerance_epsilon)
                 {
-                    m_points.add(point_d(x123, y123));
+                    m_points.add(point_r(x123, y123));
                     return;
                 }
 
                 // Angle & Cusp Condition
                 //----------------------
-                da = fabs(atan2(y3 - y2, x3 - x2) - atan2(y2 - y1, x2 - x1));
+                da = FABS((real)atan2(y3 - y2, x3 - x2) - (real)atan2(y2 - y1, x2 - x1));
                 if(da >= pi) da = 2*pi - da;
 
                 if(da < m_angle_tolerance)
                 {
                     // Finally we can stop the recursion
                     //----------------------
-                    m_points.add(point_d(x123, y123));
+                    m_points.add(point_r(x123, y123));
                     return;                 
                 }
             }
@@ -215,7 +215,7 @@ namespace agg
             }
             if(d < m_distance_tolerance_square)
             {
-                m_points.add(point_d(x2, y2));
+                m_points.add(point_r(x2, y2));
                 return;
             }
         }
@@ -227,13 +227,13 @@ namespace agg
     }
 
     //------------------------------------------------------------------------
-    void curve3_div::bezier(double x1, double y1, 
-                            double x2, double y2, 
-                            double x3, double y3)
+    void curve3_div::bezier(real x1, real y1, 
+                            real x2, real y2, 
+                            real x3, real y3)
     {
-        m_points.add(point_d(x1, y1));
+        m_points.add(point_r(x1, y1));
         recursive_bezier(x1, y1, x2, y2, x3, y3, 0);
-        m_points.add(point_d(x3, y3));
+        m_points.add(point_r(x3, y3));
     }
 
 
@@ -241,41 +241,41 @@ namespace agg
 
 
     //------------------------------------------------------------------------
-    void curve4_inc::approximation_scale(double s) 
+    void curve4_inc::approximation_scale(real s) 
     { 
         m_scale = s;
     }
 
     //------------------------------------------------------------------------
-    double curve4_inc::approximation_scale() const 
+    real curve4_inc::approximation_scale() const 
     { 
         return m_scale;
     }
 
     //------------------------------------------------------------------------
-    static double MSC60_fix_ICE(double v) { return v; }
+    static real MSC60_fix_ICE(real v) { return v; }
 
     //------------------------------------------------------------------------
-    void curve4_inc::init(double x1, double y1, 
-                          double x2, double y2, 
-                          double x3, double y3,
-                          double x4, double y4)
+    void curve4_inc::init(real x1, real y1, 
+                          real x2, real y2, 
+                          real x3, real y3,
+                          real x4, real y4)
     {
         m_start_x = x1;
         m_start_y = y1;
         m_end_x   = x4;
         m_end_y   = y4;
 
-        double dx1 = x2 - x1;
-        double dy1 = y2 - y1;
-        double dx2 = x3 - x2;
-        double dy2 = y3 - y2;
-        double dx3 = x4 - x3;
-        double dy3 = y4 - y3;
+        real dx1 = x2 - x1;
+        real dy1 = y2 - y1;
+        real dx2 = x3 - x2;
+        real dy2 = y3 - y2;
+        real dx3 = x4 - x3;
+        real dy3 = y4 - y3;
 
-        double len = (sqrt(dx1 * dx1 + dy1 * dy1) + 
-                      sqrt(dx2 * dx2 + dy2 * dy2) + 
-                      sqrt(dx3 * dx3 + dy3 * dy3)) * 0.25 * m_scale;
+        real len = (SQRT(dx1 * dx1 + dy1 * dy1) + 
+                      SQRT(dx2 * dx2 + dy2 * dy2) + 
+                      SQRT(dx3 * dx3 + dy3 * dy3)) * 0.25f * m_scale;
 
 #if defined(_MSC_VER) && _MSC_VER <= 1200
         m_num_steps = uround(MSC60_fix_ICE(len));
@@ -288,20 +288,20 @@ namespace agg
             m_num_steps = 4;   
         }
 
-        double subdivide_step  = 1.0 / m_num_steps;
-        double subdivide_step2 = subdivide_step * subdivide_step;
-        double subdivide_step3 = subdivide_step * subdivide_step * subdivide_step;
+        real subdivide_step  = 1.0f / m_num_steps;
+        real subdivide_step2 = subdivide_step * subdivide_step;
+        real subdivide_step3 = subdivide_step * subdivide_step * subdivide_step;
 
-        double pre1 = 3.0 * subdivide_step;
-        double pre2 = 3.0 * subdivide_step2;
-        double pre4 = 6.0 * subdivide_step2;
-        double pre5 = 6.0 * subdivide_step3;
-	
-        double tmp1x = x1 - x2 * 2.0 + x3;
-        double tmp1y = y1 - y2 * 2.0 + y3;
+        real pre1 = 3.0f * subdivide_step;
+        real pre2 = 3.0f * subdivide_step2;
+        real pre4 = 6.0f * subdivide_step2;
+        real pre5 = 6.0f * subdivide_step3;
+  
+        real tmp1x = x1 - x2 * 2.0f + x3;
+        real tmp1y = y1 - y2 * 2.0f + y3;
 
-        double tmp2x = (x2 - x3) * 3.0 - x1 + x4;
-        double tmp2y = (y2 - y3) * 3.0 - y1 + y4;
+        real tmp2x = (x2 - x3) * 3.0f - x1 + x4;
+        real tmp2y = (y2 - y3) * 3.0f - y1 + y4;
 
         m_saved_fx = m_fx = x1;
         m_saved_fy = m_fy = y1;
@@ -336,7 +336,7 @@ namespace agg
     }
 
     //------------------------------------------------------------------------
-    unsigned curve4_inc::vertex(double* x, double* y)
+    unsigned curve4_inc::vertex(real* x, real* y)
     {
         if(m_step < 0) return path_cmd_stop;
         if(m_step == m_num_steps)
@@ -372,23 +372,23 @@ namespace agg
 
 
     //------------------------------------------------------------------------
-    void curve4_div::init(double x1, double y1, 
-                          double x2, double y2, 
-                          double x3, double y3,
-                          double x4, double y4)
+    void curve4_div::init(real x1, real y1, 
+                          real x2, real y2, 
+                          real x3, real y3,
+                          real x4, real y4)
     {
         m_points.remove_all();
-        m_distance_tolerance_square = 0.5 / m_approximation_scale;
+        m_distance_tolerance_square = 0.5f / m_approximation_scale;
         m_distance_tolerance_square *= m_distance_tolerance_square;
         bezier(x1, y1, x2, y2, x3, y3, x4, y4);
         m_count = 0;
     }
 
     //------------------------------------------------------------------------
-    void curve4_div::recursive_bezier(double x1, double y1, 
-                                      double x2, double y2, 
-                                      double x3, double y3, 
-                                      double x4, double y4,
+    void curve4_div::recursive_bezier(real x1, real y1, 
+                                      real x2, real y2, 
+                                      real x3, real y3, 
+                                      real x4, real y4,
                                       unsigned level)
     {
         if(level > curve_recursion_limit) 
@@ -398,28 +398,28 @@ namespace agg
 
         // Calculate all the mid-points of the line segments
         //----------------------
-        double x12   = (x1 + x2) / 2;
-        double y12   = (y1 + y2) / 2;
-        double x23   = (x2 + x3) / 2;
-        double y23   = (y2 + y3) / 2;
-        double x34   = (x3 + x4) / 2;
-        double y34   = (y3 + y4) / 2;
-        double x123  = (x12 + x23) / 2;
-        double y123  = (y12 + y23) / 2;
-        double x234  = (x23 + x34) / 2;
-        double y234  = (y23 + y34) / 2;
-        double x1234 = (x123 + x234) / 2;
-        double y1234 = (y123 + y234) / 2;
+        real x12   = (x1 + x2) / 2;
+        real y12   = (y1 + y2) / 2;
+        real x23   = (x2 + x3) / 2;
+        real y23   = (y2 + y3) / 2;
+        real x34   = (x3 + x4) / 2;
+        real y34   = (y3 + y4) / 2;
+        real x123  = (x12 + x23) / 2;
+        real y123  = (y12 + y23) / 2;
+        real x234  = (x23 + x34) / 2;
+        real y234  = (y23 + y34) / 2;
+        real x1234 = (x123 + x234) / 2;
+        real y1234 = (y123 + y234) / 2;
 
 
         // Try to approximate the full cubic curve by a single straight line
         //------------------
-        double dx = x4-x1;
-        double dy = y4-y1;
+        real dx = x4-x1;
+        real dy = y4-y1;
 
-        double d2 = fabs(((x2 - x4) * dy - (y2 - y4) * dx));
-        double d3 = fabs(((x3 - x4) * dy - (y3 - y4) * dx));
-        double da1, da2, k;
+        real d2 = FABS(((x2 - x4) * dy - (y2 - y4) * dx));
+        real d3 = FABS(((x3 - x4) * dy - (y3 - y4) * dx));
+        real da1, da2, k;
 
         switch((int(d2 > curve_collinearity_epsilon) << 1) +
                 int(d3 > curve_collinearity_epsilon))
@@ -460,7 +460,7 @@ namespace agg
             {
                 if(d2 < m_distance_tolerance_square)
                 {
-                    m_points.add(point_d(x2, y2));
+                    m_points.add(point_r(x2, y2));
                     return;
                 }
             }
@@ -468,7 +468,7 @@ namespace agg
             {
                 if(d3 < m_distance_tolerance_square)
                 {
-                    m_points.add(point_d(x3, y3));
+                    m_points.add(point_r(x3, y3));
                     return;
                 }
             }
@@ -481,27 +481,27 @@ namespace agg
             {
                 if(m_angle_tolerance < curve_angle_tolerance_epsilon)
                 {
-                    m_points.add(point_d(x23, y23));
+                    m_points.add(point_r(x23, y23));
                     return;
                 }
 
                 // Angle Condition
                 //----------------------
-                da1 = fabs(atan2(y4 - y3, x4 - x3) - atan2(y3 - y2, x3 - x2));
+                da1 = FABS((real)atan2(y4 - y3, x4 - x3) - (real)atan2(y3 - y2, x3 - x2));
                 if(da1 >= pi) da1 = 2*pi - da1;
 
                 if(da1 < m_angle_tolerance)
                 {
-                    m_points.add(point_d(x2, y2));
-                    m_points.add(point_d(x3, y3));
+                    m_points.add(point_r(x2, y2));
+                    m_points.add(point_r(x3, y3));
                     return;
                 }
 
-                if(m_cusp_limit != 0.0)
+                if(m_cusp_limit != 0.0f)
                 {
                     if(da1 > m_cusp_limit)
                     {
-                        m_points.add(point_d(x3, y3));
+                        m_points.add(point_r(x3, y3));
                         return;
                     }
                 }
@@ -515,27 +515,27 @@ namespace agg
             {
                 if(m_angle_tolerance < curve_angle_tolerance_epsilon)
                 {
-                    m_points.add(point_d(x23, y23));
+                    m_points.add(point_r(x23, y23));
                     return;
                 }
 
                 // Angle Condition
                 //----------------------
-                da1 = fabs(atan2(y3 - y2, x3 - x2) - atan2(y2 - y1, x2 - x1));
+                da1 = FABS((real)atan2(y3 - y2, x3 - x2) - (real)atan2(y2 - y1, x2 - x1));
                 if(da1 >= pi) da1 = 2*pi - da1;
 
                 if(da1 < m_angle_tolerance)
                 {
-                    m_points.add(point_d(x2, y2));
-                    m_points.add(point_d(x3, y3));
+                    m_points.add(point_r(x2, y2));
+                    m_points.add(point_r(x3, y3));
                     return;
                 }
 
-                if(m_cusp_limit != 0.0)
+                if(m_cusp_limit != 0.0f)
                 {
                     if(da1 > m_cusp_limit)
                     {
-                        m_points.add(point_d(x2, y2));
+                        m_points.add(point_r(x2, y2));
                         return;
                     }
                 }
@@ -552,15 +552,15 @@ namespace agg
                 //----------------------
                 if(m_angle_tolerance < curve_angle_tolerance_epsilon)
                 {
-                    m_points.add(point_d(x23, y23));
+                    m_points.add(point_r(x23, y23));
                     return;
                 }
 
                 // Angle & Cusp Condition
                 //----------------------
-                k   = atan2(y3 - y2, x3 - x2);
-                da1 = fabs(k - atan2(y2 - y1, x2 - x1));
-                da2 = fabs(atan2(y4 - y3, x4 - x3) - k);
+                k   = (real)atan2(y3 - y2, x3 - x2);
+                da1 = FABS(k - (real)atan2(y2 - y1, x2 - x1));
+                da2 = FABS((real)atan2(y4 - y3, x4 - x3) - k);
                 if(da1 >= pi) da1 = 2*pi - da1;
                 if(da2 >= pi) da2 = 2*pi - da2;
 
@@ -568,21 +568,21 @@ namespace agg
                 {
                     // Finally we can stop the recursion
                     //----------------------
-                    m_points.add(point_d(x23, y23));
+                    m_points.add(point_r(x23, y23));
                     return;
                 }
 
-                if(m_cusp_limit != 0.0)
+                if(m_cusp_limit != 0.0f)
                 {
                     if(da1 > m_cusp_limit)
                     {
-                        m_points.add(point_d(x2, y2));
+                        m_points.add(point_r(x2, y2));
                         return;
                     }
 
                     if(da2 > m_cusp_limit)
                     {
-                        m_points.add(point_d(x3, y3));
+                        m_points.add(point_r(x3, y3));
                         return;
                     }
                 }
@@ -597,15 +597,16 @@ namespace agg
     }
 
     //------------------------------------------------------------------------
-    void curve4_div::bezier(double x1, double y1, 
-                            double x2, double y2, 
-                            double x3, double y3, 
-                            double x4, double y4)
+    void curve4_div::bezier(real x1, real y1, 
+                            real x2, real y2, 
+                            real x3, real y3, 
+                            real x4, real y4)
     {
-        m_points.add(point_d(x1, y1));
+        m_points.add(point_r(x1, y1));
         recursive_bezier(x1, y1, x2, y2, x3, y3, x4, y4, 0);
-        m_points.add(point_d(x4, y4));
+        m_points.add(point_r(x4, y4));
     }
 
 }
+
 

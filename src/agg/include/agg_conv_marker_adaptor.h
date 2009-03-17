@@ -36,8 +36,8 @@ namespace agg
         {
         }
 
-        void shorten(double s) { base_type::generator().shorten(s); }
-        double shorten() const { return base_type::generator().shorten(); }
+        void shorten(real s) { base_type::generator().shorten(s); }
+        real shorten() const { return base_type::generator().shorten(); }
 
     private:
         conv_marker_adaptor(const conv_marker_adaptor<VertexSource, Markers>&);

@@ -30,7 +30,7 @@ namespace agg
 
 
     //------------------------------------------------------------------------
-    void vcgen_markers_term::add_vertex(double x, double y, unsigned cmd)
+    void vcgen_markers_term::add_vertex(real x, real y, unsigned cmd)
     {
         if(is_move_to(cmd))
         {
@@ -81,7 +81,7 @@ namespace agg
 
 
     //------------------------------------------------------------------------
-    unsigned vcgen_markers_term::vertex(double* x, double* y)
+    unsigned vcgen_markers_term::vertex(real* x, real* y)
     {
         if(m_curr_id > 2 || m_curr_idx >= m_markers.size()) 
         {

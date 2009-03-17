@@ -406,7 +406,7 @@ GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
       break;
     case WINDOW_TYPE_FRAME:  // caption and resizeable frame
       wflags = WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_THICKFRAME | WS_MAXIMIZEBOX;
-      wflagsex = WS_EX_OVERLAPPEDWINDOW; 
+      wflagsex = 0; 
       break;
     case WINDOW_TYPE_TOOL:   // narrow caption and resizeable frame
       wflags = WS_OVERLAPPED | WS_CAPTION | WS_MINIMIZEBOX;
@@ -461,17 +461,40 @@ GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
 }
 
 GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL 
-        window_show(HWINDOW hw, SHOW_CMD cmd)
+        window_set_state(HWINDOW hw, WINDOW_STATE cmd)
 {
   if( window_is_valid(hw) )
   {
     switch(cmd)
     {
-      case WINDOW_SHOW: ::ShowWindow(hw->hwnd, SW_SHOW); break;
-      case WINDOW_EXPAND: ::ShowWindow(hw->hwnd, SW_MAXIMIZE); break;
-      case WINDOW_COLLAPSE: ::ShowWindow(hw->hwnd, SW_MINIMIZE); break;
+      case WINDOW_SHOWN:     ::ShowWindow(hw->hwnd, SW_SHOW); break;
+      case WINDOW_EXPANDED:  ::ShowWindow(hw->hwnd, SW_MAXIMIZE); break;
+      case WINDOW_COLLAPSED: ::ShowWindow(hw->hwnd, SW_MINIMIZE); break;
+      case WINDOW_HIDDEN:    ::ShowWindow(hw->hwnd, SW_HIDE); break;  
     }
     return GRAPHIN_OK;
+  }
+  return GRAPHIN_FAILURE;
+}
+
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL 
+        window_get_state(HWINDOW hw, WINDOW_STATE* wst)
+{
+  if( window_is_valid(hw) )
+  {
+    WINDOWPLACEMENT wndpl = {0}; wndpl.length = sizeof(wndpl);
+    if(GetWindowPlacement( hw->hwnd, &wndpl))
+    {
+      switch(wndpl.showCmd)
+      {
+          case SW_HIDE         : *wst = WINDOW_HIDDEN; break;
+          case SW_SHOWMINIMIZED: *wst = WINDOW_COLLAPSED;  break;
+          case SW_SHOWMAXIMIZED: *wst = WINDOW_EXPANDED;  break;
+          case SW_SHOWNORMAL   : 
+          default              : *wst = WINDOW_SHOWN;  break;
+      }
+      return GRAPHIN_OK;
+    }
   }
   return GRAPHIN_FAILURE;
 }

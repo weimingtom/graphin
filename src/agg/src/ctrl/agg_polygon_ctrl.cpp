@@ -22,7 +22,7 @@
 namespace agg
 {
 
-    polygon_ctrl_impl::polygon_ctrl_impl(unsigned np, double point_radius) :
+    polygon_ctrl_impl::polygon_ctrl_impl(unsigned np, real point_radius) :
         ctrl(0, 0, 1, 1, false),
         m_polygon(np * 2),
         m_num_points(np),
@@ -32,11 +32,11 @@ namespace agg
         m_stroke(m_vs),
         m_point_radius(point_radius),
         m_status(0),
-        m_dx(0.0),
-        m_dy(0.0),
+        m_dx(0.0f),
+        m_dy(0.0f),
         m_in_polygon_check(true)
     {
-        m_stroke.width(1.0);
+        m_stroke.width(1.0f);
     }
 
 
@@ -46,10 +46,10 @@ namespace agg
         m_stroke.rewind(0);
     }
 
-    unsigned polygon_ctrl_impl::vertex(double* x, double* y)
+    unsigned polygon_ctrl_impl::vertex(real* x, real* y)
     {
         unsigned cmd = path_cmd_stop;
-        double r = m_point_radius;
+        real r = m_point_radius;
         if(m_status == 0)
         {
             cmd = m_stroke.vertex(x, y);
@@ -81,37 +81,37 @@ namespace agg
     }
 
 
-    bool polygon_ctrl_impl::check_edge(unsigned i, double x, double y) const
+    bool polygon_ctrl_impl::check_edge(unsigned i, real x, real y) const
     {
        bool ret = false;
 
        unsigned n1 = i;
        unsigned n2 = (i + m_num_points - 1) % m_num_points;
-       double x1 = xn(n1);
-       double y1 = yn(n1);
-       double x2 = xn(n2);
-       double y2 = yn(n2);
+       real x1 = xn(n1);
+       real y1 = yn(n1);
+       real x2 = xn(n2);
+       real y2 = yn(n2);
 
-       double dx = x2 - x1;
-       double dy = y2 - y1;
+       real dx = x2 - x1;
+       real dy = y2 - y1;
 
-       if(sqrt(dx*dx + dy*dy) > 0.0000001)
+       if(SQRT(dx*dx + dy*dy) > 0.0000001)
        {
-          double x3 = x;
-          double y3 = y;
-          double x4 = x3 - dy;
-          double y4 = y3 + dx;
+          real x3 = x;
+          real y3 = y;
+          real x4 = x3 - dy;
+          real y4 = y3 + dx;
 
-          double den = (y4-y3) * (x2-x1) - (x4-x3) * (y2-y1);
-          double u1 = ((x4-x3) * (y1-y3) - (y4-y3) * (x1-x3)) / den;
+          real den = (y4-y3) * (x2-x1) - (x4-x3) * (y2-y1);
+          real u1 = ((x4-x3) * (y1-y3) - (y4-y3) * (x1-x3)) / den;
 
-          double xi = x1 + u1 * (x2 - x1);
-          double yi = y1 + u1 * (y2 - y1);
+          real xi = x1 + u1 * (x2 - x1);
+          real yi = y1 + u1 * (y2 - y1);
 
           dx = xi - x;
           dy = yi - y;
 
-          if (u1 > 0.0 && u1 < 1.0 && sqrt(dx*dx + dy*dy) <= m_point_radius)
+          if (u1 > 0.0f && u1 < 1.0f && SQRT(dx*dx + dy*dy) <= m_point_radius)
           {
              ret = true;
           }
@@ -121,13 +121,13 @@ namespace agg
 
 
 
-    bool polygon_ctrl_impl::in_rect(double x, double y) const
+    bool polygon_ctrl_impl::in_rect(real x, real y) const
     {
         return false;
     }
 
 
-    bool polygon_ctrl_impl::on_mouse_button_down(double x, double y)
+    bool polygon_ctrl_impl::on_mouse_button_down(real x, real y)
     {
         unsigned i;
         bool ret = false;
@@ -136,7 +136,7 @@ namespace agg
         inverse_transform_xy(&x, &y);
         for (i = 0; i < m_num_points; i++)
         {
-            if(sqrt( (x-xn(i)) * (x-xn(i)) + (y-yn(i)) * (y-yn(i)) ) < m_point_radius)
+            if(SQRT( (x-xn(i)) * (x-xn(i)) + (y-yn(i)) * (y-yn(i)) ) < m_point_radius)
             {
                 m_dx = x - xn(i);
                 m_dy = y - yn(i);
@@ -175,11 +175,11 @@ namespace agg
     }
 
 
-    bool polygon_ctrl_impl::on_mouse_move(double x, double y, bool button_flag)
+    bool polygon_ctrl_impl::on_mouse_move(real x, real y, bool button_flag)
     {
         bool ret = false;
-        double dx;
-        double dy;
+        real dx;
+        real dy;
         inverse_transform_xy(&x, &y);
         if(m_node == int(m_num_points))
         {
@@ -224,7 +224,7 @@ namespace agg
         return ret;
     }
 
-    bool polygon_ctrl_impl::on_mouse_button_up(double x, double y)
+    bool polygon_ctrl_impl::on_mouse_button_up(real x, real y)
     {
         bool ret = (m_node >= 0) || (m_edge >= 0);
         m_node = -1;
@@ -270,14 +270,14 @@ namespace agg
     //
     // Input 2D polygon _pgon_ with _numverts_ number of vertices and test point
     // _point_, returns 1 if inside, 0 if outside.
-    bool polygon_ctrl_impl::point_in_polygon(double tx, double ty) const
+    bool polygon_ctrl_impl::point_in_polygon(real tx, real ty) const
     {
         if(m_num_points < 3) return false;
         if(!m_in_polygon_check) return false;
 
         unsigned j;
         int yflag0, yflag1, inside_flag;
-        double  vtx0, vty0, vtx1, vty1;
+        real  vtx0, vty0, vtx1, vty1;
 
         vtx0 = xn(m_num_points - 1);
         vty0 = yn(m_num_points - 1);
@@ -329,4 +329,5 @@ namespace agg
         return inside_flag != 0;
     }
 }
+
 

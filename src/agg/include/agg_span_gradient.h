@@ -60,7 +60,7 @@ namespace agg
         span_gradient(interpolator_type& inter,
                       const GradientF& gradient_function,
                       const ColorF& color_function,
-                      double d1, double d2) : 
+                      real d1, real d2) : 
             m_interpolator(&inter),
             m_gradient_function(&gradient_function),
             m_color_function(&color_function),
@@ -72,15 +72,15 @@ namespace agg
         interpolator_type& interpolator() { return *m_interpolator; }
         const GradientF& gradient_function() const { return *m_gradient_function; }
         const ColorF& color_function() const { return *m_color_function; }
-        double d1() const { return double(m_d1) / gradient_subpixel_scale; }
-        double d2() const { return double(m_d2) / gradient_subpixel_scale; }
+        real d1() const { return real(m_d1) / gradient_subpixel_scale; }
+        real d2() const { return real(m_d2) / gradient_subpixel_scale; }
 
         //--------------------------------------------------------------------
         void interpolator(interpolator_type& i) { m_interpolator = &i; }
         void gradient_function(const GradientF& gf) { m_gradient_function = &gf; }
         void color_function(const ColorF& cf) { m_color_function = &cf; }
-        void d1(double v) { m_d1 = iround(v * gradient_subpixel_scale); }
-        void d2(double v) { m_d2 = iround(v * gradient_subpixel_scale); }
+        void d1(real v) { m_d1 = iround(v * gradient_subpixel_scale); }
+        void d2(real v) { m_d2 = iround(v * gradient_subpixel_scale); }
 
         //--------------------------------------------------------------------
         void prepare() {}
@@ -90,7 +90,7 @@ namespace agg
         {   
             int dd = m_d2 - m_d1;
             if(dd < 1) dd = 1;
-            m_interpolator->begin(x+0.5, y+0.5, len);
+            m_interpolator->begin(x+0.5f, y+0.5f, len);
             do
             {
                 m_interpolator->coordinates(&x, &y);
@@ -130,7 +130,7 @@ namespace agg
         unsigned size() const { return m_size; }
         color_type operator [] (unsigned v) const 
         {
-            return m_c1.gradient(m_c2, double(v) / double(m_size - 1));
+            return m_c1.gradient(m_c2, real(v) / real(m_size - 1));
         }
 
         void colors(const color_type& c1, const color_type& c2, unsigned size = 256)
@@ -157,7 +157,7 @@ namespace agg
     public:
         static AGG_INLINE int calculate(int x, int y, int)
         {
-            return int(fast_sqrt(x*x + y*y));
+            return int(fast_SQRT(x*x + y*y));
         }
     };
 
@@ -168,7 +168,7 @@ namespace agg
     public:
         static AGG_INLINE int calculate(int x, int y, int)
         {
-            return int(fast_sqrt(x*x + y*y));
+            return int(fast_SQRT(x*x + y*y));
         }
     };
 
@@ -178,7 +178,7 @@ namespace agg
     public:
         static AGG_INLINE int calculate(int x, int y, int)
         {
-            return uround(sqrt(double(x)*double(x) + double(y)*double(y)));
+            return uround(SQRT(real(x)*real(x) + real(y)*real(y)));
         }
     };
 
@@ -196,7 +196,7 @@ namespace agg
         }
 
         //---------------------------------------------------------------------
-        gradient_radial_focus(double r, double fx, double fy) : 
+        gradient_radial_focus(real r, real fx, real fy) : 
             m_r (iround(r  * gradient_subpixel_scale)), 
             m_fx(iround(fx * gradient_subpixel_scale)), 
             m_fy(iround(fy * gradient_subpixel_scale))
@@ -205,7 +205,7 @@ namespace agg
         }
 
         //---------------------------------------------------------------------
-        void init(double r, double fx, double fy)
+        void init(real r, real fx, real fy)
         {
             m_r  = iround(r  * gradient_subpixel_scale);
             m_fx = iround(fx * gradient_subpixel_scale);
@@ -214,18 +214,18 @@ namespace agg
         }
 
         //---------------------------------------------------------------------
-        double radius()  const { return double(m_r)  / gradient_subpixel_scale; }
-        double focus_x() const { return double(m_fx) / gradient_subpixel_scale; }
-        double focus_y() const { return double(m_fy) / gradient_subpixel_scale; }
+        real radius()  const { return real(m_r)  / gradient_subpixel_scale; }
+        real focus_x() const { return real(m_fx) / gradient_subpixel_scale; }
+        real focus_y() const { return real(m_fy) / gradient_subpixel_scale; }
 
         //---------------------------------------------------------------------
         int calculate(int x, int y, int) const
         {
-            double dx = x - m_fx;
-            double dy = y - m_fy;
-            double d2 = dx * m_fy - dy * m_fx;
-            double d3 = m_r2 * (dx * dx + dy * dy) - d2 * d2;
-            return iround((dx * m_fx + dy * m_fy + sqrt(fabs(d3))) * m_mul);
+            int dx = x - m_fx;
+            int dy = y - m_fy;
+            real d2 = real(dx) * m_fy - real(dy) * m_fx;
+            real d3 = m_r2 * (dx * dx + dy * dy) - d2 * d2;
+            return iround((dx * m_fx + dy * m_fy + SQRT(FABS(d3))) * m_mul);
         }
 
     private:
@@ -238,16 +238,16 @@ namespace agg
             // one subpixel unit possibly in the direction to the origin (0,0)
             // and calculate the values again.
             //-------------------------
-            m_r2  = double(m_r)  * double(m_r);
-            m_fx2 = double(m_fx) * double(m_fx);
-            m_fy2 = double(m_fy) * double(m_fy);
-            double d = (m_r2 - (m_fx2 + m_fy2));
+            m_r2  = real(m_r)  * real(m_r);
+            m_fx2 = real(m_fx) * real(m_fx);
+            m_fy2 = real(m_fy) * real(m_fy);
+            real d = (m_r2 - (m_fx2 + m_fy2));
             if(d == 0)
             {
                 if(m_fx) { if(m_fx < 0) ++m_fx; else --m_fx; }
                 if(m_fy) { if(m_fy < 0) ++m_fy; else --m_fy; }
-                m_fx2 = double(m_fx) * double(m_fx);
-                m_fy2 = double(m_fy) * double(m_fy);
+                m_fx2 = real(m_fx) * real(m_fx);
+                m_fy2 = real(m_fy) * real(m_fy);
                 d = (m_r2 - (m_fx2 + m_fy2));
             }
             m_mul = m_r / d;
@@ -256,10 +256,10 @@ namespace agg
         int    m_r;
         int    m_fx;
         int    m_fy;
-        double m_r2;
-        double m_fx2;
-        double m_fy2;
-        double m_mul;
+        real m_r2;
+        real m_fx2;
+        real m_fy2;
+        real m_mul;
     };
 
 
@@ -306,7 +306,7 @@ namespace agg
     public:
         static AGG_INLINE int calculate(int x, int y, int) 
         { 
-            return fast_sqrt(abs(x) * abs(y)); 
+            return fast_SQRT(abs(x) * abs(y)); 
         }
     };
 
@@ -316,7 +316,7 @@ namespace agg
     public:
         static AGG_INLINE int calculate(int x, int y, int d) 
         { 
-            return uround(fabs(atan2(double(y), double(x))) * double(d) / pi);
+            return uround(FABS((real)atan2(real(y), real(x))) * real(d) / pi);
         }
     };
 

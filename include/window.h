@@ -46,10 +46,10 @@ enum KEY_EVENTS
   KEY_CHAR
 };
 
-struct WINDOW_ON_KEY_PARAMS       
-{ 
+struct WINDOW_ON_KEY_PARAMS
+{
   KEY_EVENTS   event;
-  unsigned int code; // scan code (see keycodes.h) or unicode code point of character in  
+  unsigned int code; // scan code (see keycodes.h) or unicode code point of character in
   unsigned int alts; // ALTS above
 };
 
@@ -61,20 +61,20 @@ enum MOUSE_EVENTS
   MOUSE_UP,
   MOUSE_DOWN,
   MOUSE_DCLICK,
-  MOUSE_WHEEL, 
+  MOUSE_WHEEL,
   MOUSE_TICK, // mouse pressed ticks
   MOUSE_IDLE, // mouse stay idle for some time
 };
 
-enum MOUSE_BUTTONS 
+enum MOUSE_BUTTONS
 {
   MAIN_BUTTON = 0x01, //aka left button
   PROP_BUTTON = 0x02, //aka right button
   MIDDLE_BUTTON = 0x04,
 };
 
-struct WINDOW_ON_MOUSE_PARAMS       
-{ 
+struct WINDOW_ON_MOUSE_PARAMS
+{
   MOUSE_EVENTS event;
   unsigned int buttons; // buttons or mouse wheel delta ticks
   unsigned int alts;    // ALTS above
@@ -92,69 +92,73 @@ enum WINDOW_TYPE
   WINDOW_TYPE_DIALOG, // caption and not resizeable frame
 };
 
-GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL 
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
         window_create(window_function* pf, void* tag, WINDOW_TYPE type, HWINDOW* out_hwnd);
 
-GRAPHIN_API bool GRAPHIN_CALL 
+GRAPHIN_API bool GRAPHIN_CALL
         window_is_valid(HWINDOW hwnd);
 
-GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL 
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
         window_get_tag(HWINDOW hw, void** ptag);
 
-GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL 
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
         window_set_tag(HWINDOW hw, void* tag);
 
-GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL 
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
         window_destroy(HWINDOW hwnd);
 
-GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL 
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
         window_move(HWINDOW hwnd, int x, int y, int w, int h);
 
-enum SHOW_CMD
+enum WINDOW_STATE
 {
-  WINDOW_SHOW,
-  WINDOW_COLLAPSE, // minimize
-  WINDOW_EXPAND,   // maximize
+  WINDOW_HIDDEN,     // hidden
+  WINDOW_SHOWN,      // shown
+  WINDOW_COLLAPSED,  // minimized, iconified
+  WINDOW_EXPANDED,   // maximized, but not full screen.
 };
 
-GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL 
-        window_show(HWINDOW hwnd, SHOW_CMD cmd);
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+        window_set_state(HWINDOW hwnd, WINDOW_STATE st);
 
-GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL 
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+        window_get_state(HWINDOW hwnd, WINDOW_STATE* pst);
+
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
         window_request_close(HWINDOW hwnd);
 
-GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL 
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
         window_request_idle(HWINDOW hwnd);
 
-GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL 
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
         window_set_timer(HWINDOW hwnd, unsigned ms, unsigned long id);
 
-GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL 
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
         window_set_caption(HWINDOW hwnd, const wchar_t* text);
 
-GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL 
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
         window_get_caption(HWINDOW hwnd, wchar_t* buf, unsigned buf_size);
 
 // invalidates rect - set dirty area
-GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL 
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
         window_invalidate(HWINDOW hwnd, int x, int y, int w, int h);
 
 // updates the window
-GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL 
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
         window_update(HWINDOW hwnd);
 
 
 // SECTION: GUI application functions
 
-GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL 
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
         application_init(void* hinstance, const char* command_line);
 
 // fetch and dispatch single event from event queue.
-GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL 
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
         application_do_event(int* retval);
 
 // request exit
-GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL 
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
         application_request_exit(int retval);
 
 

@@ -24,27 +24,27 @@ namespace agg
 
     //------------------------------------------------------------------------
     gamma_spline::gamma_spline() : 
-        m_x1(0), m_y1(0), m_x2(10), m_y2(10), m_cur_x(0.0)
+        m_x1(0), m_y1(0), m_x2(10), m_y2(10), m_cur_x(0.0f)
     {
-        values(1.0, 1.0, 1.0, 1.0);
+        values(1.0f, 1.0f, 1.0f, 1.0f);
     }
 
 
     //------------------------------------------------------------------------
-    double gamma_spline::y(double x) const 
+    real gamma_spline::y(real x) const 
     { 
-        if(x < 0.0) x = 0.0;
-        if(x > 1.0) x = 1.0;
-        double val = m_spline.get(x);
-        if(val < 0.0) val = 0.0;
-        if(val > 1.0) val = 1.0;
+        if(x < 0.0f) x = 0.0f;
+        if(x > 1.0f) x = 1.0f;
+        real val = m_spline.get(x);
+        if(val < 0.0f) val = 0.0f;
+        if(val > 1.0f) val = 1.0f;
         return val;
     }
 
 
 
     //------------------------------------------------------------------------
-    void gamma_spline::values(double kx1, double ky1, double kx2, double ky2)
+    void gamma_spline::values(real kx1, real ky1, real kx2, real ky2)
     {
         if(kx1 < 0.001) kx1 = 0.001;
         if(kx1 > 1.999) kx1 = 1.999;
@@ -55,37 +55,37 @@ namespace agg
         if(ky2 < 0.001) ky2 = 0.001;
         if(ky2 > 1.999) ky2 = 1.999;
 
-        m_x[0] = 0.0;
-        m_y[0] = 0.0;
+        m_x[0] = 0.0f;
+        m_y[0] = 0.0f;
         m_x[1] = kx1 * 0.25;
         m_y[1] = ky1 * 0.25;
-        m_x[2] = 1.0 - kx2 * 0.25;
-        m_y[2] = 1.0 - ky2 * 0.25;
-        m_x[3] = 1.0;
-        m_y[3] = 1.0;
+        m_x[2] = 1.0f - kx2 * 0.25;
+        m_y[2] = 1.0f - ky2 * 0.25;
+        m_x[3] = 1.0f;
+        m_y[3] = 1.0f;
 
         m_spline.init(4, m_x, m_y);
 
         int i;
         for(i = 0; i < 256; i++)
         {
-            m_gamma[i] = (unsigned char)(y(double(i) / 255.0) * 255.0);
+            m_gamma[i] = (unsigned char)(y(real(i) / 255.0f) * 255.0f);
         }
     }
 
 
     //------------------------------------------------------------------------
-    void gamma_spline::values(double* kx1, double* ky1, double* kx2, double* ky2) const
+    void gamma_spline::values(real* kx1, real* ky1, real* kx2, real* ky2) const
     {
-        *kx1 = m_x[1] * 4.0;
-        *ky1 = m_y[1] * 4.0;
-        *kx2 = (1.0 - m_x[2]) * 4.0;
-        *ky2 = (1.0 - m_y[2]) * 4.0;
+        *kx1 = m_x[1] * 4.0f;
+        *ky1 = m_y[1] * 4.0f;
+        *kx2 = (1.0f - m_x[2]) * 4.0f;
+        *ky2 = (1.0f - m_y[2]) * 4.0f;
     }
 
 
     //------------------------------------------------------------------------
-    void gamma_spline::box(double x1, double y1, double x2, double y2)
+    void gamma_spline::box(real x1, real y1, real x2, real y2)
     {
         m_x1 = x1;
         m_y1 = y1;
@@ -97,22 +97,22 @@ namespace agg
     //------------------------------------------------------------------------
     void gamma_spline::rewind(unsigned)
     {
-        m_cur_x = 0.0;
+        m_cur_x = 0.0f;
     }
 
 
     //------------------------------------------------------------------------
-    unsigned gamma_spline::vertex(double* vx, double* vy)
+    unsigned gamma_spline::vertex(real* vx, real* vy)
     {
-        if(m_cur_x == 0.0) 
+        if(m_cur_x == 0.0f) 
         {
             *vx = m_x1;
             *vy = m_y1;
-            m_cur_x += 1.0 / (m_x2 - m_x1);
+            m_cur_x += 1.0f / (m_x2 - m_x1);
             return path_cmd_move_to;
         }
 
-        if(m_cur_x > 1.0) 
+        if(m_cur_x > 1.0f) 
         {
             return path_cmd_stop;
         }
@@ -120,11 +120,12 @@ namespace agg
         *vx = m_x1 + m_cur_x * (m_x2 - m_x1);
         *vy = m_y1 + y(m_cur_x) * (m_y2 - m_y1);
 
-        m_cur_x += 1.0 / (m_x2 - m_x1);
+        m_cur_x += 1.0f / (m_x2 - m_x1);
         return path_cmd_line_to;
     }
   
 
 
 }
+
 

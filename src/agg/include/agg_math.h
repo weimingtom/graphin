@@ -27,56 +27,56 @@ namespace agg
 
     //------------------------------------------------------vertex_dist_epsilon
     // Coinciding points maximal distance (Epsilon)
-    const double vertex_dist_epsilon = 1e-14;
+    const real vertex_dist_epsilon = 1e-14;
 
     //-----------------------------------------------------intersection_epsilon
     // See calc_intersection
-    const double intersection_epsilon = 1.0e-30;
+    const real intersection_epsilon = 1.0e-30;
 
     //------------------------------------------------------------cross_product
-    AGG_INLINE double cross_product(double x1, double y1, 
-                                    double x2, double y2, 
-                                    double x,  double y)
+    AGG_INLINE real cross_product(real x1, real y1, 
+                                    real x2, real y2, 
+                                    real x,  real y)
     {
         return (x - x2) * (y2 - y1) - (y - y2) * (x2 - x1);
     }
 
     //--------------------------------------------------------point_in_triangle
-    AGG_INLINE bool point_in_triangle(double x1, double y1, 
-                                      double x2, double y2, 
-                                      double x3, double y3, 
-                                      double x,  double y)
+    AGG_INLINE bool point_in_triangle(real x1, real y1, 
+                                      real x2, real y2, 
+                                      real x3, real y3, 
+                                      real x,  real y)
     {
-        bool cp1 = cross_product(x1, y1, x2, y2, x, y) < 0.0;
-        bool cp2 = cross_product(x2, y2, x3, y3, x, y) < 0.0;
-        bool cp3 = cross_product(x3, y3, x1, y1, x, y) < 0.0;
+        bool cp1 = cross_product(x1, y1, x2, y2, x, y) < 0.0f;
+        bool cp2 = cross_product(x2, y2, x3, y3, x, y) < 0.0f;
+        bool cp3 = cross_product(x3, y3, x1, y1, x, y) < 0.0f;
         return cp1 == cp2 && cp2 == cp3 && cp3 == cp1;
     }
 
     //-----------------------------------------------------------calc_distance
-    AGG_INLINE double calc_distance(double x1, double y1, double x2, double y2)
+    AGG_INLINE real calc_distance(real x1, real y1, real x2, real y2)
     {
-        double dx = x2-x1;
-        double dy = y2-y1;
-        return sqrt(dx * dx + dy * dy);
+        real dx = x2-x1;
+        real dy = y2-y1;
+        return SQRT(dx * dx + dy * dy);
     }
 
     //--------------------------------------------------------calc_sq_distance
-    AGG_INLINE double calc_sq_distance(double x1, double y1, double x2, double y2)
+    AGG_INLINE real calc_sq_distance(real x1, real y1, real x2, real y2)
     {
-        double dx = x2-x1;
-        double dy = y2-y1;
+        real dx = x2-x1;
+        real dy = y2-y1;
         return dx * dx + dy * dy;
     }
 
     //------------------------------------------------calc_line_point_distance
-    AGG_INLINE double calc_line_point_distance(double x1, double y1, 
-                                               double x2, double y2, 
-                                               double x,  double y)
+    AGG_INLINE real calc_line_point_distance(real x1, real y1, 
+                                               real x2, real y2, 
+                                               real x,  real y)
     {
-        double dx = x2-x1;
-        double dy = y2-y1;
-        double d = sqrt(dx * dx + dy * dy);
+        real dx = x2-x1;
+        real dy = y2-y1;
+        real d = SQRT(dx * dx + dy * dy);
         if(d < vertex_dist_epsilon)
         {
             return calc_distance(x1, y1, x, y);
@@ -85,46 +85,46 @@ namespace agg
     }
 
     //-------------------------------------------------------calc_line_point_u
-    AGG_INLINE double calc_segment_point_u(double x1, double y1, 
-                                           double x2, double y2, 
-                                           double x,  double y)
+    AGG_INLINE real calc_segment_point_u(real x1, real y1, 
+                                           real x2, real y2, 
+                                           real x,  real y)
     {
-        double dx = x2 - x1;
-        double dy = y2 - y1;
+        real dx = x2 - x1;
+        real dy = y2 - y1;
 
         if(dx == 0 && dy == 0)
         {
-	        return 0;
+          return 0;
         }
 
-        double pdx = x - x1;
-        double pdy = y - y1;
+        real pdx = x - x1;
+        real pdy = y - y1;
 
         return (pdx * dx + pdy * dy) / (dx * dx + dy * dy);
     }
 
     //---------------------------------------------calc_line_point_sq_distance
-    AGG_INLINE double calc_segment_point_sq_distance(double x1, double y1, 
-                                                     double x2, double y2, 
-                                                     double x,  double y,
-                                                     double u)
+    AGG_INLINE real calc_segment_point_sq_distance(real x1, real y1, 
+                                                     real x2, real y2, 
+                                                     real x,  real y,
+                                                     real u)
     {
         if(u <= 0)
         {
-	        return calc_sq_distance(x, y, x1, y1);
+          return calc_sq_distance(x, y, x1, y1);
         }
         else 
         if(u >= 1)
         {
-	        return calc_sq_distance(x, y, x2, y2);
+          return calc_sq_distance(x, y, x2, y2);
         }
         return calc_sq_distance(x, y, x1 + u * (x2 - x1), y1 + u * (y2 - y1));
     }
 
     //---------------------------------------------calc_line_point_sq_distance
-    AGG_INLINE double calc_segment_point_sq_distance(double x1, double y1, 
-                                                     double x2, double y2, 
-                                                     double x,  double y)
+    AGG_INLINE real calc_segment_point_sq_distance(real x1, real y1, 
+                                                     real x2, real y2, 
+                                                     real x,  real y)
     {
         return 
             calc_segment_point_sq_distance(
@@ -133,76 +133,76 @@ namespace agg
     }
 
     //-------------------------------------------------------calc_intersection
-    AGG_INLINE bool calc_intersection(double ax, double ay, double bx, double by,
-                                      double cx, double cy, double dx, double dy,
-                                      double* x, double* y)
+    AGG_INLINE bool calc_intersection(real ax, real ay, real bx, real by,
+                                      real cx, real cy, real dx, real dy,
+                                      real* x, real* y)
     {
-        double num = (ay-cy) * (dx-cx) - (ax-cx) * (dy-cy);
-        double den = (bx-ax) * (dy-cy) - (by-ay) * (dx-cx);
-        if(fabs(den) < intersection_epsilon) return false;
-        double r = num / den;
+        real num = (ay-cy) * (dx-cx) - (ax-cx) * (dy-cy);
+        real den = (bx-ax) * (dy-cy) - (by-ay) * (dx-cx);
+        if(FABS(den) < intersection_epsilon) return false;
+        real r = num / den;
         *x = ax + r * (bx-ax);
         *y = ay + r * (by-ay);
         return true;
     }
 
     //-----------------------------------------------------intersection_exists
-    AGG_INLINE bool intersection_exists(double x1, double y1, double x2, double y2,
-                                        double x3, double y3, double x4, double y4)
+    AGG_INLINE bool intersection_exists(real x1, real y1, real x2, real y2,
+                                        real x3, real y3, real x4, real y4)
     {
         // It's less expensive but you can't control the 
         // boundary conditions: Less or LessEqual
-        double dx1 = x2 - x1;
-        double dy1 = y2 - y1;
-        double dx2 = x4 - x3;
-        double dy2 = y4 - y3;
-        return ((x3 - x2) * dy1 - (y3 - y2) * dx1 < 0.0) != 
-               ((x4 - x2) * dy1 - (y4 - y2) * dx1 < 0.0) &&
-               ((x1 - x4) * dy2 - (y1 - y4) * dx2 < 0.0) !=
-               ((x2 - x4) * dy2 - (y2 - y4) * dx2 < 0.0);
+        real dx1 = x2 - x1;
+        real dy1 = y2 - y1;
+        real dx2 = x4 - x3;
+        real dy2 = y4 - y3;
+        return ((x3 - x2) * dy1 - (y3 - y2) * dx1 < 0.0f) != 
+               ((x4 - x2) * dy1 - (y4 - y2) * dx1 < 0.0f) &&
+               ((x1 - x4) * dy2 - (y1 - y4) * dx2 < 0.0f) !=
+               ((x2 - x4) * dy2 - (y2 - y4) * dx2 < 0.0f);
 
         // It's is more expensive but more flexible 
         // in terms of boundary conditions.
         //--------------------
-        //double den  = (x2-x1) * (y4-y3) - (y2-y1) * (x4-x3);
-        //if(fabs(den) < intersection_epsilon) return false;
-        //double nom1 = (x4-x3) * (y1-y3) - (y4-y3) * (x1-x3);
-        //double nom2 = (x2-x1) * (y1-y3) - (y2-y1) * (x1-x3);
-        //double ua = nom1 / den;
-        //double ub = nom2 / den;
-        //return ua >= 0.0 && ua <= 1.0 && ub >= 0.0 && ub <= 1.0;
+        //real den  = (x2-x1) * (y4-y3) - (y2-y1) * (x4-x3);
+        //if(FABS(den) < intersection_epsilon) return false;
+        //real nom1 = (x4-x3) * (y1-y3) - (y4-y3) * (x1-x3);
+        //real nom2 = (x2-x1) * (y1-y3) - (y2-y1) * (x1-x3);
+        //real ua = nom1 / den;
+        //real ub = nom2 / den;
+        //return ua >= 0.0f && ua <= 1.0f && ub >= 0.0f && ub <= 1.0f;
     }
 
     //--------------------------------------------------------calc_orthogonal
-    AGG_INLINE void calc_orthogonal(double thickness,
-                                    double x1, double y1,
-                                    double x2, double y2,
-                                    double* x, double* y)
+    AGG_INLINE void calc_orthogonal(real thickness,
+                                    real x1, real y1,
+                                    real x2, real y2,
+                                    real* x, real* y)
     {
-        double dx = x2 - x1;
-        double dy = y2 - y1;
-        double d = sqrt(dx*dx + dy*dy); 
+        real dx = x2 - x1;
+        real dy = y2 - y1;
+        real d = SQRT(dx*dx + dy*dy); 
         *x =  thickness * dy / d;
         *y = -thickness * dx / d;
     }
 
     //--------------------------------------------------------dilate_triangle
-    AGG_INLINE void dilate_triangle(double x1, double y1,
-                                    double x2, double y2,
-                                    double x3, double y3,
-                                    double *x, double* y,
-                                    double d)
+    AGG_INLINE void dilate_triangle(real x1, real y1,
+                                    real x2, real y2,
+                                    real x3, real y3,
+                                    real *x, real* y,
+                                    real d)
     {
-        double dx1=0.0;
-        double dy1=0.0; 
-        double dx2=0.0;
-        double dy2=0.0; 
-        double dx3=0.0;
-        double dy3=0.0; 
-        double loc = cross_product(x1, y1, x2, y2, x3, y3);
-        if(fabs(loc) > intersection_epsilon)
+        real dx1=0.0f;
+        real dy1=0.0f; 
+        real dx2=0.0f;
+        real dy2=0.0f; 
+        real dx3=0.0f;
+        real dy3=0.0f; 
+        real loc = cross_product(x1, y1, x2, y2, x3, y3);
+        if(FABS(loc) > intersection_epsilon)
         {
-            if(cross_product(x1, y1, x2, y2, x3, y3) > 0.0) 
+            if(cross_product(x1, y1, x2, y2, x3, y3) > 0.0f) 
             {
                 d = -d;
             }
@@ -219,22 +219,22 @@ namespace agg
     }
 
     //------------------------------------------------------calc_triangle_area
-    AGG_INLINE double calc_triangle_area(double x1, double y1,
-                                         double x2, double y2,
-                                         double x3, double y3)
+    AGG_INLINE real calc_triangle_area(real x1, real y1,
+                                         real x2, real y2,
+                                         real x3, real y3)
     {
-        return (x1*y2 - x2*y1 + x2*y3 - x3*y2 + x3*y1 - x1*y3) * 0.5;
+        return (x1*y2 - x2*y1 + x2*y3 - x3*y2 + x3*y1 - x1*y3) * 0.5f;
     }
 
     //-------------------------------------------------------calc_polygon_area
-    template<class Storage> double calc_polygon_area(const Storage& st)
+    template<class Storage> real calc_polygon_area(const Storage& st)
     {
         unsigned i;
-        double sum = 0.0;
-        double x  = st[0].x;
-        double y  = st[0].y;
-        double xs = x;
-        double ys = y;
+        real sum = 0.0f;
+        real x  = st[0].x;
+        real y  = st[0].y;
+        real xs = x;
+        real ys = y;
 
         for(i = 1; i < st.size(); i++)
         {
@@ -243,7 +243,7 @@ namespace agg
             x = v.x;
             y = v.y;
         }
-        return (sum + x * ys - y * xs) * 0.5;
+        return (sum + x * ys - y * xs) * 0.5f;
     }
 
     //------------------------------------------------------------------------
@@ -258,7 +258,7 @@ namespace agg
     #pragma warning(push)
     #pragma warning(disable : 4035) //Disable warning "no return value"
     #endif
-    AGG_INLINE unsigned fast_sqrt(unsigned val)
+    AGG_INLINE unsigned fast_SQRT(unsigned val)
     {
     #if defined(_M_IX86) && defined(_MSC_VER) && !defined(AGG_NO_ASM)
         //For Ix86 family processors this assembler code is used. 
@@ -357,32 +357,32 @@ namespace agg
     //
     // Documentation available on the web
     // http://www.ma.umist.ac.uk/mrm/Teaching/392/libs/392.html
-    // Version 1.0   8/98
+    // Version 1.0f   8/98
     // 29 October, 1999
     //--------------------
     // Adapted for use in AGG library by Andy Wilk (castor.vulgaris@gmail.com)
     //------------------------------------------------------------------------
-    inline double besj(double x, int n)
+    inline real besj(real x, int n)
     {
         if(n < 0)
         {
             return 0;
         }
-        double d = 1E-6;
-        double b = 0;
-        if(fabs(x) <= d) 
+        real d = 1E-6;
+        real b = 0;
+        if(FABS(x) <= d) 
         {
             if(n != 0) return 0;
             return 1;
         }
-        double b1 = 0; // b1 is the value from the previous iteration
+        real b1 = 0; // b1 is the value from the previous iteration
         // Set up a starting order for recurrence
-        int m1 = (int)fabs(x) + 6;
-        if(fabs(x) > 5) 
+        int m1 = (int)FABS(x) + 6;
+        if(FABS(x) > 5) 
         {
-            m1 = (int)(fabs(1.4 * x + 60 / x));
+            m1 = (int)(FABS(1.4f * x + 60.0f / x));
         }
-        int m2 = (int)(n + 2 + fabs(x) / 4);
+        int m2 = (int)(n + 2.0f + FABS(x) / 4.0f);
         if (m1 > m2) 
         {
             m2 = m1;
@@ -391,9 +391,9 @@ namespace agg
         // Apply recurrence down from curent max order
         for(;;) 
         {
-            double c3 = 0;
-            double c2 = 1E-30;
-            double c4 = 0;
+            real c3 = 0.0f;
+            real c2 = 1E-30f;
+            real c4 = 0.0f;
             int m8 = 1;
             if (m2 / 2 * 2 == m2) 
             {
@@ -402,7 +402,7 @@ namespace agg
             int imax = m2 - 2;
             for (int i = 1; i <= imax; i++) 
             {
-                double c6 = 2 * (m2 - i) * c2 / x - c3;
+                real c6 = 2 * (m2 - i) * c2 / x - c3;
                 c3 = c2;
                 c2 = c6;
                 if(m2 - i - 1 == n)
@@ -415,14 +415,14 @@ namespace agg
                     c4 = c4 + 2 * c6;
                 }
             }
-            double c6 = 2 * c2 / x - c3;
+            real c6 = 2 * c2 / x - c3;
             if(n == 0)
             {
                 b = c6;
             }
             c4 += c6;
             b /= c4;
-            if(fabs(b - b1) < d)
+            if(FABS(b - b1) < d)
             {
                 return b;
             }

@@ -455,7 +455,7 @@ namespace agg
 
         //--------------------------------------------------------------------
         serialized_scanlines_adaptor_bin(const int8u* data, unsigned size,
-                                         double dx, double dy) :
+                                         real dx, real dy) :
             m_data(data),
             m_end(data + size),
             m_ptr(data),
@@ -468,7 +468,7 @@ namespace agg
         {}
 
         //--------------------------------------------------------------------
-        void init(const int8u* data, unsigned size, double dx, double dy)
+        void init(const int8u* data, unsigned size, real dx, real dy)
         {
             m_data  = data;
             m_end   = data + size;
@@ -583,4 +583,5 @@ namespace agg
 }
 
 #endif
+
 

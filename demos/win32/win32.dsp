@@ -124,6 +124,10 @@ SOURCE=.\resource.h
 
 SOURCE=.\win32.h
 # End Source File
+# Begin Source File
+
+SOURCE=..\..\include\window.hpp
+# End Source File
 # End Group
 # Begin Group "Resource Files"
 

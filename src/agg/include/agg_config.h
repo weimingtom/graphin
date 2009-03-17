@@ -3,6 +3,28 @@
 
 // This file can be used to redefine certain data types.
 
+#ifdef UNDER_CE
+  typedef float real;
+  #define REAL(n) ((float)n);
+
+  #define SQRT(r) sqrtf(r)
+  #define CEIL(r) ceilf(r)
+  #define FABS(r) fabsf(r)
+  #define FLOOR(r) floorf(r)
+  #define FMOD(r1,r2) fmodf(r1,r2)
+
+#else
+  typedef double real;
+  #define REAL(n) n
+
+  #define SQRT(r) sqrt(r)
+  #define CEIL(r) ceil(r)
+  #define FABS(r) fabs(r)
+  #define FLOOR(r) floor(r)
+  #define FMOD(r1,r2) fmod(r1,r2)
+
+#endif
+
 //---------------------------------------
 // 1. Default basic types such as:
 // 

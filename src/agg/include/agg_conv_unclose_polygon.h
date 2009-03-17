@@ -32,7 +32,7 @@ namespace agg
             m_source->rewind(path_id);
         }
 
-        unsigned vertex(double* x, double* y)
+        unsigned vertex(real* x, real* y)
         {
             unsigned cmd = m_source->vertex(x, y);
             if(is_end_poly(cmd)) cmd &= ~path_flags_close;

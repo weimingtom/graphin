@@ -45,7 +45,7 @@ namespace agg
         span_gradient_alpha(interpolator_type& inter,
                             const GradientF& gradient_function,
                             const AlphaF& alpha_function,
-                            double d1, double d2) : 
+                            real d1, real d2) : 
             m_interpolator(&inter),
             m_gradient_function(&gradient_function),
             m_alpha_function(&alpha_function),
@@ -57,15 +57,15 @@ namespace agg
         interpolator_type& interpolator() { return *m_interpolator; }
         const GradientF& gradient_function() const { return *m_gradient_function; }
         const AlphaF& alpha_function() const { return *m_alpha_function; }
-        double d1() const { return double(m_d1) / gradient_subpixel_scale; }
-        double d2() const { return double(m_d2) / gradient_subpixel_scale; }
+        real d1() const { return real(m_d1) / gradient_subpixel_scale; }
+        real d2() const { return real(m_d2) / gradient_subpixel_scale; }
 
         //--------------------------------------------------------------------
         void interpolator(interpolator_type& i) { m_interpolator = &i; }
         void gradient_function(const GradientF& gf) { m_gradient_function = &gf; }
         void alpha_function(const AlphaF& af) { m_alpha_function = &af; }
-        void d1(double v) { m_d1 = iround(v * gradient_subpixel_scale); }
-        void d2(double v) { m_d2 = iround(v * gradient_subpixel_scale); }
+        void d1(real v) { m_d1 = iround(v * gradient_subpixel_scale); }
+        void d2(real v) { m_d2 = iround(v * gradient_subpixel_scale); }
 
         //--------------------------------------------------------------------
         void prepare() {}
@@ -75,7 +75,7 @@ namespace agg
         {   
             int dd = m_d2 - m_d1;
             if(dd < 1) dd = 1;
-            m_interpolator->begin(x+0.5, y+0.5, len);
+            m_interpolator->begin(x+0.5f, y+0.5f, len);
             do
             {
                 m_interpolator->coordinates(&x, &y);

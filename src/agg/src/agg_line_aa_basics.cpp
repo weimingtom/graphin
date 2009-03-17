@@ -52,24 +52,24 @@ namespace agg
                    const line_parameters& l2, 
                    int* x, int* y)
     {
-        double k = double(l2.len) / double(l1.len);
-        double tx = l2.x2 - (l2.x1 - l1.x1) * k;
-        double ty = l2.y2 - (l2.y1 - l1.y1) * k;
+        real k = real(l2.len) / real(l1.len);
+        real tx = l2.x2 - (l2.x1 - l1.x1) * k;
+        real ty = l2.y2 - (l2.y1 - l1.y1) * k;
 
         //All bisectrices must be on the right of the line
         //If the next point is on the left (l1 => l2.2)
         //then the bisectix should be rotated by 180 degrees.
-        if(double(l2.x2 - l2.x1) * double(l2.y1 - l1.y1) <
-           double(l2.y2 - l2.y1) * double(l2.x1 - l1.x1) + 100.0)
+        if(real(l2.x2 - l2.x1) * real(l2.y1 - l1.y1) <
+           real(l2.y2 - l2.y1) * real(l2.x1 - l1.x1) + 100.0f)
         {
-            tx -= (tx - l2.x1) * 2.0;
-            ty -= (ty - l2.y1) * 2.0;
+            tx -= (tx - l2.x1) * 2.0f;
+            ty -= (ty - l2.y1) * 2.0f;
         }
 
         // Check if the bisectrix is too short
-        double dx = tx - l2.x1;
-        double dy = ty - l2.y1;
-        if((int)sqrt(dx * dx + dy * dy) < line_subpixel_scale)
+        real dx = tx - l2.x1;
+        real dy = ty - l2.y1;
+        if((int)SQRT(dx * dx + dy * dy) < line_subpixel_scale)
         {
             *x = (l2.x1 + l2.x1 + (l2.y1 - l1.y1) + (l2.y2 - l2.y1)) >> 1;
             *y = (l2.y1 + l2.y1 - (l2.x1 - l1.x1) - (l2.x2 - l2.x1)) >> 1;

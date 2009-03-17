@@ -52,31 +52,31 @@ namespace agg
         {
             void init(const coord_type& c1, const coord_type& c2)
             {
-                m_x1  = c1.x - 0.5;
-                m_y1  = c1.y - 0.5;
+                m_x1  = c1.x - 0.5f;
+                m_y1  = c1.y - 0.5f;
                 m_dx  = c2.x - c1.x;
-                double dy = c2.y - c1.y;
-                m_1dy = (fabs(dy) < 1e-10) ? 1e10 : 1.0 / dy;
+                real dy = c2.y - c1.y;
+                m_1dy = (FABS(dy) < 1e-10) ? 1e10 : 1.0f / dy;
                 m_v1 = c1.color.v;
                 m_a1 = c1.color.a;
                 m_dv = c2.color.v - m_v1;
                 m_da = c2.color.a - m_a1;
             }
 
-            void calc(double y)
+            void calc(real y)
             {
-                double k = (y - m_y1) * m_1dy;
-                if(k < 0.0) k = 0.0;
-                if(k > 1.0) k = 1.0;
+                real k = (y - m_y1) * m_1dy;
+                if(k < 0.0f) k = 0.0f;
+                if(k > 1.0f) k = 1.0f;
                 m_v = m_v1 + iround(m_dv * k);
                 m_a = m_a1 + iround(m_da * k);
                 m_x = iround((m_x1 + m_dx * k) * subpixel_scale);
             }
 
-            double m_x1;
-            double m_y1;
-            double m_dx;
-            double m_1dy;
+            real m_x1;
+            real m_y1;
+            real m_dx;
+            real m_1dy;
             int    m_v1;
             int    m_a1;
             int    m_dv;
@@ -93,10 +93,10 @@ namespace agg
         span_gouraud_gray(const color_type& c1, 
                           const color_type& c2, 
                           const color_type& c3,
-                          double x1, double y1, 
-                          double x2, double y2,
-                          double x3, double y3, 
-                          double d = 0) : 
+                          real x1, real y1, 
+                          real x2, real y2,
+                          real x3, real y3, 
+                          real d = 0) : 
             base_type(c1, c2, c3, x1, y1, x2, y2, x3, y3, d)
         {}
 
@@ -110,7 +110,7 @@ namespace agg
 
             m_swap = cross_product(coord[0].x, coord[0].y, 
                                    coord[2].x, coord[2].y,
-                                   coord[1].x, coord[1].y) < 0.0;
+                                   coord[1].x, coord[1].y) < 0.0f;
 
             m_c1.init(coord[0], coord[2]);
             m_c2.init(coord[0], coord[1]);

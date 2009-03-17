@@ -61,7 +61,7 @@ namespace agg
         typedef conv_curve<VertexSource, Curve3, Curve4> self_type;
 
         explicit conv_curve(VertexSource& source) :
-          m_source(&source), m_last_x(0.0), m_last_y(0.0) {}
+          m_source(&source), m_last_x(0.0f), m_last_y(0.0f) {}
         void attach(VertexSource& source) { m_source = &source; }
 
         void approximation_method(curve_approximation_method_e v) 
@@ -75,49 +75,49 @@ namespace agg
             return m_curve4.approximation_method();
         }
 
-        void approximation_scale(double s) 
+        void approximation_scale(real s) 
         { 
             m_curve3.approximation_scale(s); 
             m_curve4.approximation_scale(s); 
         }
 
-        double approximation_scale() const 
+        real approximation_scale() const 
         { 
             return m_curve4.approximation_scale();  
         }
 
-        void angle_tolerance(double v) 
+        void angle_tolerance(real v) 
         { 
             m_curve3.angle_tolerance(v); 
             m_curve4.angle_tolerance(v); 
         }
 
-        double angle_tolerance() const 
+        real angle_tolerance() const 
         { 
             return m_curve4.angle_tolerance();  
         }
 
-        void cusp_limit(double v) 
+        void cusp_limit(real v) 
         { 
             m_curve3.cusp_limit(v); 
             m_curve4.cusp_limit(v); 
         }
 
-        double cusp_limit() const 
+        real cusp_limit() const 
         { 
             return m_curve4.cusp_limit();  
         }
 
         void     rewind(unsigned path_id); 
-        unsigned vertex(double* x, double* y);
+        unsigned vertex(real* x, real* y);
 
     private:
         conv_curve(const self_type&);
         const self_type& operator = (const self_type&);
 
         VertexSource* m_source;
-        double        m_last_x;
-        double        m_last_y;
+        real        m_last_x;
+        real        m_last_y;
         curve3_type   m_curve3;
         curve4_type   m_curve4;
     };
@@ -129,8 +129,8 @@ namespace agg
     void conv_curve<VertexSource, Curve3, Curve4>::rewind(unsigned path_id)
     {
         m_source->rewind(path_id);
-        m_last_x = 0.0;
-        m_last_y = 0.0;
+        m_last_x = 0.0f;
+        m_last_y = 0.0f;
         m_curve3.reset();
         m_curve4.reset();
     }
@@ -138,7 +138,7 @@ namespace agg
 
     //------------------------------------------------------------------------
     template<class VertexSource, class Curve3, class Curve4>
-    unsigned conv_curve<VertexSource, Curve3, Curve4>::vertex(double* x, double* y)
+    unsigned conv_curve<VertexSource, Curve3, Curve4>::vertex(real* x, real* y)
     {
         if(!is_stop(m_curve3.vertex(x, y)))
         {
@@ -154,10 +154,10 @@ namespace agg
             return path_cmd_line_to;
         }
 
-        double ct2_x;
-        double ct2_y;
-        double end_x;
-        double end_y;
+        real ct2_x;
+        real ct2_y;
+        real end_x;
+        real end_y;
 
         unsigned cmd = m_source->vertex(x, y);
         switch(cmd)

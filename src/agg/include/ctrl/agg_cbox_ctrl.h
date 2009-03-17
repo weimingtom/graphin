@@ -36,10 +36,10 @@ namespace agg
     class cbox_ctrl_impl : public ctrl
     {
     public:
-        cbox_ctrl_impl(double x, double y, const char* label, bool flip_y=false);
+        cbox_ctrl_impl(real x, real y, const char* label, bool flip_y=false);
 
-        void text_thickness(double t)  { m_text_thickness = t; }
-        void text_size(double h, double w=0.0);
+        void text_thickness(real t)  { m_text_thickness = t; }
+        void text_size(real h, real w=0.0f);
 
         const char* label() { return m_label; }
         void label(const char* l);
@@ -47,25 +47,25 @@ namespace agg
         bool status() const { return m_status; }
         void status(bool st) { m_status = st; }
 
-        virtual bool in_rect(double x, double y) const;
-        virtual bool on_mouse_button_down(double x, double y);
-        virtual bool on_mouse_button_up(double x, double y);
-        virtual bool on_mouse_move(double x, double y, bool button_flag);
+        virtual bool in_rect(real x, real y) const;
+        virtual bool on_mouse_button_down(real x, real y);
+        virtual bool on_mouse_button_up(real x, real y);
+        virtual bool on_mouse_move(real x, real y, bool button_flag);
         virtual bool on_arrow_keys(bool left, bool right, bool down, bool up);
 
         // Vertex soutce interface
         unsigned num_paths() { return 3; };
         void     rewind(unsigned path_id);
-        unsigned vertex(double* x, double* y);
+        unsigned vertex(real* x, real* y);
 
     private:
-        double   m_text_thickness;
-        double   m_text_height;
-        double   m_text_width;
+        real   m_text_thickness;
+        real   m_text_height;
+        real   m_text_width;
         char     m_label[128];
         bool     m_status;
-        double   m_vx[32];
-        double   m_vy[32];
+        real   m_vx[32];
+        real   m_vy[32];
 
         gsv_text              m_text;
         conv_stroke<gsv_text> m_text_poly;
@@ -79,11 +79,11 @@ namespace agg
     template<class ColorT> class cbox_ctrl : public cbox_ctrl_impl
     {
     public:
-        cbox_ctrl(double x, double y, const char* label, bool flip_y=false) :
+        cbox_ctrl(real x, real y, const char* label, bool flip_y=false) :
             cbox_ctrl_impl(x, y, label, flip_y),
-            m_text_color(rgba(0.0, 0.0, 0.0)),
-            m_inactive_color(rgba(0.0, 0.0, 0.0)),
-            m_active_color(rgba(0.4, 0.0, 0.0))
+            m_text_color(rgba(0.0f, 0.0f, 0.0f)),
+            m_inactive_color(rgba(0.0f, 0.0f, 0.0f)),
+            m_active_color(rgba(0.4, 0.0f, 0.0f))
         {
             m_colors[0] = &m_inactive_color;
             m_colors[1] = &m_text_color;

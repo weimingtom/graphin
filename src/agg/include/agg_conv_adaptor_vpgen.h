@@ -32,7 +32,7 @@ namespace agg
         const VPGen& vpgen() const { return m_vpgen; }
 
         void rewind(unsigned path_id);
-        unsigned vertex(double* x, double* y);
+        unsigned vertex(real* x, real* y);
 
     private:
         conv_adaptor_vpgen(const conv_adaptor_vpgen<VertexSource, VPGen>&);
@@ -41,8 +41,8 @@ namespace agg
 
         VertexSource* m_source;
         VPGen         m_vpgen;
-        double        m_start_x;
-        double        m_start_y;
+        real        m_start_x;
+        real        m_start_y;
         unsigned      m_poly_flags;
         int           m_vertices;
     };
@@ -64,7 +64,7 @@ namespace agg
 
     //------------------------------------------------------------------------
     template<class VertexSource, class VPGen>
-    unsigned conv_adaptor_vpgen<VertexSource, VPGen>::vertex(double* x, double* y)
+    unsigned conv_adaptor_vpgen<VertexSource, VPGen>::vertex(real* x, real* y)
     {
         unsigned cmd = path_cmd_stop;
         for(;;)
@@ -74,8 +74,8 @@ namespace agg
 
             if(m_poly_flags && !m_vpgen.auto_unclose())
             {
-                *x = 0.0;
-                *y = 0.0;
+                *x = 0.0f;
+                *y = 0.0f;
                 cmd = m_poly_flags;
                 m_poly_flags = 0;
                 break;
@@ -93,7 +93,7 @@ namespace agg
                 continue;
             }
 
-            double tx, ty;
+            real tx, ty;
             cmd = m_source->vertex(&tx, &ty);
             if(is_vertex(cmd))
             {
@@ -156,4 +156,5 @@ namespace agg
 
 
 #endif
+
 

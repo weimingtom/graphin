@@ -24,19 +24,19 @@
 namespace agg
 {
     //------------------------------------------------------------------------
-    arc::arc(double x,  double y, 
-             double rx, double ry, 
-             double a1, double a2, 
+    arc::arc(real x,  real y, 
+             real rx, real ry, 
+             real a1, real a2, 
              bool ccw) :
-        m_x(x), m_y(y), m_rx(rx), m_ry(ry), m_scale(1.0)
+        m_x(x), m_y(y), m_rx(rx), m_ry(ry), m_scale(1.0f)
     {
         normalize(a1, a2, ccw);
     }
 
     //------------------------------------------------------------------------
-    void arc::init(double x,  double y, 
-                   double rx, double ry, 
-                   double a1, double a2, 
+    void arc::init(real x,  real y, 
+                   real rx, real ry, 
+                   real a1, real a2, 
                    bool ccw)
     {
         m_x   = x;  m_y  = y;
@@ -45,7 +45,7 @@ namespace agg
     }
     
     //------------------------------------------------------------------------
-    void arc::approximation_scale(double s)
+    void arc::approximation_scale(real s)
     {
         m_scale = s;
         if(m_initialized)
@@ -62,19 +62,19 @@ namespace agg
     }
 
     //------------------------------------------------------------------------
-    unsigned arc::vertex(double* x, double* y)
+    unsigned arc::vertex(real* x, real* y)
     {
         if(is_stop(m_path_cmd)) return path_cmd_stop;
         if((m_angle < m_end - m_da/4) != m_ccw)
         {
-            *x = m_x + cos(m_end) * m_rx;
-            *y = m_y + sin(m_end) * m_ry;
+            *x = m_x + (real)cos(m_end) * m_rx;
+            *y = m_y + (real)sin(m_end) * m_ry;
             m_path_cmd = path_cmd_stop;
             return path_cmd_line_to;
         }
 
-        *x = m_x + cos(m_angle) * m_rx;
-        *y = m_y + sin(m_angle) * m_ry;
+        *x = m_x + (real)cos(m_angle) * m_rx;
+        *y = m_y + (real)sin(m_angle) * m_ry;
 
         m_angle += m_da;
 
@@ -84,17 +84,17 @@ namespace agg
     }
 
     //------------------------------------------------------------------------
-    void arc::normalize(double a1, double a2, bool ccw)
+    void arc::normalize(real a1, real a2, bool ccw)
     {
-        double ra = (fabs(m_rx) + fabs(m_ry)) / 2;
-        m_da = acos(ra / (ra + 0.125 / m_scale)) * 2;
+        real ra = (FABS(m_rx) + FABS(m_ry)) / 2;
+        m_da = (real)acos(ra / (ra + 0.125 / m_scale)) * 2;
         if(ccw)
         {
-            while(a2 < a1) a2 += pi * 2.0;
+            while(a2 < a1) a2 += pi * 2.0f;
         }
         else
         {
-            while(a1 < a2) a1 += pi * 2.0;
+            while(a1 < a2) a1 += pi * 2.0f;
             m_da = -m_da;
         }
         m_ccw   = ccw;

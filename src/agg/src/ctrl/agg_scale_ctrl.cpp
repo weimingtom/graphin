@@ -23,13 +23,13 @@ namespace agg
 {
 
     //------------------------------------------------------------------------
-    scale_ctrl_impl::scale_ctrl_impl(double x1, double y1, 
-                                     double x2, double y2, bool flip_y) :
+    scale_ctrl_impl::scale_ctrl_impl(real x1, real y1, 
+                                     real x2, real y2, bool flip_y) :
         ctrl(x1, y1, x2, y2, flip_y),
-        m_border_thickness(1.0),
-        m_border_extra((fabs(x2 - x1) > fabs(y2 - y1)) ? (y2 - y1) / 2 : (x2 - x1) / 2),
-        m_pdx(0.0),
-        m_pdy(0.0),
+        m_border_thickness(1.0f),
+        m_border_extra((FABS(x2 - x1) > FABS(y2 - y1)) ? (y2 - y1) / 2 : (x2 - x1) / 2),
+        m_pdx(0.0f),
+        m_pdy(0.0f),
         m_move_what(move_nothing),
         m_value1(0.3),
         m_value2(0.7),
@@ -50,7 +50,7 @@ namespace agg
 
 
     //------------------------------------------------------------------------
-    void scale_ctrl_impl::border_thickness(double t, double extra)
+    void scale_ctrl_impl::border_thickness(real t, real extra)
     { 
         m_border_thickness = t; 
         m_border_extra = extra;
@@ -59,53 +59,53 @@ namespace agg
 
 
     //------------------------------------------------------------------------
-    void scale_ctrl_impl::resize(double x1, double y1, double x2, double y2)
+    void scale_ctrl_impl::resize(real x1, real y1, real x2, real y2)
     {
         m_x1 = x1;
         m_y1 = y1;
         m_x2 = x2;
         m_y2 = y2;
         calc_box(); 
-        m_border_extra = (fabs(x2 - x1) > fabs(y2 - y1)) ? 
+        m_border_extra = (FABS(x2 - x1) > FABS(y2 - y1)) ? 
                             (y2 - y1) / 2 : 
                             (x2 - x1) / 2;
     }
 
 
     //------------------------------------------------------------------------
-    void scale_ctrl_impl::value1(double value) 
+    void scale_ctrl_impl::value1(real value) 
     { 
-        if(value < 0.0) value = 0.0;
-        if(value > 1.0) value = 1.0;
+        if(value < 0.0f) value = 0.0f;
+        if(value > 1.0f) value = 1.0f;
         if(m_value2 - value < m_min_d) value = m_value2 - m_min_d;
         m_value1 = value; 
     }
 
 
     //------------------------------------------------------------------------
-    void scale_ctrl_impl::value2(double value) 
+    void scale_ctrl_impl::value2(real value) 
     { 
-        if(value < 0.0) value = 0.0;
-        if(value > 1.0) value = 1.0;
+        if(value < 0.0f) value = 0.0f;
+        if(value > 1.0f) value = 1.0f;
         if(m_value1 + value < m_min_d) value = m_value1 + m_min_d;
         m_value2 = value; 
     }
 
 
     //------------------------------------------------------------------------
-    void scale_ctrl_impl::move(double d)
+    void scale_ctrl_impl::move(real d)
     {
         m_value1 += d;
         m_value2 += d;
-        if(m_value1 < 0.0)
+        if(m_value1 < 0.0f)
         {
             m_value2 -= m_value1;
-            m_value1 = 0.0;
+            m_value1 = 0.0f;
         }
-        if(m_value2 > 1.0)
+        if(m_value2 > 1.0f)
         {
-            m_value1 -= m_value2 - 1.0;
-            m_value2 = 1.0;
+            m_value1 -= m_value2 - 1.0f;
+            m_value2 = 1.0f;
         }
     }
 
@@ -152,7 +152,7 @@ namespace agg
             break;
 
         case 2:                 // pointer1
-            if(fabs(m_x2 - m_x1) > fabs(m_y2 - m_y1))
+            if(FABS(m_x2 - m_x1) > FABS(m_y2 - m_y1))
             {
                 m_ellipse.init(m_xs1 + (m_xs2 - m_xs1) * m_value1,
                                (m_ys1 + m_ys2) / 2.0,
@@ -172,7 +172,7 @@ namespace agg
             break;
 
         case 3:                 // pointer2
-            if(fabs(m_x2 - m_x1) > fabs(m_y2 - m_y1))
+            if(FABS(m_x2 - m_x1) > FABS(m_y2 - m_y1))
             {
                 m_ellipse.init(m_xs1 + (m_xs2 - m_xs1) * m_value2,
                                (m_ys1 + m_ys2) / 2.0,
@@ -193,24 +193,24 @@ namespace agg
 
         case 4:                 // slider
             m_vertex = 0;
-            if(fabs(m_x2 - m_x1) > fabs(m_y2 - m_y1))
+            if(FABS(m_x2 - m_x1) > FABS(m_y2 - m_y1))
             {
                 m_vx[0] = m_xs1 + (m_xs2 - m_xs1) * m_value1;
-                m_vy[0] = m_y1 - m_border_extra / 2.0;
+                m_vy[0] = m_y1 - m_border_extra / 2.0f;
                 m_vx[1] = m_xs1 + (m_xs2 - m_xs1) * m_value2; 
                 m_vy[1] = m_vy[0];
                 m_vx[2] = m_vx[1]; 
-                m_vy[2] = m_y2 + m_border_extra / 2.0;
+                m_vy[2] = m_y2 + m_border_extra / 2.0f;
                 m_vx[3] = m_vx[0]; 
                 m_vy[3] = m_vy[2];
             }
             else
             {
-                m_vx[0] = m_x1 - m_border_extra / 2.0;
+                m_vx[0] = m_x1 - m_border_extra / 2.0f;
                 m_vy[0] = m_ys1 + (m_ys2 - m_ys1) * m_value1;
                 m_vx[1] = m_vx[0];
                 m_vy[1] = m_ys1 + (m_ys2 - m_ys1) * m_value2; 
-                m_vx[2] = m_x2 + m_border_extra / 2.0;
+                m_vx[2] = m_x2 + m_border_extra / 2.0f;
                 m_vy[2] = m_vy[1]; 
                 m_vx[3] = m_vx[2];
                 m_vy[3] = m_vy[0]; 
@@ -221,7 +221,7 @@ namespace agg
 
 
     //------------------------------------------------------------------------
-    unsigned scale_ctrl_impl::vertex(double* x, double* y)
+    unsigned scale_ctrl_impl::vertex(real* x, real* y)
     {
         unsigned cmd = path_cmd_line_to;
         switch(m_idx)
@@ -264,7 +264,7 @@ namespace agg
 
 
     //------------------------------------------------------------------------
-    bool scale_ctrl_impl::in_rect(double x, double y) const
+    bool scale_ctrl_impl::in_rect(real x, real y) const
     {
         inverse_transform_xy(&x, &y);
         return x >= m_x1 && x <= m_x2 && y >= m_y1 && y <= m_y2;
@@ -272,24 +272,24 @@ namespace agg
 
 
     //------------------------------------------------------------------------
-    bool scale_ctrl_impl::on_mouse_button_down(double x, double y)
+    bool scale_ctrl_impl::on_mouse_button_down(real x, real y)
     {
         inverse_transform_xy(&x, &y);
 
-        double xp1;
-        double xp2;
-        double ys1;
-        double ys2;
-        double xp;
-        double yp;
+        real xp1;
+        real xp2;
+        real ys1;
+        real ys2;
+        real xp;
+        real yp;
 
-        if(fabs(m_x2 - m_x1) > fabs(m_y2 - m_y1))
+        if(FABS(m_x2 - m_x1) > FABS(m_y2 - m_y1))
         {
             xp1 = m_xs1 + (m_xs2 - m_xs1) * m_value1;
             xp2 = m_xs1 + (m_xs2 - m_xs1) * m_value2;
-            ys1 = m_y1  - m_border_extra / 2.0;
-            ys2 = m_y2  + m_border_extra / 2.0;
-            yp = (m_ys1 + m_ys2) / 2.0;
+            ys1 = m_y1  - m_border_extra / 2.0f;
+            ys2 = m_y2  + m_border_extra / 2.0f;
+            yp = (m_ys1 + m_ys2) / 2.0f;
 
             if(x > xp1 && y > ys1 && x < xp2 && y < ys2)
             {
@@ -316,11 +316,11 @@ namespace agg
         }
         else
         {
-            xp1 = m_x1  - m_border_extra / 2.0;
-            xp2 = m_x2  + m_border_extra / 2.0;
+            xp1 = m_x1  - m_border_extra / 2.0f;
+            xp2 = m_x2  + m_border_extra / 2.0f;
             ys1 = m_ys1 + (m_ys2 - m_ys1) * m_value1;
             ys2 = m_ys1 + (m_ys2 - m_ys1) * m_value2;
-            xp = (m_xs1 + m_xs2) / 2.0;
+            xp = (m_xs1 + m_xs2) / 2.0f;
 
             if(x > xp1 && y > ys1 && x < xp2 && y < ys2)
             {
@@ -351,7 +351,7 @@ namespace agg
 
 
     //------------------------------------------------------------------------
-    bool scale_ctrl_impl::on_mouse_move(double x, double y, bool button_flag)
+    bool scale_ctrl_impl::on_mouse_move(real x, real y, bool button_flag)
     {
         inverse_transform_xy(&x, &y);
         if(!button_flag)
@@ -359,14 +359,14 @@ namespace agg
             return on_mouse_button_up(x, y);
         }
 
-        double xp = x + m_pdx;
-        double yp = y + m_pdy;
-        double dv;
+        real xp = x + m_pdx;
+        real yp = y + m_pdy;
+        real dv;
 
         switch(m_move_what)
         {
         case move_value1:
-            if(fabs(m_x2 - m_x1) > fabs(m_y2 - m_y1))
+            if(FABS(m_x2 - m_x1) > FABS(m_y2 - m_y1))
             {
                 m_value1 = (xp - m_xs1) / (m_xs2 - m_xs1);
             }
@@ -374,12 +374,12 @@ namespace agg
             {
                 m_value1 = (yp - m_ys1) / (m_ys2 - m_ys1);
             }
-            if(m_value1 < 0.0) m_value1 = 0.0;
+            if(m_value1 < 0.0f) m_value1 = 0.0f;
             if(m_value1 > m_value2 - m_min_d) m_value1 = m_value2 - m_min_d;
             return true;
 
         case move_value2:
-            if(fabs(m_x2 - m_x1) > fabs(m_y2 - m_y1))
+            if(FABS(m_x2 - m_x1) > FABS(m_y2 - m_y1))
             {
                 m_value2 = (xp - m_xs1) / (m_xs2 - m_xs1);
             }
@@ -387,13 +387,13 @@ namespace agg
             {
                 m_value2 = (yp - m_ys1) / (m_ys2 - m_ys1);
             }
-            if(m_value2 > 1.0) m_value2 = 1.0;
+            if(m_value2 > 1.0f) m_value2 = 1.0f;
             if(m_value2 < m_value1 + m_min_d) m_value2 = m_value1 + m_min_d;
             return true;
 
         case move_slider:
             dv = m_value2 - m_value1;
-            if(fabs(m_x2 - m_x1) > fabs(m_y2 - m_y1))
+            if(FABS(m_x2 - m_x1) > FABS(m_y2 - m_y1))
             {
                 m_value1 = (xp - m_xs1) / (m_xs2 - m_xs1);
             }
@@ -402,16 +402,16 @@ namespace agg
                 m_value1 = (yp - m_ys1) / (m_ys2 - m_ys1);
             }
             m_value2 = m_value1 + dv;
-            if(m_value1 < 0.0)
+            if(m_value1 < 0.0f)
             {
                 dv = m_value2 - m_value1;
-                m_value1 = 0.0;
+                m_value1 = 0.0f;
                 m_value2 = m_value1 + dv;
             }
-            if(m_value2 > 1.0)
+            if(m_value2 > 1.0f)
             {
                 dv = m_value2 - m_value1;
-                m_value2 = 1.0;
+                m_value2 = 1.0f;
                 m_value1 = m_value2 - dv;
             }
             return true;
@@ -436,14 +436,14 @@ namespace agg
         if(right || up)
         {
             m_value += 0.005;
-            if(m_value > 1.0) m_value = 1.0;
+            if(m_value > 1.0f) m_value = 1.0f;
             return true;
         }
 
         if(left || down)
         {
             m_value -= 0.005;
-            if(m_value < 0.0) m_value = 0.0;
+            if(m_value < 0.0f) m_value = 0.0f;
             return true;
         }
 */
@@ -451,4 +451,5 @@ namespace agg
     }
 
 }
+
 

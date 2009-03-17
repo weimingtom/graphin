@@ -108,7 +108,8 @@ namespace agg
 #endif
 
 #if defined(_MSC_VER)
-#define AGG_INLINE __forceinline
+//#define AGG_INLINE __forceinline - this line causes VS6 to hung.
+#define AGG_INLINE inline
 #else
 #define AGG_INLINE inline
 #endif
@@ -128,14 +129,14 @@ namespace agg
 #if defined(AGG_FISTP)
 #pragma warning(push)
 #pragma warning(disable : 4035) //Disable warning "no return value"
-    AGG_INLINE int iround(double v)              //-------iround
+    AGG_INLINE int iround(real v)              //-------iround
     {
         int t;
         __asm fld   qword ptr [v]
         __asm fistp dword ptr [t]
         __asm mov eax, dword ptr [t]
     }
-    AGG_INLINE unsigned uround(double v)         //-------uround
+    AGG_INLINE unsigned uround(real v)         //-------uround
     {
         unsigned t;
         __asm fld   qword ptr [v]
@@ -143,57 +144,57 @@ namespace agg
         __asm mov eax, dword ptr [t]
     }
 #pragma warning(pop)
-    AGG_INLINE unsigned ufloor(double v)         //-------ufloor
+    AGG_INLINE unsigned ufloorf(real v)         //-------ufloor
     {
-        return unsigned(floor(v));
+        return unsigned(floorf(v));
     }
-    AGG_INLINE unsigned uceil(double v)          //--------uceil
+    AGG_INLINE unsigned uceilf(real v)          //--------uceil
     {
-        return unsigned(ceil(v));
+        return unsigned(CEIL(v));
     }
 #elif defined(AGG_QIFIST)
-    AGG_INLINE int iround(double v)
+    AGG_INLINE int iround(real v)
     {
         return int(v);
     }
-    AGG_INLINE int uround(double v)
+    AGG_INLINE int uround(real v)
     {
         return unsigned(v);
     }
-    AGG_INLINE unsigned ufloor(double v)
+    AGG_INLINE unsigned ufloorf(real v)
     {
-        return unsigned(floor(v));
+        return unsigned(floorf(v));
     }
-    AGG_INLINE unsigned uceil(double v)
+    AGG_INLINE unsigned uceilf(real v)
     {
-        return unsigned(ceil(v));
+        return unsigned(CEIL(v));
     }
 #else
-    AGG_INLINE int iround(double v)
+    AGG_INLINE int iround(real v)
     {
-        return int((v < 0.0) ? v - 0.5 : v + 0.5);
+        return int((v < 0.0f) ? v - 0.5 : v + 0.5f);
     }
-    AGG_INLINE int uround(double v)
+    AGG_INLINE int uround(real v)
     {
-        return unsigned(v + 0.5);
+        return unsigned(v + 0.5f);
     }
-    AGG_INLINE unsigned ufloor(double v)
+    AGG_INLINE unsigned ufloorf(real v)
     {
         return unsigned(v);
     }
-    AGG_INLINE unsigned uceil(double v)
+    AGG_INLINE unsigned uceilf(real v)
     {
-        return unsigned(ceil(v));
+        return unsigned(CEIL(v));
     }
 #endif
 
     //---------------------------------------------------------------saturation
     template<int Limit> struct saturation
     {
-        AGG_INLINE static int iround(double v)
+        AGG_INLINE static int iround(real v)
         {
-            if(v < double(-Limit)) return -Limit;
-            if(v > double( Limit)) return  Limit;
+            if(v < real(-Limit)) return -Limit;
+            if(v > real( Limit)) return  Limit;
             return agg::iround(v);
         }
     };
@@ -240,18 +241,18 @@ namespace agg
     };
 
     //-----------------------------------------------------------------------pi
-    const double pi = 3.14159265358979323846;
+    const real pi = 3.14159265358979323846f;
 
     //------------------------------------------------------------------deg2rad
-    inline double deg2rad(double deg)
+    inline real deg2rad(real deg)
     {
-        return deg * pi / 180.0;
+        return deg * pi / 180.0f;
     }
 
     //------------------------------------------------------------------rad2deg
-    inline double rad2deg(double rad)
+    inline real rad2deg(real rad)
     {
-        return rad * 180.0 / pi;
+        return rad * 180.0f / pi;
     }
  
     //----------------------------------------------------------------rect_base
@@ -484,6 +485,9 @@ namespace agg
     typedef point_base<int>    point_i; //-----point_i
     typedef point_base<float>  point_f; //-----point_f
     typedef point_base<double> point_d; //-----point_d
+    
+    typedef point_base<real>   point_r; //-----point_r
+
 
     //-------------------------------------------------------------vertex_base
     template<class T> struct vertex_base
@@ -520,11 +524,12 @@ namespace agg
     //------------------------------------------------------------is_equal_eps
     template<class T> inline bool is_equal_eps(T v1, T v2, T epsilon)
     {
-        return fabs(v1 - v2) <= double(epsilon);
+        return FABS(v1 - v2) <= real(epsilon);
     }
 
 }
 
 
 #endif
+
 

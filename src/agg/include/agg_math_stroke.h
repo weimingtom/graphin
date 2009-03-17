@@ -69,57 +69,57 @@ namespace agg
         line_join_e  line_join()  const { return m_line_join; }
         inner_join_e inner_join() const { return m_inner_join; }
 
-        void width(double w);
-        void miter_limit(double ml) { m_miter_limit = ml; }
-        void miter_limit_theta(double t);
-        void inner_miter_limit(double ml) { m_inner_miter_limit = ml; }
-        void approximation_scale(double as) { m_approx_scale = as; }
+        void width(real w);
+        void miter_limit(real ml) { m_miter_limit = ml; }
+        void miter_limit_theta(real t);
+        void inner_miter_limit(real ml) { m_inner_miter_limit = ml; }
+        void approximation_scale(real as) { m_approx_scale = as; }
 
-        double width() const { return m_width * 2.0; }
-        double miter_limit() const { return m_miter_limit; }
-        double inner_miter_limit() const { return m_inner_miter_limit; }
-        double approximation_scale() const { return m_approx_scale; }
+        real width() const { return m_width * 2.0f; }
+        real miter_limit() const { return m_miter_limit; }
+        real inner_miter_limit() const { return m_inner_miter_limit; }
+        real approximation_scale() const { return m_approx_scale; }
 
         void calc_cap(VertexConsumer& vc,
                       const vertex_dist& v0, 
                       const vertex_dist& v1, 
-                      double len);
+                      real len);
 
         void calc_join(VertexConsumer& vc,
                        const vertex_dist& v0, 
                        const vertex_dist& v1, 
                        const vertex_dist& v2,
-                       double len1, 
-                       double len2);
+                       real len1, 
+                       real len2);
 
     private:
-        AGG_INLINE void add_vertex(VertexConsumer& vc, double x, double y)
+        AGG_INLINE void add_vertex(VertexConsumer& vc, real x, real y)
         {
             vc.add(coord_type(x, y));
         }
 
         void calc_arc(VertexConsumer& vc,
-                      double x,   double y, 
-                      double dx1, double dy1, 
-                      double dx2, double dy2);
+                      real x,   real y, 
+                      real dx1, real dy1, 
+                      real dx2, real dy2);
 
         void calc_miter(VertexConsumer& vc,
                         const vertex_dist& v0, 
                         const vertex_dist& v1, 
                         const vertex_dist& v2,
-                        double dx1, double dy1, 
-                        double dx2, double dy2,
+                        real dx1, real dy1, 
+                        real dx2, real dy2,
                         line_join_e lj,
-                        double mlimit,
-                        double dbevel);
+                        real mlimit,
+                        real dbevel);
 
-        double       m_width;
-        double       m_width_abs;
-        double       m_width_eps;
+        real       m_width;
+        real       m_width_abs;
+        real       m_width_eps;
         int          m_width_sign;
-        double       m_miter_limit;
-        double       m_inner_miter_limit;
-        double       m_approx_scale;
+        real       m_miter_limit;
+        real       m_inner_miter_limit;
+        real       m_approx_scale;
         line_cap_e   m_line_cap;
         line_join_e  m_line_join;
         inner_join_e m_inner_join;
@@ -127,13 +127,13 @@ namespace agg
 
     //-----------------------------------------------------------------------
     template<class VC> math_stroke<VC>::math_stroke() :
-        m_width(0.5),
-        m_width_abs(0.5),
-        m_width_eps(0.5/1024.0),
+        m_width(0.5f),
+        m_width_abs(0.5f),
+        m_width_eps(0.5/1024.0f),
         m_width_sign(1),
-        m_miter_limit(4.0),
-        m_inner_miter_limit(1.01),
-        m_approx_scale(1.0),
+        m_miter_limit(4.0f),
+        m_inner_miter_limit(1.01f),
+        m_approx_scale(1.0f),
         m_line_cap(butt_cap),
         m_line_join(miter_join),
         m_inner_join(inner_miter)
@@ -141,9 +141,9 @@ namespace agg
     }
 
     //-----------------------------------------------------------------------
-    template<class VC> void math_stroke<VC>::width(double w)
+    template<class VC> void math_stroke<VC>::width(real w)
     { 
-        m_width = w * 0.5; 
+        m_width = w * 0.5f; 
         if(m_width < 0)
         {
             m_width_abs  = -m_width;
@@ -154,28 +154,28 @@ namespace agg
             m_width_abs  = m_width;
             m_width_sign = 1;
         }
-        m_width_eps = m_width / 1024.0;
+        m_width_eps = m_width / 1024.0f;
     }
 
     //-----------------------------------------------------------------------
-    template<class VC> void math_stroke<VC>::miter_limit_theta(double t)
+    template<class VC> void math_stroke<VC>::miter_limit_theta(real t)
     { 
-        m_miter_limit = 1.0 / sin(t * 0.5) ;
+        m_miter_limit = 1.0f / (real)sin(t * 0.5f) ;
     }
 
     //-----------------------------------------------------------------------
     template<class VC> 
     void math_stroke<VC>::calc_arc(VC& vc,
-                                   double x,   double y, 
-                                   double dx1, double dy1, 
-                                   double dx2, double dy2)
+                                   real x,   real y, 
+                                   real dx1, real dy1, 
+                                   real dx2, real dy2)
     {
-        double a1 = atan2(dy1 * m_width_sign, dx1 * m_width_sign);
-        double a2 = atan2(dy2 * m_width_sign, dx2 * m_width_sign);
-        double da = a1 - a2;
+        real a1 = (real)atan2(dy1 * m_width_sign, dx1 * m_width_sign);
+        real a2 = (real)atan2(dy2 * m_width_sign, dx2 * m_width_sign);
+        real da = a1 - a2;
         int i, n;
 
-        da = acos(m_width_abs / (m_width_abs + 0.125 / m_approx_scale)) * 2;
+        da = (real)acos(m_width_abs / (m_width_abs + 0.125f / m_approx_scale)) * 2.0f;
 
         add_vertex(vc, x + dx1, y + dy1);
         if(m_width_sign > 0)
@@ -186,7 +186,7 @@ namespace agg
             a1 += da;
             for(i = 0; i < n; i++)
             {
-                add_vertex(vc, x + cos(a1) * m_width, y + sin(a1) * m_width);
+                add_vertex(vc, x + (real)cos(a1) * m_width, y + (real)sin(a1) * m_width);
                 a1 += da;
             }
         }
@@ -198,7 +198,7 @@ namespace agg
             a1 -= da;
             for(i = 0; i < n; i++)
             {
-                add_vertex(vc, x + cos(a1) * m_width, y + sin(a1) * m_width);
+                add_vertex(vc, x + (real)cos(a1) * m_width, y + (real)sin(a1) * m_width);
                 a1 -= da;
             }
         }
@@ -211,16 +211,16 @@ namespace agg
                                      const vertex_dist& v0, 
                                      const vertex_dist& v1, 
                                      const vertex_dist& v2,
-                                     double dx1, double dy1, 
-                                     double dx2, double dy2,
+                                     real dx1, real dy1, 
+                                     real dx2, real dy2,
                                      line_join_e lj,
-                                     double mlimit,
-                                     double dbevel)
+                                     real mlimit,
+                                     real dbevel)
     {
-        double xi  = v1.x;
-        double yi  = v1.y;
-        double di  = 1;
-        double lim = m_width_abs * mlimit;
+        real xi  = v1.x;
+        real yi  = v1.y;
+        real di  = 1;
+        real lim = m_width_abs * mlimit;
         bool miter_limit_exceeded = true; // Assume the worst
         bool intersection_failed  = true; // Assume the worst
 
@@ -252,10 +252,10 @@ namespace agg
             // This condition determines whether the next line segments continues
             // the previous one or goes back.
             //----------------
-            double x2 = v1.x + dx1;
-            double y2 = v1.y - dy1;
-            if((cross_product(v0.x, v0.y, v1.x, v1.y, x2, y2) < 0.0) == 
-               (cross_product(v1.x, v1.y, v2.x, v2.y, x2, y2) < 0.0))
+            real x2 = v1.x + dx1;
+            real y2 = v1.y - dy1;
+            if((cross_product(v0.x, v0.y, v1.x, v1.y, x2, y2) < 0.0f) == 
+               (cross_product(v1.x, v1.y, v2.x, v2.y, x2, y2) < 0.0f))
             {
                 // This case means that the next segment continues 
                 // the previous one (straight line)
@@ -297,10 +297,10 @@ namespace agg
                 }
                 else
                 {
-                    double x1 = v1.x + dx1;
-                    double y1 = v1.y - dy1;
-                    double x2 = v1.x + dx2;
-                    double y2 = v1.y - dy2;
+                    real x1 = v1.x + dx1;
+                    real y1 = v1.y - dy1;
+                    real x2 = v1.x + dx2;
+                    real y2 = v1.y - dy2;
                     di = (lim - dbevel) / (di - dbevel);
                     add_vertex(vc, x1 + (xi - x1) * di, 
                                    y1 + (yi - y1) * di);
@@ -317,14 +317,14 @@ namespace agg
     void math_stroke<VC>::calc_cap(VC& vc,
                                    const vertex_dist& v0, 
                                    const vertex_dist& v1, 
-                                   double len)
+                                   real len)
     {
         vc.remove_all();
 
-        double dx1 = (v1.y - v0.y) / len;
-        double dy1 = (v1.x - v0.x) / len;
-        double dx2 = 0;
-        double dy2 = 0;
+        real dx1 = (v1.y - v0.y) / len;
+        real dy1 = (v1.x - v0.x) / len;
+        real dx2 = 0;
+        real dy2 = 0;
 
         dx1 *= m_width;
         dy1 *= m_width;
@@ -341,8 +341,8 @@ namespace agg
         }
         else
         {
-            double da = acos(m_width_abs / (m_width_abs + 0.125 / m_approx_scale)) * 2;
-            double a1;
+            real da = (real)acos(m_width_abs / (m_width_abs + 0.125f / m_approx_scale)) * 2.0f;
+            real a1;
             int i;
             int n = int(pi / da);
 
@@ -350,23 +350,23 @@ namespace agg
             add_vertex(vc, v0.x - dx1, v0.y + dy1);
             if(m_width_sign > 0)
             {
-                a1 = atan2(dy1, -dx1);
+                a1 = (real)atan2(dy1, -dx1);
                 a1 += da;
                 for(i = 0; i < n; i++)
                 {
-                    add_vertex(vc, v0.x + cos(a1) * m_width, 
-                                   v0.y + sin(a1) * m_width);
+                    add_vertex(vc, v0.x + (real)cos(a1) * m_width, 
+                                   v0.y + (real)sin(a1) * m_width);
                     a1 += da;
                 }
             }
             else
             {
-                a1 = atan2(-dy1, dx1);
+                a1 = (real)atan2(-dy1, dx1);
                 a1 -= da;
                 for(i = 0; i < n; i++)
                 {
-                    add_vertex(vc, v0.x + cos(a1) * m_width, 
-                                   v0.y + sin(a1) * m_width);
+                    add_vertex(vc, v0.x + (real)cos(a1) * m_width, 
+                                   v0.y + (real)sin(a1) * m_width);
                     a1 -= da;
                 }
             }
@@ -380,22 +380,22 @@ namespace agg
                                     const vertex_dist& v0, 
                                     const vertex_dist& v1, 
                                     const vertex_dist& v2,
-                                    double len1, 
-                                    double len2)
+                                    real len1, 
+                                    real len2)
     {
-        double dx1 = m_width * (v1.y - v0.y) / len1;
-        double dy1 = m_width * (v1.x - v0.x) / len1;
-        double dx2 = m_width * (v2.y - v1.y) / len2;
-        double dy2 = m_width * (v2.x - v1.x) / len2;
+        real dx1 = m_width * (v1.y - v0.y) / len1;
+        real dy1 = m_width * (v1.x - v0.x) / len1;
+        real dx2 = m_width * (v2.y - v1.y) / len2;
+        real dy2 = m_width * (v2.x - v1.x) / len2;
 
         vc.remove_all();
 
-        double cp = cross_product(v0.x, v0.y, v1.x, v1.y, v2.x, v2.y);
+        real cp = cross_product(v0.x, v0.y, v1.x, v1.y, v2.x, v2.y);
         if(cp != 0 && (cp > 0) == (m_width > 0))
         {
             // Inner join
             //---------------
-            double limit = ((len1 < len2) ? len1 : len2) / m_width_abs;
+            real limit = ((len1 < len2) ? len1 : len2) / m_width_abs;
             if(limit < m_inner_miter_limit)
             {
                 limit = m_inner_miter_limit;
@@ -453,9 +453,9 @@ namespace agg
             // Calculate the distance between v1 and 
             // the central point of the bevel line segment
             //---------------
-            double dx = (dx1 + dx2) / 2;
-            double dy = (dy1 + dy2) / 2;
-            double dbevel = sqrt(dx * dx + dy * dy);
+            real dx = (dx1 + dx2) / 2;
+            real dy = (dy1 + dy2) / 2;
+            real dbevel = SQRT(dx * dx + dy * dy);
 
             if(m_line_join == round_join || m_line_join == bevel_join)
             {
