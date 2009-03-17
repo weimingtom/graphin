@@ -664,10 +664,10 @@ if(m_ctrls.on_mouse_button_down(m_specific->m_cur_x,
     }
 
     //------------------------------------------------------------------------
-    double platform_support::elapsed_time() const
+    real platform_support::elapsed_time() const
     {
         int stop = SDL_GetTicks();
-        return double(stop - m_specific->m_sw_start);
+        return real(stop - m_specific->m_sw_start);
     }
 
     //------------------------------------------------------------------------

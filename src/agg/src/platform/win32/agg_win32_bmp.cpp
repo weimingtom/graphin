@@ -63,7 +63,6 @@ namespace agg
         }
     }
 
-
     //------------------------------------------------------------------------
     HBITMAP pixel_map::create_dib_section(HDC h_dc,
                                           unsigned width, 
@@ -105,11 +104,20 @@ namespace agg
         }
     }
 
+    void pixel_map::attach_to_dibsection(BITMAPINFO *bmp, void* bits)
+    {
+        if(bmp)
+        {
+            destroy();
+            create_from_dibsection(bmp, bits);
+            m_is_internal = false;
+        }
+    }
 
 
     //static
     //------------------------------------------------------------------------
-    unsigned pixel_map::calc_full_size(BITMAPINFO *bmp)
+    unsigned pixel_map::calc_full_size(const BITMAPINFO *bmp)
     {
         if(bmp == 0) return 0;
 
@@ -120,7 +128,7 @@ namespace agg
 
     //static
     //------------------------------------------------------------------------
-    unsigned pixel_map::calc_header_size(BITMAPINFO *bmp)
+    unsigned pixel_map::calc_header_size(const BITMAPINFO *bmp)
     {
         if(bmp == 0) return 0;
         return sizeof(BITMAPINFOHEADER) + sizeof(RGBQUAD) * calc_palette_size(bmp);
@@ -146,7 +154,7 @@ namespace agg
 
     //static
     //------------------------------------------------------------------------
-    unsigned pixel_map::calc_palette_size(BITMAPINFO *bmp)
+    unsigned pixel_map::calc_palette_size(const BITMAPINFO *bmp)
     {
         if(bmp == 0) return 0;
         return calc_palette_size(bmp->bmiHeader.biClrUsed, bmp->bmiHeader.biBitCount);
@@ -155,7 +163,7 @@ namespace agg
 
     //static
     //------------------------------------------------------------------------
-    unsigned char * pixel_map::calc_img_ptr(BITMAPINFO *bmp)
+    unsigned char * pixel_map::calc_img_ptr(const BITMAPINFO *bmp)
     {
         if(bmp == 0) return 0;
         return ((unsigned char*)bmp) + calc_header_size(bmp);
@@ -192,7 +200,7 @@ namespace agg
 
     //static
     //------------------------------------------------------------------------
-    void pixel_map::create_gray_scale_palette(BITMAPINFO *bmp)
+    void pixel_map::create_gray_scale_palette(const BITMAPINFO *bmp)
     {
         if(bmp == 0) return;
 
@@ -298,7 +306,7 @@ namespace agg
 
         if(dvc_width != bmp_width || dvc_height != bmp_height)
         {
-#ifndef UNDER_CE
+#if !defined(UNDER_CE)
             ::SetStretchBltMode(h_dc, COLORONCOLOR);
 #endif
             ::StretchDIBits(
@@ -326,19 +334,19 @@ namespace agg
                 dvc_width,       // source rectangle width
                 dvc_height,      // source rectangle height
                 bmp_x,           // x-coordinate of lower-left corner of 
-                height() - bmp_y - bmp_height, // y-coordinate of lower-left corner of , Andrew F. fix.
+                bmp_y,           // y-coordinate of lower-left corner of 
                 0,               // first scan line in array
-                height(),        // number of scan lines
+                bmp_height,      // number of scan lines
                 m_buf,           // address of array with DIB bits
                 m_bmp,           // address of structure with bitmap info.
                 DIB_RGB_COLORS   // RGB or palette indexes
             );
         }
     }
-    //sz.y - src.top() - src.height()
+
 
     //------------------------------------------------------------------------
-    void pixel_map::draw(HDC h_dc, int x, int y, double scale) const
+    void pixel_map::draw(HDC h_dc, int x, int y, real scale) const
     {
         if(m_bmp == 0 || m_buf == 0) return;
 
@@ -352,23 +360,62 @@ namespace agg
         draw(h_dc, &rect);
     }
 
+#ifdef _WIN32_WCE
 
+#ifndef AC_SRC_OVER
+typedef struct _BLENDFUNCTION
+{
+    BYTE   BlendOp;
+    BYTE   BlendFlags;
+    BYTE   SourceConstantAlpha;
+    BYTE   AlphaFormat;
+}BLENDFUNCTION,*PBLENDFUNCTION;
+
+
+//
+// currentlly defined blend function
+//
+
+#define AC_SRC_OVER                 0x00
+
+//
+// alpha format flags
+//
+
+#define AC_SRC_ALPHA                0x01      // premultiplied alpha
+#define AC_SRC_ALPHA_NONPREMULT     0x02      // non-premultiplied alpha
+
+typedef BOOL  (WINAPI *TAlphaBlend)(HDC,int,int,int,int,HDC,int,int,int,int,BLENDFUNCTION);
+
+#endif
+
+#endif // _WIN32_WCE
 
 
     //------------------------------------------------------------------------
     void pixel_map::blend(HDC h_dc, const RECT *device_rect, const RECT *bmp_rect) const
     {
-#if !defined(AGG_BMP_ALPHA_BLEND)
-        draw(h_dc, device_rect, bmp_rect);
-        return;
-#else
         if(m_bpp != 32)
         {
             draw(h_dc, device_rect, bmp_rect);
             return;
         }
-
         if(m_bmp == 0 || m_buf == 0) return;
+
+#if defined(_WIN32_WCE) && (_WIN32_WCE < 0x500)
+
+    static HMODULE hCoreDll = 0;
+    static TAlphaBlend pAlphaBlend = 0;
+
+    if( !pAlphaBlend && !hCoreDll )
+    {
+      if( !hCoreDll )
+        hCoreDll = ::LoadLibrary(L"coredll.dll");
+      if( hCoreDll )
+      {
+        pAlphaBlend = (TAlphaBlend) ::GetProcAddress(hCoreDll, L"AlphaBlend");
+      }
+    }
 
         unsigned bmp_x = 0;
         unsigned bmp_y = 0;
@@ -401,6 +448,138 @@ namespace agg
         }
 
         HDC mem_dc = ::CreateCompatibleDC(h_dc);
+
+        void* buf = 0;
+        HBITMAP bmp = ::CreateDIBSection(
+            mem_dc, 
+            m_bmp,  
+            DIB_RGB_COLORS,
+            &buf,
+            0,
+            0
+        );
+
+        bmp = (HBITMAP)::SelectObject(mem_dc, bmp);
+
+    if( !pAlphaBlend )
+    {
+      // 1. copy from hdc to memdc
+      ::BitBlt(mem_dc,
+      0, 0,
+      dvc_width,  
+      dvc_height, 
+      h_dc,
+      dvc_x,
+      dvc_y, SRCCOPY);
+
+      // 2. blend with alpha m_buf to buf
+      DWORD *src = (DWORD*)m_buf;
+      DWORD *dst = (DWORD*)buf;
+
+      int pixels = dvc_height * dvc_width;
+      while(pixels--)
+      {
+        int alpha = (*src >> 24);
+  
+        if( alpha == 255)
+        {
+          *dst = *src;
+        } else
+          if( alpha == 0 )
+          {
+            
+          } else
+          {
+            // all channels of src are premultiplied by alpha!
+            int invalpha = 255 - alpha;
+            unsigned char red = GetRValue(*src) + (invalpha * GetRValue(*dst) >> 8);
+            unsigned char green = GetGValue(*src) + (invalpha * GetGValue(*dst) >> 8);
+            unsigned char blue = GetBValue(*src) + (invalpha * GetBValue(*dst) >> 8);
+
+            *dst = (blue << 16) | (green << 8) | (red);
+          }
+
+        ++dst;
+        ++src;
+      }
+
+      // 3. copy result back to h_dc
+      ::BitBlt(h_dc,
+      dvc_x,      
+      dvc_y,
+      dvc_width,  
+      dvc_height, 
+      mem_dc,
+      0,  
+      0, SRCCOPY);
+    } else
+    {
+      memcpy(buf, m_buf, m_bmp->bmiHeader.biSizeImage);
+
+          BLENDFUNCTION blend;
+        blend.BlendOp = AC_SRC_OVER;
+      blend.BlendFlags = 0;
+
+          blend.AlphaFormat = AC_SRC_ALPHA;
+
+        blend.SourceConstantAlpha = 255;
+      pAlphaBlend(
+            h_dc,      
+          dvc_x,      
+        dvc_y,      
+            dvc_width,  
+          dvc_height, 
+        mem_dc,
+            bmp_x,
+          bmp_y,     
+        bmp_width, 
+      bmp_height,
+      blend
+      );
+    }
+    bmp = (HBITMAP)::SelectObject(mem_dc, bmp);
+    ::DeleteObject(bmp);
+    ::DeleteDC(mem_dc);
+
+    return;
+#else
+
+#if !defined(AGG_BMP_ALPHA_BLEND)
+        draw(h_dc, device_rect, bmp_rect);
+        return;
+#else
+        unsigned bmp_x = 0;
+        unsigned bmp_y = 0;
+        unsigned bmp_width  = m_bmp->bmiHeader.biWidth;
+        unsigned bmp_height = m_bmp->bmiHeader.biHeight;
+        unsigned dvc_x = 0;
+        unsigned dvc_y = 0; 
+        unsigned dvc_width  = m_bmp->bmiHeader.biWidth;
+        unsigned dvc_height = m_bmp->bmiHeader.biHeight;
+        
+        if(bmp_rect) 
+        {
+            bmp_x      = bmp_rect->left;
+            bmp_y      = bmp_rect->top;
+            bmp_width  = bmp_rect->right  - bmp_rect->left;
+            bmp_height = bmp_rect->bottom - bmp_rect->top;
+        } 
+
+        dvc_x      = bmp_x;
+        dvc_y      = bmp_y;
+        dvc_width  = bmp_width;
+        dvc_height = bmp_height;
+
+        if(device_rect) 
+        {
+            dvc_x      = device_rect->left;
+            dvc_y      = device_rect->top;
+            dvc_width  = device_rect->right  - device_rect->left;
+            dvc_height = device_rect->bottom - device_rect->top;
+        }
+
+        HDC mem_dc = ::CreateCompatibleDC(h_dc);
+
         void* buf = 0;
         HBITMAP bmp = ::CreateDIBSection(
             mem_dc, 
@@ -412,7 +591,7 @@ namespace agg
         );
         memcpy(buf, m_buf, m_bmp->bmiHeader.biSizeImage);
 
-        HBITMAP temp = (HBITMAP)::SelectObject(mem_dc, bmp);
+        bmp = (HBITMAP)::SelectObject(mem_dc, bmp);
 
         BLENDFUNCTION blend;
         blend.BlendOp = AC_SRC_OVER;
@@ -441,15 +620,17 @@ namespace agg
           blend
         );
 
-        ::SelectObject(mem_dc, temp);
+        bmp = (HBITMAP) ::SelectObject(mem_dc, bmp);
         ::DeleteObject(bmp);
-        ::DeleteObject(mem_dc);
+        ::DeleteDC(mem_dc);
 #endif //defined(AGG_BMP_ALPHA_BLEND)
+
+#endif // _WIN32_WCE
     }
 
 
     //------------------------------------------------------------------------
-    void pixel_map::blend(HDC h_dc, int x, int y, double scale) const
+    void pixel_map::blend(HDC h_dc, int x, int y, real scale) const
     {
         if(m_bmp == 0 || m_buf == 0) return;
         unsigned width  = unsigned(m_bmp->bmiHeader.biWidth * scale);
@@ -560,8 +741,8 @@ namespace agg
     //------------------------------------------------------------------------
     int pixel_map::stride() const
     {
-        return calc_row_len(m_bmp->bmiHeader.biWidth, 
-                            m_bmp->bmiHeader.biBitCount);
+        return -((int)calc_row_len(m_bmp->bmiHeader.biWidth, 
+                                   m_bmp->bmiHeader.biBitCount));
     }
 
 
@@ -571,6 +752,19 @@ namespace agg
     {
         if(bmp)
         {
+      switch(bmp->bmiHeader.biBitCount)
+      {
+      case 16:
+        m_bpp = org_color16;
+        break;
+      case 24:
+        m_bpp = org_color24;
+        break;
+      case 32:
+        m_bpp = org_color32;
+        break;
+      }
+
             m_img_size  = calc_row_len(bmp->bmiHeader.biWidth, 
                                        bmp->bmiHeader.biBitCount) * 
                           bmp->bmiHeader.biHeight;
@@ -581,6 +775,32 @@ namespace agg
         }
     }
 
+    void pixel_map::create_from_dibsection(BITMAPINFO *bmp, void *bits)
+    {
+        if(bmp)
+        {
+      switch(bmp->bmiHeader.biBitCount)
+      {
+      case 16:
+        m_bpp = org_color16;
+        break;
+      case 24:
+        m_bpp = org_color24;
+        break;
+      case 32:
+        m_bpp = org_color32;
+        break;
+      }
+
+            m_img_size  = calc_row_len(bmp->bmiHeader.biWidth, 
+                                       bmp->bmiHeader.biBitCount) * 
+                          bmp->bmiHeader.biHeight;
+
+            m_full_size = 0;
+            m_bmp       = bmp;
+            m_buf       = (unsigned char*) bits;
+        }
+    }
 
     //private
     //------------------------------------------------------------------------

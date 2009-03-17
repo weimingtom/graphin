@@ -56,7 +56,7 @@ namespace agg
 
         void        clear(unsigned clear_val=256);
         void        attach_to_bmp(BITMAPINFO* bmp);
-        void attach_to_dibsection(BITMAPINFO *bmp, void* bits);
+        void        attach_to_dibsection(BITMAPINFO *bmp, void* bits);
         BITMAPINFO* bitmap_info() { return m_bmp; }
         bool        load_from_bmp(FILE* fd);
         bool        save_as_bmp(FILE* fd) const;
