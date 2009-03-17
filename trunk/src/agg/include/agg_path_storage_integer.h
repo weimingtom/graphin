@@ -44,12 +44,12 @@ namespace agg
             x(((x_ << 1) & ~1) | (flag &  1)),
             y(((y_ << 1) & ~1) | (flag >> 1)) {}
 
-        unsigned vertex(double* x_, double* y_, 
-                        double dx=0, double dy=0,
-                        double scale=1.0) const
+        unsigned vertex(real* x_, real* y_, 
+                        real dx=0, real dy=0,
+                        real scale=1.0f) const
         {
-            *x_ = dx + (double(x >> 1) / coord_scale) * scale;
-            *y_ = dy + (double(y >> 1) / coord_scale) * scale;
+            *x_ = dx + (real(x >> 1) / coord_scale) * scale;
+            *y_ = dy + (real(y >> 1) / coord_scale) * scale;
             switch(((y & 1) << 1) | (x & 1))
             {
                 case cmd_move_to: return path_cmd_move_to;
@@ -110,7 +110,7 @@ namespace agg
 
         //--------------------------------------------------------------------
         unsigned size() const { return m_storage.size(); }
-        unsigned vertex(unsigned idx, double* x, double* y) const
+        unsigned vertex(unsigned idx, real* x, real* y) const
         {
             return m_storage[idx].vertex(x, y);
         }
@@ -135,7 +135,7 @@ namespace agg
         }
 
         //--------------------------------------------------------------------
-        unsigned vertex(double* x, double* y)
+        unsigned vertex(real* x, real* y)
         {
             if(m_storage.size() < 2 || m_vertex_idx > m_storage.size()) 
             {
@@ -169,14 +169,14 @@ namespace agg
             rect_d bounds(1e100, 1e100, -1e100, -1e100);
             if(m_storage.size() == 0)
             {
-                bounds.x1 = bounds.y1 = bounds.x2 = bounds.y2 = 0.0;
+                bounds.x1 = bounds.y1 = bounds.x2 = bounds.y2 = 0.0f;
             }
             else
             {
                 unsigned i;
                 for(i = 0; i < m_storage.size(); i++)
                 {
-                    double x, y;
+                    real x, y;
                     m_storage[i].vertex(&x, &y);
                     if(x < bounds.x1) bounds.x1 = x;
                     if(y < bounds.y1) bounds.y1 = y;
@@ -207,15 +207,15 @@ namespace agg
             m_data(0),
             m_end(0),
             m_ptr(0),
-            m_dx(0.0),
-            m_dy(0.0),
-            m_scale(1.0),
+            m_dx(0.0f),
+            m_dy(0.0f),
+            m_scale(1.0f),
             m_vertices(0)
         {}
 
         //--------------------------------------------------------------------
         serialized_integer_path_adaptor(const int8u* data, unsigned size,
-                                        double dx, double dy) :
+                                        real dx, real dy) :
             m_data(data),
             m_end(data + size),
             m_ptr(data),
@@ -226,7 +226,7 @@ namespace agg
 
         //--------------------------------------------------------------------
         void init(const int8u* data, unsigned size, 
-                  double dx, double dy, double scale=1.0)
+                  real dx, real dy, real scale=1.0f)
         {
             m_data     = data;
             m_end      = data + size;
@@ -246,7 +246,7 @@ namespace agg
         }
 
         //--------------------------------------------------------------------
-        unsigned vertex(double* x, double* y)
+        unsigned vertex(real* x, real* y)
         {
             if(m_data == 0 || m_ptr > m_end) 
             {
@@ -282,9 +282,9 @@ namespace agg
         const int8u* m_data;
         const int8u* m_end;
         const int8u* m_ptr;
-        double       m_dx;
-        double       m_dy;
-        double       m_scale;
+        real       m_dx;
+        real       m_dy;
+        real       m_scale;
         unsigned     m_vertices;
     };
 
@@ -292,4 +292,5 @@ namespace agg
 
 
 #endif
+
 

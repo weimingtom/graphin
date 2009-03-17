@@ -3,8 +3,8 @@
 // Based on Anti-Grain Geometry
 // Copyright (C) 2005 Maxim Shemanarev (http://www.antigrain.com)
 //
-// Permission to copy, use, modify, sell and distribute this software
-// is granted provided this copyright notice appears in all copies.
+// Permission to copy, use, modify, sell and distribute this software 
+// is granted provided this copyright notice appears in all copies. 
 // This software is provided "as is" without express or implied
 // warranty, and with no claim as to its suitability for any purpose.
 //
@@ -15,18 +15,54 @@
 //----------------------------------------------------------------------------
 //----------------------------------------------------------------------------
 //
-//	25 Jan 2007 - Ported to AGG 2.4 Jerry Evans (jerry@novadsp.com)
+//  25 Jan 2007 - Ported to AGG 2.4 Jerry Evans (jerry@novadsp.com)
 //
 //----------------------------------------------------------------------------
 
-#include "agg2D.h"
-
-static const double g_approxScale = 2.0;
-
+#include "agg2d.h"
+#include "agg_bounding_rect.h"
+#include "agg_blur.h"
+#include <assert.h>
+//-----------------------------------------------------------------------------
+static const real g_approxScale = 2.0f;
+//-----------------------------------------------------------------------------
+class gradient_opacity
+{
+public:
+  //---------------------------------------------------------------------
+  typedef Agg2D::Color             color_type;
+  typedef Agg2D::gradient_lut_type gradient_lut_type;
+  //---------------------------------------------------------------------
+  gradient_opacity(const gradient_lut_type& lut, real opacity) 
+    :
+        m_lut(lut), 
+        m_opacity(unsigned(opacity * color_type::base_scale + 0.5f))
+    {}
+  //---------------------------------------------------------------------
+    static unsigned size() 
+  { 
+    return gradient_lut_type::size(); 
+  }
+  //---------------------------------------------------------------------
+  color_type operator[] (unsigned i) const
+    {
+        color_type c = m_lut[i];
+        c.a = (color_type::value_type)
+        ((c.a * m_opacity) >> color_type::base_shift);
+        return c;
+    }
+  //---------------------------------------------------------------------
+private:
+  const gradient_lut_type& m_lut;
+    unsigned                 m_opacity;
+};
+//-----------------------------------------------------------------------------
 Agg2D::~Agg2D()
 {
+#if !defined( UNDER_CE )
 #ifndef AGG2D_USE_FREETYPE
     ::ReleaseDC(0, m_fontDC);
+#endif
 #endif
 }
 
@@ -53,33 +89,39 @@ Agg2D::Agg2D() :
     m_scanline(),
     m_rasterizer(),
 
-    m_masterAlpha(1.0),
-    m_antiAliasGamma(1.0),
+    m_masterAlpha(1.0f),
+    m_antiAliasGamma(1.0f),
 
     m_fillColor(255, 255, 255),
     m_lineColor(0,   0,   0),
     m_fillGradient(),
     m_lineGradient(),
 
-    m_lineCap(CAP_ROUND),
-    m_lineJoin(JOIN_ROUND),
+    m_lineCap(CapRound),
+    m_lineJoin(JoinRound),
 
     m_fillGradientFlag(Solid),
     m_lineGradientFlag(Solid),
     m_fillGradientMatrix(),
     m_lineGradientMatrix(),
-    m_fillGradientD1(0.0),
-    m_lineGradientD1(0.0),
-    m_fillGradientD2(100.0),
-    m_lineGradientD2(100.0),
+    m_fillGradientD1(0.0f),
+    m_lineGradientD1(0.0f),
+    m_fillGradientD2(100.0f),
+    m_lineGradientD2(100.0f),
+    
+    m_fillGradientSpreadMethod(spreadMethod_pad),
+    m_lineGradientSpreadMethod(spreadMethod_pad),
 
-    m_textAngle(0.0),
+    m_fillGradientOpacity(1.0f),
+    m_lineGradientOpacity(1.0f),
+
+    m_textAngle(0.0f),
     m_textAlignX(AlignLeft),
     m_textAlignY(AlignBottom),
     m_textHints(true),
-    m_fontHeight(0.0),
-    m_fontAscent(0.0),
-    m_fontDescent(0.0),
+    m_fontHeight(0.0f),
+    m_fontAscent(0.0f),
+    m_fontDescent(0.0f),
     m_fontCacheType(RasterFontCache),
 
     m_imageFilter(Bilinear),
@@ -95,8 +137,8 @@ Agg2D::Agg2D() :
     m_lineWidth(1),
     m_evenOddFlag(false),
 
-    m_start_x(0.0),
-    m_start_y(0.0),
+    m_start_x(0.0f),
+    m_start_y(0.0f),
 
     m_path(),
     m_transform(),
@@ -113,7 +155,6 @@ Agg2D::Agg2D() :
     m_fontDC(::GetDC(0)),
     m_fontEngine(m_fontDC),
 #endif
-
     m_fontCacheManager(m_fontEngine)
 {
     lineCap(m_lineCap);
@@ -122,7 +163,7 @@ Agg2D::Agg2D() :
 
 void Agg2D::saveStateTo(State& st)
 {
-
+   
   st.m_clipBox             = m_clipBox;
 
   st.m_blendMode           = m_blendMode;
@@ -168,7 +209,7 @@ void Agg2D::saveStateTo(State& st)
 
 void Agg2D::restoreStateFrom(const State& st)
 {
-
+   
   m_clipBox             = st.m_clipBox;
 
   m_blendMode           = st.m_blendMode;
@@ -225,18 +266,18 @@ void Agg2D::attach(unsigned char* buf, unsigned width, unsigned height, int stri
     m_renBaseCompPre.reset_clipping(true);
 
     resetTransformations();
-    lineWidth(1.0),
+    lineWidth(1.0f),
     lineColor(0,0,0);
     fillColor(255,255,255);
     textAlignment(AlignLeft, AlignBottom);
     clipBox(0, 0, width, height);
-    lineCap(CAP_ROUND);
-    lineJoin(JOIN_ROUND);
+    lineCap(CapRound);
+    lineJoin(JoinRound);
     flipText(false);
     imageFilter(Bilinear);
     imageResample(NoResample);
-    m_masterAlpha = 1.0;
-    m_antiAliasGamma = 1.0;
+    m_masterAlpha = 1.0f;
+    m_antiAliasGamma = 1.0f;
     m_rasterizer.gamma(agg::gamma_none());
     m_blendMode = BlendAlpha;
 }
@@ -249,13 +290,9 @@ void Agg2D::attach(Image& img)
 }
 
 //------------------------------------------------------------------------
-void Agg2D::clipBox(double x1, double y1, double x2, double y2)
+void Agg2D::clipBox(real x1, real y1, real x2, real y2)
 {
-    m_viewport.transform(&x1, &y1); // 
-    m_viewport.transform(&x2, &y2); // see: http://article.gmane.org/gmane.comp.graphics.agg/3543
-
     m_clipBox = RectD(x1, y1, x2, y2);
-
     int rx1 = int(x1);
     int ry1 = int(y1);
     int rx2 = int(x2);
@@ -266,10 +303,7 @@ void Agg2D::clipBox(double x1, double y1, double x2, double y2)
     m_renBasePre.clip_box(rx1, ry1, rx2, ry2);
     m_renBaseCompPre.clip_box(rx1, ry1, rx2, ry2);
 
-    // m_rasterizer.clip_box(x1, y1, x2, y2);
-    m_rasterizer.clip_box(m_renBase.xmin(),   m_renBase.ymin(), 
-                          m_renBase.xmax()+1, m_renBase.ymax()+1); // see link above
-
+    m_rasterizer.clip_box(x1, y1, x2, y2);
 }
 
 //------------------------------------------------------------------------
@@ -317,27 +351,27 @@ Agg2D::Color Agg2D::imageBlendColor() const
 }
 
 //------------------------------------------------------------------------
-void Agg2D::masterAlpha(double a)
+void Agg2D::masterAlpha(real a)
 {
     m_masterAlpha = a;
     updateRasterizerGamma();
 }
 
 //------------------------------------------------------------------------
-double Agg2D::masterAlpha() const
+real Agg2D::masterAlpha() const
 {
     return m_masterAlpha;
 }
 
-//------------------------------------------------------------------------+
-void Agg2D::antiAliasGamma(double g)
+//------------------------------------------------------------------------
+void Agg2D::antiAliasGamma(real g)
 {
     m_antiAliasGamma = g;
     updateRasterizerGamma();
 }
 
 //------------------------------------------------------------------------
-double Agg2D::antiAliasGamma() const
+real Agg2D::antiAliasGamma() const
 {
     return m_antiAliasGamma;
 }
@@ -373,56 +407,56 @@ void Agg2D::clearClipBox(unsigned r, unsigned g, unsigned b, unsigned a)
 }
 
 //------------------------------------------------------------------------
-void Agg2D::worldToScreen(double& x, double& y) const
+void Agg2D::worldToScreen(real& x, real& y) const
 {
     m_transform.transform(&x, &y);
 }
 
 //------------------------------------------------------------------------
-void Agg2D::screenToWorld(double& x, double& y) const
+void Agg2D::screenToWorld(real& x, real& y) const
 {
     m_transform.inverse_transform(&x, &y);
 }
 
 
 //------------------------------------------------------------------------
-double Agg2D::worldToScreen(double scalar) const
+real Agg2D::worldToScreen(real scalar) const
 {
-    double x1 = 0;
-    double y1 = 0;
-    double x2 = scalar;
-    double y2 = scalar;
+    real x1 = 0;
+    real y1 = 0;
+    real x2 = scalar;
+    real y2 = scalar;
     worldToScreen(x1, y1);
     worldToScreen(x2, y2);
-    return sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1)) * 0.7071068;
+    return SQRT((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1)) * 0.7071068f;
 }
 
 
 //------------------------------------------------------------------------
-double Agg2D::screenToWorld(double scalar) const
+real Agg2D::screenToWorld(real scalar) const
 {
-    double x1 = 0;
-    double y1 = 0;
-    double x2 = scalar;
-    double y2 = scalar;
+    real x1 = 0;
+    real y1 = 0;
+    real x2 = scalar;
+    real y2 = scalar;
     screenToWorld(x1, y1);
     screenToWorld(x2, y2);
-    return sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1)) * 0.7071068;
+    return SQRT((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1)) * 0.7071068f;
 }
 
 
 //------------------------------------------------------------------------
-void Agg2D::alignPoint(double& x, double& y) const
+void Agg2D::alignPoint(real& x, real& y) const
 {
     worldToScreen(x, y);
-    x = floor(x) + 0.5;
-    y = floor(y) + 0.5;
+    x = FLOOR(x) + 0.5f;
+    y = FLOOR(y) + 0.5f;
     screenToWorld(x, y);
 }
 
 
 //------------------------------------------------------------------------
-bool Agg2D::inBox(double worldX, double worldY) const
+bool Agg2D::inBox(real worldX, real worldY) const
 {
     worldToScreen(worldX, worldY);
     return m_renBase.inbox(int(worldX), int(worldY));
@@ -451,12 +485,12 @@ void Agg2D::affine(const Affine& af)
 void Agg2D::transformations(const Transformations& tr)
 {
     m_transform.load_from(tr.affineMatrix);
-    m_convCurve.approximation_scale(worldToScreen(1.0) * g_approxScale);
-    m_convStroke.approximation_scale(worldToScreen(1.0) * g_approxScale);
+    m_convCurve.approximation_scale(worldToScreen(1.0f) * g_approxScale);
+    m_convStroke.approximation_scale(worldToScreen(1.0f) * g_approxScale);
 }
 //------------------------------------------------------------------------
 void Agg2D::resetTransformations()
-{
+{ 
     m_transform.reset();
 }
 //------------------------------------------------------------------------
@@ -464,17 +498,17 @@ void Agg2D::updateTransformations()
 {
    m_transform  = m_affine;
    m_transform *= m_viewport;
-   m_convCurve.approximation_scale(worldToScreen(1.0) * g_approxScale);
-   m_convStroke.approximation_scale(worldToScreen(1.0) * g_approxScale);
+   m_convCurve.approximation_scale(worldToScreen(1.0f) * g_approxScale);
+   m_convStroke.approximation_scale(worldToScreen(1.0f) * g_approxScale);
 }
 //------------------------------------------------------------------------
-void Agg2D::rotate(double angle)
-{
+void Agg2D::rotate(real angle)          
+{ 
     m_affine.premultiply(agg::trans_affine_rotation(angle));
     updateTransformations();
 }
 //------------------------------------------------------------------------
-void Agg2D::rotate(double angle, double cx, double cy)
+void Agg2D::rotate(real angle, real cx, real cy)
 {
     agg::trans_affine_translation m(-cx, -cy);
     m *= agg::trans_affine_rotation(angle);
@@ -483,50 +517,50 @@ void Agg2D::rotate(double angle, double cx, double cy)
     updateTransformations();
 }
 //------------------------------------------------------------------------
-void Agg2D::skew(double sx, double sy)
-{
+void Agg2D::skew(real sx, real sy)   
+{ 
     m_affine.premultiply(agg::trans_affine_skewing(sx, sy));
     updateTransformations();
 }
 //------------------------------------------------------------------------
-void Agg2D::translate(double x, double y)
-{
-    m_affine.premultiply(agg::trans_affine_translation(x, y));
+void Agg2D::translate(real x, real y) 
+{ 
+    m_affine.premultiply(agg::trans_affine_translation(x, y)); 
     updateTransformations();
 }
 //------------------------------------------------------------------------
 void Agg2D::matrix(const Affine& tr)
-{
+{ 
     m_affine.premultiply(tr);
     updateTransformations();
 }
 //------------------------------------------------------------------------
 void Agg2D::matrix(const Transformations& tr)
-{
+{ 
     matrix(agg::trans_affine(tr.affineMatrix[0], tr.affineMatrix[1], tr.affineMatrix[2],
                              tr.affineMatrix[3], tr.affineMatrix[4], tr.affineMatrix[5]));
 }
 //------------------------------------------------------------------------
-void Agg2D::scale(double s)
+void Agg2D::scale(real s)
 {
     m_affine.premultiply(agg::trans_affine_scaling(s));
     updateTransformations();
 }
 //------------------------------------------------------------------------
-void Agg2D::scale(double sx, double sy)
-{
+void Agg2D::scale(real sx, real sy)   
+{ 
     m_affine.premultiply(agg::trans_affine_scaling(sx, sy));
     updateTransformations();
 }
 //------------------------------------------------------------------------
-void Agg2D::parallelogram(double x1, double y1, double x2, double y2, const double* para)
+void Agg2D::parallelogram(real x1, real y1, real x2, real y2, const real* para)
 {
     m_affine.premultiply(agg::trans_affine(x1, y1, x2, y2, para));
     updateTransformations();
 }
 //------------------------------------------------------------------------
-void Agg2D::viewport(double worldX1,  double worldY1,  double worldX2,  double worldY2,
-                     double screenX1, double screenY1, double screenX2, double screenY2,
+void Agg2D::viewport(real worldX1,  real worldY1,  real worldX2,  real worldY2,
+                     real screenX1, real screenY1, real screenX2, real screenY2,
                      ViewportOption opt, WindowFitLogic fl)
 {
     agg::trans_viewport vp;
@@ -536,16 +570,16 @@ void Agg2D::viewport(double worldX1,  double worldY1,  double worldX2,  double w
                                       agg::aspect_ratio_slice;
     switch(opt)
     {
-        case Anisotropic: vp.preserve_aspect_ratio(0.0, 0.0, agg::aspect_ratio_stretch); break;
-        case XMinYMin:    vp.preserve_aspect_ratio(0.0, 0.0, ar);    break;
-        case XMidYMin:    vp.preserve_aspect_ratio(0.5, 0.0, ar);    break;
-        case XMaxYMin:    vp.preserve_aspect_ratio(1.0, 0.0, ar);    break;
-        case XMinYMid:    vp.preserve_aspect_ratio(0.0, 0.5, ar);    break;
-        case XMidYMid:    vp.preserve_aspect_ratio(0.5, 0.5, ar);    break;
-        case XMaxYMid:    vp.preserve_aspect_ratio(1.0, 0.5, ar);    break;
-        case XMinYMax:    vp.preserve_aspect_ratio(0.0, 1.0, ar);    break;
-        case XMidYMax:    vp.preserve_aspect_ratio(0.5, 1.0, ar);    break;
-        case XMaxYMax:    vp.preserve_aspect_ratio(1.0, 1.0, ar);    break;
+        case Anisotropic: vp.preserve_aspect_ratio(0.0f, 0.0f, agg::aspect_ratio_stretch); break;
+        case XMinYMin:    vp.preserve_aspect_ratio(0.0f, 0.0f, ar);    break;
+        case XMidYMin:    vp.preserve_aspect_ratio(0.5f, 0.0f, ar);    break;
+        case XMaxYMin:    vp.preserve_aspect_ratio(1.0f, 0.0f, ar);    break;
+        case XMinYMid:    vp.preserve_aspect_ratio(0.0f, 0.5f, ar);    break;
+        case XMidYMid:    vp.preserve_aspect_ratio(0.5f, 0.5f, ar);    break;
+        case XMaxYMid:    vp.preserve_aspect_ratio(1.0f, 0.5f, ar);    break;
+        case XMinYMax:    vp.preserve_aspect_ratio(0.0f, 1.0f, ar);    break;
+        case XMidYMax:    vp.preserve_aspect_ratio(0.5f, 1.0f, ar);    break;
+        case XMaxYMax:    vp.preserve_aspect_ratio(1.0f, 1.0f, ar);    break;
     }
     vp.world_viewport(worldX1,   worldY1,  worldX2,  worldY2);
     vp.device_viewport(screenX1, screenY1, screenX2, screenY2);
@@ -556,10 +590,10 @@ void Agg2D::viewport(double worldX1,  double worldY1,  double worldX2,  double w
 
 
 //------------------------------------------------------------------------
-void Agg2D::fillColor(Color c)
-{
+void Agg2D::fillColor(Color c) 
+{ 
     m_fillColor = c;
-    m_fillGradientFlag = Solid;
+    m_fillGradientFlag = Solid; 
 }
 
 //------------------------------------------------------------------------
@@ -575,10 +609,10 @@ void Agg2D::noFill()
 }
 
 //------------------------------------------------------------------------
-void Agg2D::lineColor(Color c)
-{
+void Agg2D::lineColor(Color c) 
+{ 
     m_lineColor = c;
-    m_lineGradientFlag = Solid;
+    m_lineGradientFlag = Solid; 
 }
 
 //------------------------------------------------------------------------
@@ -604,91 +638,311 @@ Agg2D::Color Agg2D::lineColor() const
 {
     return m_lineColor;
 }
-
 //------------------------------------------------------------------------
-void Agg2D::fillLinearGradient(double x1, double y1, double x2, double y2, Color c1, Color c2, double profile)
+void Agg2D::fillLinearGradient(const gradient_lut_type& lut, 
+                real x1, real y1, real x2, real y2,
+              const agg::trans_affine& gradientTransform,
+              spreadMethod_e spreadMethod,
+              gradientUnits_e units,
+              real opacity)
+{
+    agg::trans_affine mtx;
+
+  mtx = agg::trans_affine_line_segment(x1, y1, x2, y2, 100.0f);
+
+  if (units == gradientUnits_objectBoundingBox)
+  {
+    real parl[6] = { 0,0, 1,0, 1,1 };
+    real object_bbox_x1 = 0.;
+    real object_bbox_y1 = 0.;
+    real object_bbox_x2 = 0.;
+    real object_bbox_y2 = 0.;
+
+    agg::bounding_rect_single(m_path, 0, 
+                  &object_bbox_x1, &object_bbox_y1,
+                  &object_bbox_x2, &object_bbox_y2);
+
+        if (object_bbox_y1 == object_bbox_y2)
+            object_bbox_y2 += .1;
+
+        if (object_bbox_x1 == object_bbox_x2)
+            object_bbox_x2 += .1;
+
+    mtx *= agg::trans_affine(parl, 
+                 object_bbox_x1, 
+                 object_bbox_y1, 
+                 object_bbox_x2, 
+                 object_bbox_y2);
+  }
+
+    mtx *= gradientTransform;
+    mtx *= m_transform;
+    mtx.invert();
+
+  m_fillGradientSpreadMethod = spreadMethod;
+  m_fillGradientFlag         = Linear;
+  m_fillGradient             = lut;
+  m_fillGradientMatrix       = mtx;
+    m_fillGradientD1           = 0.0f;
+    m_fillGradientD2           = 100.0f;
+  m_fillGradientOpacity      = opacity;
+  m_fillColor = Color(0,0,0);  // Set some real color
+}
+//------------------------------------------------------------------------
+void Agg2D::lineLinearGradient(const gradient_lut_type& lut, 
+                real x1, real y1, real x2, real y2,
+              const agg::trans_affine& gradientTransform,
+              spreadMethod_e spreadMethod,
+              gradientUnits_e units,
+              real opacity)
+{
+    agg::trans_affine mtx;
+
+  mtx = agg::trans_affine_line_segment(x1, y1, x2, y2, 100.0f);
+
+  if (units == gradientUnits_objectBoundingBox)
+  {
+    real parl[6] = { 0,0, 1,0, 1,1 };
+    real object_bbox_x1 = 0.;
+    real object_bbox_y1 = 0.;
+    real object_bbox_x2 = 0.;
+    real object_bbox_y2 = 0.;
+
+    agg::bounding_rect_single(m_path, 0, 
+                  &object_bbox_x1, &object_bbox_y1,
+                  &object_bbox_x2, &object_bbox_y2);
+
+        if (object_bbox_y1 == object_bbox_y2)
+            object_bbox_y2 += .1;
+
+        if (object_bbox_x1 == object_bbox_x2)
+            object_bbox_x2 += .1;
+
+    mtx *= agg::trans_affine(parl, 
+                 object_bbox_x1, 
+                 object_bbox_y1, 
+                 object_bbox_x2, 
+                 object_bbox_y2);
+  }
+
+    mtx *= gradientTransform;
+    mtx *= m_transform;
+    mtx.invert();
+
+  m_lineGradientSpreadMethod = spreadMethod;
+  m_lineGradientFlag         = Linear;
+  m_lineGradient             = lut;
+  m_lineGradientMatrix       = mtx;
+    m_lineGradientD1           = 0.0f;
+    m_lineGradientD2           = 100.0f;
+  m_lineGradientOpacity      = opacity;
+  m_lineColor = Color(0,0,0);  // Set some real color
+}
+//------------------------------------------------------------------------
+void Agg2D::fillRadialGradient(const gradient_lut_type& lut, 
+                real cx, real cy, real r,
+              real fx, real fy,
+              const agg::trans_affine& gradientTransform,
+              spreadMethod_e spreadMethod,
+              gradientUnits_e units,
+              real opacity)
+{
+  agg::trans_affine mtx;
+    int gradient_type = 0;
+
+    real fx_ = 0;
+    real fy_ = 0;
+
+  m_fillGradientFlag = (fx == cx && fy == cy) ? Radial : RadialWithFocus;
+
+    mtx  = agg::trans_affine_scaling(r / 100.0f);
+    mtx *= agg::trans_affine_translation(cx, cy);
+    fx_ = fx;
+    fy_ = fy;
+    mtx.inverse_transform(&fx_, &fy_);
+
+  if (units == gradientUnits_objectBoundingBox)
+  {
+    real parl[6] = { 0,0, 1,0, 1,1 };
+    real object_bbox_x1 = 0.;
+    real object_bbox_y1 = 0.;
+    real object_bbox_x2 = 0.;
+    real object_bbox_y2 = 0.;
+
+    agg::bounding_rect_single(m_path, 0, 
+                  &object_bbox_x1, &object_bbox_y1,
+                  &object_bbox_x2, &object_bbox_y2);
+
+        if (object_bbox_y1 == object_bbox_y2)
+            object_bbox_y2 += .1;
+
+        if (object_bbox_x1 == object_bbox_x2)
+            object_bbox_x2 += .1;
+
+    mtx *= agg::trans_affine(parl, 
+                 object_bbox_x1, 
+                 object_bbox_y1, 
+                 object_bbox_x2, 
+                 object_bbox_y2);
+  }
+
+    mtx *= gradientTransform;
+    mtx *= m_transform;
+    mtx.invert();
+
+    m_fillGradientSpreadMethod = spreadMethod;
+    m_fillGradient             = lut;
+    m_fillGradientMatrix       = mtx;
+    m_fillGradientD1           = fx_;
+    m_fillGradientD2           = fy_;
+    m_fillGradientOpacity      = opacity;
+    m_fillColor = Color(0,0,0);  // Set some real color
+}
+//------------------------------------------------------------------------
+void Agg2D::lineRadialGradient(const gradient_lut_type& lut, 
+                real cx, real cy, real r,
+              real fx, real fy,
+              const agg::trans_affine& gradientTransform,
+              spreadMethod_e spreadMethod,
+              gradientUnits_e units,
+              real opacity)
+{
+    agg::trans_affine mtx;
+    int gradient_type = 0;
+
+    real fx_ = 0;
+    real fy_ = 0;
+
+    m_lineGradientFlag = (fx == cx && fy == cy) ? Radial : RadialWithFocus;
+
+    mtx  = agg::trans_affine_scaling(r / 100.0f);
+    mtx *= agg::trans_affine_translation(cx, cy);
+    fx_ = fx;
+    fy_ = fy;
+    mtx.inverse_transform(&fx_, &fy_);
+
+    if (units == gradientUnits_objectBoundingBox)
+    {
+      real parl[6] = { 0,0, 1,0, 1,1 };
+      real object_bbox_x1 = 0.;
+      real object_bbox_y1 = 0.;
+      real object_bbox_x2 = 0.;
+      real object_bbox_y2 = 0.;
+
+      agg::bounding_rect_single(m_path, 0, 
+                    &object_bbox_x1, &object_bbox_y1,
+                    &object_bbox_x2, &object_bbox_y2);
+
+          if (object_bbox_y1 == object_bbox_y2)
+              object_bbox_y2 += .1;
+
+          if (object_bbox_x1 == object_bbox_x2)
+              object_bbox_x2 += .1;
+
+      mtx *= agg::trans_affine(parl, 
+                   object_bbox_x1, 
+                   object_bbox_y1, 
+                   object_bbox_x2, 
+                   object_bbox_y2);
+    }
+
+    mtx *= gradientTransform;
+    mtx *= m_transform;
+    mtx.invert();
+
+    m_lineGradientSpreadMethod = spreadMethod;
+    m_lineGradient             = lut;
+    m_lineGradientMatrix       = mtx;
+    m_lineGradientD1           = fx_;
+    m_lineGradientD2           = fy_;
+    m_lineGradientOpacity      = opacity;
+    m_lineColor = Color(0,0,0);  // Set some real color
+}
+//-------------------------------------------------------------------------
+void Agg2D::fillLinearGradient(real x1, real y1, real x2, real y2, Color c1, Color c2, real profile)
 {
     int i;
-    int startGradient = 128 - int(profile * 127.0);
-    int endGradient   = 128 + int(profile * 127.0);
+    int startGradient = 128 - int(profile * 127.0f);
+    int endGradient   = 128 + int(profile * 127.0f);
     if (endGradient <= startGradient) endGradient = startGradient + 1;
-    double k = 1.0 / double(endGradient - startGradient);
+    real k = 1.0f / real(endGradient - startGradient);
     for (i = 0; i < startGradient; i++)
-    {
+    { 
         m_fillGradient[i] = c1;
     }
     for (; i < endGradient; i++)
     {
-        m_fillGradient[i] = c1.gradient(c2, double(i - startGradient) * k);
+        m_fillGradient[i] = c1.gradient(c2, real(i - startGradient) * k);
     }
     for (; i < 256; i++)
-    {
+    { 
         m_fillGradient[i] = c2;
     }
-    double angle = atan2(y2-y1, x2-x1);
+    real angle = (real)atan2(y2-y1, x2-x1);
     m_fillGradientMatrix.reset();
     m_fillGradientMatrix *= agg::trans_affine_rotation(angle);
     m_fillGradientMatrix *= agg::trans_affine_translation(x1, y1);
     m_fillGradientMatrix *= m_transform;
     m_fillGradientMatrix.invert();
-    m_fillGradientD1 = 0.0;
-    m_fillGradientD2 = sqrt((x2-x1) * (x2-x1) + (y2-y1) * (y2-y1));
+    m_fillGradientD1 = 0.0f;
+    m_fillGradientD2 = SQRT((x2-x1) * (x2-x1) + (y2-y1) * (y2-y1));
     m_fillGradientFlag = Linear;
     m_fillColor = Color(0,0,0);  // Set some real color
+    m_fillGradientOpacity = 1.0;
 }
 
 
 //------------------------------------------------------------------------
-void Agg2D::lineLinearGradient(double x1, double y1, double x2, double y2, Color c1, Color c2, double profile)
+void Agg2D::lineLinearGradient(real x1, real y1, real x2, real y2, Color c1, Color c2, real profile)
 {
     int i;
-    int startGradient = 128 - int(profile * 128.0);
-    int endGradient   = 128 + int(profile * 128.0);
+    int startGradient = 128 - int(profile * 128.0f);
+    int endGradient   = 128 + int(profile * 128.0f);
     if (endGradient <= startGradient) endGradient = startGradient + 1;
-    double k = 1.0 / double(endGradient - startGradient);
+    real k = 1.0f / real(endGradient - startGradient);
     for (i = 0; i < startGradient; i++)
-    {
+    { 
         m_lineGradient[i] = c1;
     }
     for (; i < endGradient; i++)
     {
-        m_lineGradient[i] = c1.gradient(c2, double(i - startGradient) * k);
+        m_lineGradient[i] = c1.gradient(c2, real(i - startGradient) * k);
     }
     for (; i < 256; i++)
-    {
+    { 
         m_lineGradient[i] = c2;
     }
-    double angle = atan2(y2-y1, x2-x1);
+    real angle = (real)atan2(y2-y1, x2-x1);
     m_lineGradientMatrix.reset();
     m_lineGradientMatrix *= agg::trans_affine_rotation(angle);
     m_lineGradientMatrix *= agg::trans_affine_translation(x1, y1);
     m_fillGradientMatrix *= m_transform;
     m_lineGradientMatrix.invert();
     m_lineGradientD1 = 0;
-    m_lineGradientD2 = sqrt((x2-x1) * (x2-x1) + (y2-y1) * (y2-y1));
+    m_lineGradientD2 = SQRT((x2-x1) * (x2-x1) + (y2-y1) * (y2-y1));
     m_lineGradientFlag = Linear;
     m_lineColor = Color(0,0,0);  // Set some real color
 }
 
 
 //------------------------------------------------------------------------
-void Agg2D::fillRadialGradient(double x, double y, double r, Color c1, Color c2, double profile)
+void Agg2D::fillRadialGradient(real x, real y, real r, Color c1, Color c2, real profile)
 {
     int i;
-    int startGradient = 128 - int(profile * 127.0);
-    int endGradient   = 128 + int(profile * 127.0);
+    int startGradient = 128 - int(profile * 127.0f);
+    int endGradient   = 128 + int(profile * 127.0f);
     if (endGradient <= startGradient) endGradient = startGradient + 1;
-    double k = 1.0 / double(endGradient - startGradient);
+    real k = 1.0f / real(endGradient - startGradient);
     for (i = 0; i < startGradient; i++)
-    {
+    { 
         m_fillGradient[i] = c1;
     }
     for (; i < endGradient; i++)
     {
-        m_fillGradient[i] = c1.gradient(c2, double(i - startGradient) * k);
+        m_fillGradient[i] = c1.gradient(c2, real(i - startGradient) * k);
     }
     for (; i < 256; i++)
-    {
+    { 
         m_fillGradient[i] = c2;
     }
     m_fillGradientD2 = worldToScreen(r);
@@ -699,27 +953,28 @@ void Agg2D::fillRadialGradient(double x, double y, double r, Color c1, Color c2,
     m_fillGradientD1 = 0;
     m_fillGradientFlag = Radial;
     m_fillColor = Color(0,0,0);  // Set some real color
+    m_fillGradientOpacity = 1.0;
 }
 
 
 //------------------------------------------------------------------------
-void Agg2D::lineRadialGradient(double x, double y, double r, Color c1, Color c2, double profile)
+void Agg2D::lineRadialGradient(real x, real y, real r, Color c1, Color c2, real profile)
 {
     int i;
-    int startGradient = 128 - int(profile * 128.0);
-    int endGradient   = 128 + int(profile * 128.0);
+    int startGradient = 128 - int(profile * 128.0f);
+    int endGradient   = 128 + int(profile * 128.0f);
     if (endGradient <= startGradient) endGradient = startGradient + 1;
-    double k = 1.0 / double(endGradient - startGradient);
+    real k = 1.0f / real(endGradient - startGradient);
     for (i = 0; i < startGradient; i++)
-    {
+    { 
         m_lineGradient[i] = c1;
     }
     for (; i < endGradient; i++)
     {
-        m_lineGradient[i] = c1.gradient(c2, double(i - startGradient) * k);
+        m_lineGradient[i] = c1.gradient(c2, real(i - startGradient) * k);
     }
     for (; i < 256; i++)
-    {
+    { 
         m_lineGradient[i] = c2;
     }
     m_lineGradientD2 = worldToScreen(r);
@@ -734,16 +989,16 @@ void Agg2D::lineRadialGradient(double x, double y, double r, Color c1, Color c2,
 
 
 //------------------------------------------------------------------------
-void Agg2D::fillRadialGradient(double x, double y, double r, Color c1, Color c2, Color c3)
+void Agg2D::fillRadialGradient(real x, real y, real r, Color c1, Color c2, Color c3)
 {
     int i;
     for (i = 0; i < 128; i++)
-    {
-        m_fillGradient[i] = c1.gradient(c2, double(i) / 127.0);
+    { 
+        m_fillGradient[i] = c1.gradient(c2, real(i) / 127.0f);
     }
     for (; i < 256; i++)
-    {
-        m_fillGradient[i] = c2.gradient(c3, double(i - 128) / 127.0);
+    { 
+        m_fillGradient[i] = c2.gradient(c3, real(i - 128) / 127.0f);
     }
     m_fillGradientD2 = worldToScreen(r);
     worldToScreen(x, y);
@@ -753,20 +1008,21 @@ void Agg2D::fillRadialGradient(double x, double y, double r, Color c1, Color c2,
     m_fillGradientD1 = 0;
     m_fillGradientFlag = Radial;
     m_fillColor = Color(0,0,0);  // Set some real color
+    m_fillGradientOpacity = 1.0;
 }
 
 
 //------------------------------------------------------------------------
-void Agg2D::lineRadialGradient(double x, double y, double r, Color c1, Color c2, Color c3)
+void Agg2D::lineRadialGradient(real x, real y, real r, Color c1, Color c2, Color c3)
 {
     int i;
     for (i = 0; i < 128; i++)
-    {
-        m_lineGradient[i] = c1.gradient(c2, double(i) / 127.0);
+    { 
+        m_lineGradient[i] = c1.gradient(c2, real(i) / 127.0f);
     }
     for (; i < 256; i++)
-    {
-        m_lineGradient[i] = c2.gradient(c3, double(i - 128) / 127.0);
+    { 
+        m_lineGradient[i] = c2.gradient(c3, real(i - 128) / 127.0f);
     }
     m_lineGradientD2 = worldToScreen(r);
     worldToScreen(x, y);
@@ -779,7 +1035,7 @@ void Agg2D::lineRadialGradient(double x, double y, double r, Color c1, Color c2,
 }
 
 
-void Agg2D::fillRadialGradient(double x, double y, double r)
+void Agg2D::fillRadialGradient(real x, real y, real r)
 {
     m_fillGradientD2 = worldToScreen(r);
     worldToScreen(x, y);
@@ -791,7 +1047,7 @@ void Agg2D::fillRadialGradient(double x, double y, double r)
 
 
 //------------------------------------------------------------------------
-void Agg2D::lineRadialGradient(double x, double y, double r)
+void Agg2D::lineRadialGradient(real x, real y, real r)
 {
     m_lineGradientD2 = worldToScreen(r);
     worldToScreen(x, y);
@@ -803,15 +1059,15 @@ void Agg2D::lineRadialGradient(double x, double y, double r)
 
 
 //------------------------------------------------------------------------
-void Agg2D::lineWidth(double w)
-{
+void Agg2D::lineWidth(real w) 
+{ 
     m_lineWidth = w;
     m_convStroke.width(w);
 }
 
 
 //------------------------------------------------------------------------
-double Agg2D::lineWidth(double w) const
+real Agg2D::lineWidth(real w) const
 {
     return m_lineWidth;
 }
@@ -863,7 +1119,7 @@ Agg2D::LineJoin Agg2D::lineJoin() const
 
 
 //------------------------------------------------------------------------
-void Agg2D::addLine(double x1, double y1, double x2, double y2)
+void Agg2D::addLine(real x1, real y1, real x2, real y2)
 {
     m_path.move_to(x1, y1);
     m_path.line_to(x2, y2);
@@ -871,7 +1127,7 @@ void Agg2D::addLine(double x1, double y1, double x2, double y2)
 
 
 //------------------------------------------------------------------------
-void Agg2D::line(double x1, double y1, double x2, double y2)
+void Agg2D::line(real x1, real y1, real x2, real y2)
 {
     m_path.remove_all();
     addLine(x1, y1, x2, y2);
@@ -880,7 +1136,7 @@ void Agg2D::line(double x1, double y1, double x2, double y2)
 
 
 //------------------------------------------------------------------------
-void Agg2D::triangle(double x1, double y1, double x2, double y2, double x3, double y3)
+void Agg2D::triangle(real x1, real y1, real x2, real y2, real x3, real y3)
 {
     m_path.remove_all();
     m_path.move_to(x1, y1);
@@ -892,7 +1148,7 @@ void Agg2D::triangle(double x1, double y1, double x2, double y2, double x3, doub
 
 
 //------------------------------------------------------------------------
-void Agg2D::rectangle(double x1, double y1, double x2, double y2)
+void Agg2D::rectangle(real x1, real y1, real x2, real y2)
 {
     m_path.remove_all();
     m_path.move_to(x1, y1);
@@ -905,12 +1161,12 @@ void Agg2D::rectangle(double x1, double y1, double x2, double y2)
 
 
 //------------------------------------------------------------------------
-void Agg2D::roundedRect(double x1, double y1, double x2, double y2, double r)
+void Agg2D::roundedRect(real x1, real y1, real x2, real y2, real r)
 {
     m_path.remove_all();
     agg::rounded_rect rc(x1, y1, x2, y2, r);
     rc.normalize_radius();
-    rc.approximation_scale(worldToScreen(1.0) * g_approxScale);
+    rc.approximation_scale(worldToScreen(1.0f) * g_approxScale);
     // JME audit
     //m_path.add_path(rc, 0, false);
     m_path.concat_path(rc,0);
@@ -920,7 +1176,7 @@ void Agg2D::roundedRect(double x1, double y1, double x2, double y2, double r)
 
 
 //------------------------------------------------------------------------
-void Agg2D::roundedRect(double x1, double y1, double x2, double y2, double rx, double ry)
+void Agg2D::roundedRect(real x1, real y1, real x2, real y2, real rx, real ry)
 {
     m_path.remove_all();
     agg::rounded_rect rc;
@@ -935,24 +1191,38 @@ void Agg2D::roundedRect(double x1, double y1, double x2, double y2, double rx, d
 
 
 //------------------------------------------------------------------------
-void Agg2D::roundedRect(double x1, double y1, double x2, double y2,
-                        double rx_bottom, double ry_bottom,
-                        double rx_top,    double ry_top)
+void Agg2D::roundedRect(real x1, real y1, real x2, real y2, 
+                        real rx_bottom, real ry_bottom,
+                        real rx_top,    real ry_top)
 {
     m_path.remove_all();
     agg::rounded_rect rc;
     rc.rect(x1, y1, x2, y2);
     rc.radius(rx_bottom, ry_bottom, rx_top, ry_top);
     rc.normalize_radius();
-    rc.approximation_scale(worldToScreen(1.0) * g_approxScale);
+    rc.approximation_scale(worldToScreen(1.0f) * g_approxScale);
     //m_path.add_path(rc, 0, false);
     m_path.concat_path(rc,0); // JME
     drawPath(FillAndStroke);
 }
 
+//------------------------------------------------------------------------
+void Agg2D::roundedRect(real x1, real y1, real x2, real y2, 
+                     real rx1, real ry1, real rx2, real ry2, 
+                     real rx3, real ry3, real rx4, real ry4)
+{
+    m_path.remove_all();
+    agg::rounded_rect rc;
+    rc.rect(x1, y1, x2, y2);
+    rc.radius(rx1, ry1, rx2, ry2, rx3, ry3, rx4, ry4);
+    rc.normalize_radius();
+    rc.approximation_scale(worldToScreen(1.0f) * g_approxScale);
+    m_path.concat_path(rc,0);
+    drawPath(FillAndStroke);
+}
 
 //------------------------------------------------------------------------
-void Agg2D::ellipse(double cx, double cy, double rx, double ry)
+void Agg2D::ellipse(real cx, real cy, real rx, real ry)
 {
     m_path.remove_all();
     agg::bezier_arc arc(cx, cy, rx, ry, 0, 2*pi());
@@ -964,7 +1234,7 @@ void Agg2D::ellipse(double cx, double cy, double rx, double ry)
 
 
 //------------------------------------------------------------------------
-void Agg2D::arc(double cx, double cy, double rx, double ry, double start, double sweep)
+void Agg2D::arc(real cx, real cy, real rx, real ry, real start, real sweep)
 {
     m_path.remove_all();
     agg::bezier_arc arc(cx, cy, rx, ry, start, sweep);
@@ -975,20 +1245,20 @@ void Agg2D::arc(double cx, double cy, double rx, double ry, double start, double
 
 
 //------------------------------------------------------------------------
-void Agg2D::star(double cx, double cy, double r1, double r2, double startAngle, int numRays)
+void Agg2D::star(real cx, real cy, real r1, real r2, real startAngle, int numRays)
 {
     m_path.remove_all();
-    double da = agg::pi / double(numRays);
-    double a = startAngle;
+    real da = agg::pi / real(numRays);
+    real a = startAngle;
     int i;
     for (i = 0; i < numRays; i++)
     {
-        double x = cos(a) * r2 + cx;
-        double y = sin(a) * r2 + cy;
+        real x = (real)cos(a) * r2 + cx;
+        real y = (real)sin(a) * r2 + cy;
         if (i) m_path.line_to(x, y);
         else   m_path.move_to(x, y);
         a += da;
-        m_path.line_to(cos(a) * r1 + cx, sin(a) * r1 + cy);
+        m_path.line_to((real)cos(a) * r1 + cx, (real)sin(a) * r1 + cy);
         a += da;
     }
     closePolygon();
@@ -997,7 +1267,7 @@ void Agg2D::star(double cx, double cy, double r1, double r2, double startAngle, 
 
 
 //------------------------------------------------------------------------
-void Agg2D::curve(double x1, double y1, double x2, double y2, double x3, double y3)
+void Agg2D::curve(real x1, real y1, real x2, real y2, real x3, real y3)
 {
     m_path.remove_all();
     m_path.move_to(x1, y1);
@@ -1007,7 +1277,7 @@ void Agg2D::curve(double x1, double y1, double x2, double y2, double x3, double 
 
 
 //------------------------------------------------------------------------
-void Agg2D::curve(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4)
+void Agg2D::curve(real x1, real y1, real x2, real y2, real x3, real y3, real x4, real y4)
 {
     m_path.remove_all();
     m_path.move_to(x1, y1);
@@ -1017,7 +1287,7 @@ void Agg2D::curve(double x1, double y1, double x2, double y2, double x3, double 
 
 
 //------------------------------------------------------------------------
-void Agg2D::polygon(double* xy, int numPoints)
+void Agg2D::polygon(real* xy, int numPoints)
 {
     m_path.remove_all();
     //m_path.add_poly(xy, numPoints);
@@ -1028,11 +1298,11 @@ void Agg2D::polygon(double* xy, int numPoints)
 
 
 //------------------------------------------------------------------------
-void Agg2D::polyline(double* xy, int numPoints)
+void Agg2D::polyline(real* xy, int numPoints)
 {
     m_path.remove_all();
     //m_path.add_poly(xy, numPoints);
-	  m_path.concat_poly(xy,numPoints,true); // JME, AF
+    m_path.concat_poly(xy,numPoints,true); // JME, AF
     drawPath(StrokeOnly);
 }
 
@@ -1040,26 +1310,30 @@ void Agg2D::polyline(double* xy, int numPoints)
 //------------------------------------------------------------------------
 void Agg2D::flipText(bool flip)
 {
+#if !defined( UNDER_CE )
     m_fontEngine.flip_y(flip);
+#endif
 }
 
 //------------------------------------------------------------------------
-void Agg2D::font(const char* fontName,
-                 double height,
-                 bool bold,
+void Agg2D::font(const char* fontName, 
+                 real height, 
+                 bool bold, 
                  bool italic,
-                 FontCacheType ch,
-                 double angle)
+                 FontCacheType ch, 
+                 real angle)
 {
+#if !defined( UNDER_CE )
+
     m_textAngle = angle;
     m_fontHeight = height;
     m_fontCacheType = ch;
 
 
 #ifdef AGG2D_USE_FREETYPE
-    m_fontEngine.load_font(fontName,
-                           0,
-                           (ch == VectorFontCache) ?
+    m_fontEngine.load_font(fileName, 
+                           0, 
+                           (ch == VectorFontCache) ? 
                                 agg::glyph_ren_outline :
                                 agg::glyph_ren_agg_gray8);
     m_fontEngine.hinting(m_textHints);
@@ -1067,31 +1341,31 @@ void Agg2D::font(const char* fontName,
 #else
     m_fontEngine.hinting(m_textHints);
 
-    m_fontEngine.create_font(fontName,
-                             (ch == VectorFontCache) ?
+    m_fontEngine.create_font(fontName, 
+                             (ch == VectorFontCache) ? 
                                 agg::glyph_ren_outline :
                                 agg::glyph_ren_agg_gray8,
                               (ch == VectorFontCache) ? height : worldToScreen(height),
-                              0.0,
+                              0.0f,
                               bold ? 700 : 400,
                               italic);
+#endif
+
 #endif
 
 }
 
 
 //------------------------------------------------------------------------
-double Agg2D::fontHeight() const
+real Agg2D::fontHeight() const
 {
    return m_fontHeight;
 }
 
-//------------------------------------------------------------------------
-double Agg2D::fontAscent() const
+real Agg2D::fontAscent() const
 {
    return m_fontAscent;
 }
-
 
 //------------------------------------------------------------------------
 void Agg2D::textAlignment(TextAlignment alignX, TextAlignment alignY)
@@ -1101,13 +1375,13 @@ void Agg2D::textAlignment(TextAlignment alignX, TextAlignment alignY)
 }
 
 //------------------------------------------------------------------------
-double Agg2D::textWidth(const char* str, unsigned int len)
+real Agg2D::textWidth(const char* str, unsigned int len)
 {
 #if defined( UNDER_CE )
   return 0;
 #else
-    double x = 0;
-    double y = 0;
+    real x = 0;
+    real y = 0;
     bool first = true;
     while(*str && len)
     {
@@ -1126,13 +1400,13 @@ double Agg2D::textWidth(const char* str, unsigned int len)
 }
 
 //------------------------------------------------------------------------
-double Agg2D::textWidth(const wchar_t* str, unsigned int len)
+real Agg2D::textWidth(const wchar_t* str, unsigned int len)
 {
 #if defined( UNDER_CE )
   return 0;
 #else
-    double x = 0;
-    double y = 0;
+    real x = 0;
+    real y = 0;
     bool first = true;
     while(*str && len)
     {
@@ -1166,21 +1440,22 @@ void Agg2D::textHints(bool hints)
 
 
 //------------------------------------------------------------------------
-void Agg2D::text(double x, double y, const char* str, unsigned int len, bool roundOff, double ddx, double ddy)
+void Agg2D::text(real x, real y, const char* str, unsigned int len, bool roundOff, real ddx, real ddy)
 {
+#if !defined( UNDER_CE )
 
-   double dx = 0.0;
-   double dy = 0.0;
-
+   real dx = 0.0f;
+   real dy = 0.0f;
+ 
    switch(m_textAlignX)
    {
-       case AlignCenter:  dx = -textWidth(str,len) * 0.5; break;
+       case AlignCenter:  dx = -textWidth(str,len) * 0.5f; break;
        case AlignRight:   dx = -textWidth(str,len);       break;
        default: break;
    }
 
-
-   double asc = fontHeight();
+   
+   real asc = fontHeight();
    const agg::glyph_cache* glyph = m_fontCacheManager.glyph('H');
    if(glyph)
    {
@@ -1194,9 +1469,8 @@ void Agg2D::text(double x, double y, const char* str, unsigned int len, bool rou
 
    switch(m_textAlignY)
    {
-       case AlignCenter:    dy = -asc * 0.5; break;
-       case AlignTop:       dy = -asc;       break;
-       case AlignBaseline:  dy = -fontAscent();   break;
+       case AlignCenter:  dy = -asc * 0.5f; break;
+       case AlignTop:     dy = -asc;       break;
        default: break;
    }
 
@@ -1204,8 +1478,8 @@ void Agg2D::text(double x, double y, const char* str, unsigned int len, bool rou
 
    agg::trans_affine  mtx;
 
-    double start_x = x + dx;
-    double start_y = y + dy;
+    real start_x = x + dx;
+    real start_y = y + dy;
 
     if (roundOff)
     {
@@ -1251,23 +1525,24 @@ void Agg2D::text(double x, double y, const char* str, unsigned int len, bool rou
             start_y += glyph->advance_y;
         }
     }
-
+#endif
 }
 
-void Agg2D::text(double x, double y, const wchar_t* str, unsigned int len, bool roundOff, double ddx, double ddy)
+void Agg2D::text(real x, real y, const wchar_t* str, unsigned int len, bool roundOff, real ddx, real ddy)
 {
+#if !defined( UNDER_CE )
 
-   double dx = 0.0;
-   double dy = 0.0;
-
+   real dx = 0.0f;
+   real dy = 0.0f;
+ 
    switch(m_textAlignX)
    {
-       case AlignCenter:  dx = -textWidth(str,len) * 0.5; break;
+       case AlignCenter:  dx = -textWidth(str,len) * 0.5f; break;
        case AlignRight:   dx = -textWidth(str,len);       break;
        default: break;
    }
-
-   double asc = fontHeight();
+   
+   real asc = fontHeight();
    const agg::glyph_cache* glyph = m_fontCacheManager.glyph('H');
    if(glyph)
    {
@@ -1281,9 +1556,8 @@ void Agg2D::text(double x, double y, const wchar_t* str, unsigned int len, bool 
 
    switch(m_textAlignY)
    {
-       case AlignCenter:    dy = -asc * 0.5; break;
-       case AlignTop:       dy = -asc;       break;
-       case AlignBaseline:  dy = -fontAscent();   break;
+       case AlignCenter:  dy = -asc * 0.5f; break;
+       case AlignTop:     dy = -asc;       break;
        default: break;
    }
 
@@ -1291,8 +1565,8 @@ void Agg2D::text(double x, double y, const wchar_t* str, unsigned int len, bool 
 
    agg::trans_affine  mtx;
 
-    double start_x = x + dx;
-    double start_y = y + dy;
+    real start_x = x + dx;
+    real start_y = y + dy;
 
     if (roundOff)
     {
@@ -1326,7 +1600,7 @@ void Agg2D::text(double x, double y, const wchar_t* str, unsigned int len, bool 
             {
                 m_path.remove_all();
                 //m_path.add_path(tr, 0, false);
-				        m_path.concat_path(tr,0); // JME
+        m_path.concat_path(tr,0); // JME
                 drawPath();
             }
 
@@ -1339,7 +1613,7 @@ void Agg2D::text(double x, double y, const wchar_t* str, unsigned int len, bool 
             start_y += glyph->advance_y;
         }
     }
-
+  #endif 
 }
 
 
@@ -1347,7 +1621,7 @@ void Agg2D::text(double x, double y, const wchar_t* str, unsigned int len, bool 
 void Agg2D::resetPath() { m_path.remove_all(); }
 
 //------------------------------------------------------------------------
-void Agg2D::moveTo(double x, double y)
+void Agg2D::moveTo(real x, real y)
 {
     m_start_x = x;
     m_start_y = y;
@@ -1356,12 +1630,12 @@ void Agg2D::moveTo(double x, double y)
 }
 
 //------------------------------------------------------------------------
-void Agg2D::moveRel(double dx, double dy)
+void Agg2D::moveRel(real dx, real dy)
 {
     if(m_path.vertices().total_vertices())
     {
-        double x2;
-        double y2;
+        real x2;
+        real y2;
         m_path.vertices().last_vertex(&x2, &y2);
 
         dx += x2;
@@ -1373,138 +1647,138 @@ void Agg2D::moveRel(double dx, double dy)
 
 
 //------------------------------------------------------------------------
-void Agg2D::lineTo(double x, double y)
+void Agg2D::lineTo(real x, real y)
 {
     m_path.line_to(x, y);
 }
 
 
 //------------------------------------------------------------------------
-void Agg2D::lineRel(double dx, double dy)
+void Agg2D::lineRel(real dx, real dy)
 {
     m_path.line_rel(dx, dy);
 }
 
 
 //------------------------------------------------------------------------
-void Agg2D::horLineTo(double x)
+void Agg2D::horLineTo(real x)
 {
     m_path.hline_to(x);
 }
 
 
 //------------------------------------------------------------------------
-void Agg2D::horLineRel(double dx)
+void Agg2D::horLineRel(real dx)
 {
     m_path.hline_rel(dx);
 }
 
 
 //------------------------------------------------------------------------
-void Agg2D::verLineTo(double y)
+void Agg2D::verLineTo(real y)
 {
     m_path.vline_to(y);
 }
 
 
 //------------------------------------------------------------------------
-void Agg2D::verLineRel(double dy)
+void Agg2D::verLineRel(real dy)
 {
     m_path.vline_rel(dy);
 }
 
 
 //------------------------------------------------------------------------
-void Agg2D::arcTo(double rx, double ry,
-                  double angle,
+void Agg2D::arcTo(real rx, real ry,
+                  real angle,
                   bool largeArcFlag,
                   bool sweepFlag,
-                  double x, double y)
+                  real x, real y)
 {
     m_path.arc_to(rx, ry, angle, largeArcFlag, sweepFlag, x, y);
 }
 
 
 //------------------------------------------------------------------------
-void Agg2D::arcRel(double rx, double ry,
-                   double angle,
+void Agg2D::arcRel(real rx, real ry,
+                   real angle,
                    bool largeArcFlag,
                    bool sweepFlag,
-                   double dx, double dy)
+                   real dx, real dy)
 {
     m_path.arc_rel(rx, ry, angle, largeArcFlag, sweepFlag, dx, dy);
 }
 
 
 //------------------------------------------------------------------------
-void Agg2D::quadricCurveTo(double xCtrl, double yCtrl,
-                           double xTo,   double yTo)
+void Agg2D::quadricCurveTo(real xCtrl, real yCtrl, 
+                           real xTo,   real yTo)
 {
     m_path.curve3(xCtrl, yCtrl, xTo, yTo);
 }
 
 
 //------------------------------------------------------------------------
-void Agg2D::quadricCurveRel(double dxCtrl, double dyCtrl,
-                            double dxTo,   double dyTo)
+void Agg2D::quadricCurveRel(real dxCtrl, real dyCtrl, 
+                            real dxTo,   real dyTo)
 {
     m_path.curve3_rel(dxCtrl, dyCtrl, dxTo, dyTo);
 }
 
 
 //------------------------------------------------------------------------
-void Agg2D::quadricCurveTo(double xTo, double yTo)
+void Agg2D::quadricCurveTo(real xTo, real yTo)
 {
     m_path.curve3(xTo, yTo);
 }
 
 
 //------------------------------------------------------------------------
-void Agg2D::quadricCurveRel(double dxTo, double dyTo)
+void Agg2D::quadricCurveRel(real dxTo, real dyTo)
 {
     m_path.curve3_rel(dxTo, dyTo);
 }
 
 
 //------------------------------------------------------------------------
-void Agg2D::cubicCurveTo(double xCtrl1, double yCtrl1,
-                         double xCtrl2, double yCtrl2,
-                         double xTo,    double yTo)
+void Agg2D::cubicCurveTo(real xCtrl1, real yCtrl1, 
+                         real xCtrl2, real yCtrl2, 
+                         real xTo,    real yTo)
 {
     m_path.curve4(xCtrl1, yCtrl1, xCtrl2, yCtrl2, xTo, yTo);
 }
 
 
 //------------------------------------------------------------------------
-void Agg2D::cubicCurveRel(double dxCtrl1, double dyCtrl1,
-                          double dxCtrl2, double dyCtrl2,
-                          double dxTo,    double dyTo)
+void Agg2D::cubicCurveRel(real dxCtrl1, real dyCtrl1, 
+                          real dxCtrl2, real dyCtrl2, 
+                          real dxTo,    real dyTo)
 {
     m_path.curve4_rel(dxCtrl1, dyCtrl1, dxCtrl2, dyCtrl2, dxTo, dyTo);
 }
 
 
 //------------------------------------------------------------------------
-void Agg2D::cubicCurveTo(double xCtrl2, double yCtrl2,
-                         double xTo,    double yTo)
+void Agg2D::cubicCurveTo(real xCtrl2, real yCtrl2, 
+                         real xTo,    real yTo)
 {
     m_path.curve4(xCtrl2, yCtrl2, xTo, yTo);
 }
 
 
 //------------------------------------------------------------------------
-void Agg2D::cubicCurveRel(double xCtrl2, double yCtrl2,
-                          double xTo,    double yTo)
+void Agg2D::cubicCurveRel(real xCtrl2, real yCtrl2, 
+                          real xTo,    real yTo)
 {
     m_path.curve4_rel(xCtrl2, yCtrl2, xTo, yTo);
 }
 
 //------------------------------------------------------------------------
-void Agg2D::addEllipse(double cx, double cy, double rx, double ry, Direction dir)
+void Agg2D::addEllipse(real cx, real cy, real rx, real ry, Direction dir)
 {
     agg::bezier_arc arc(cx, cy, rx, ry, 0, (dir == CCW) ? 2*pi() : -2*pi());
     //m_path.add_path(arc, 0, false);
-	  m_path.concat_path(arc,0); // JME
+  m_path.concat_path(arc,0); // JME
     m_path.close_polygon();
 }
 
@@ -1513,11 +1787,16 @@ void Agg2D::closePolygon()
 {
     if(agg::is_vertex(m_path.vertices().last_command()))
     {
-        m_path.vertices().add_vertex(m_start_x, m_start_y,
+        m_path.vertices().add_vertex(m_start_x, m_start_y, 
             agg::path_cmd_end_poly | agg::path_flags_close);
     }
 }
 
+void Agg2D::blur(unsigned rx, unsigned ry)
+{
+  PixFormat pixf(m_rbuf);
+  agg::stack_blur_rgba32(pixf, rx, ry);
+}
 
 //------------------------------------------------------------------------
 void Agg2D::imageFilter(ImageFilter f)
@@ -1528,6 +1807,7 @@ void Agg2D::imageFilter(ImageFilter f)
         case NoFilter:    break;
         case Bilinear:    m_imageFilterLut.calculate(agg::image_filter_bilinear(),    true); break;
         case Hanning:     m_imageFilterLut.calculate(agg::image_filter_hanning(),     true); break;
+        case Hamming:     m_imageFilterLut.calculate(agg::image_filter_hamming(),     true); break;
         case Hermite:     m_imageFilterLut.calculate(agg::image_filter_hermite(),     true); break;
         case Quadric:     m_imageFilterLut.calculate(agg::image_filter_quadric(),     true); break;
         case Bicubic:     m_imageFilterLut.calculate(agg::image_filter_bicubic(),     true); break;
@@ -1562,7 +1842,7 @@ Agg2D::ImageResample Agg2D::imageResample() const
 
 //------------------------------------------------------------------------
 void Agg2D::transformImage(const Image& img,    int imgX1,    int imgY1,    int imgX2,    int imgY2,
-                                             double dstX1, double dstY1, double dstX2, double dstY2)
+                                             real dstX1, real dstY1, real dstX2, real dstY2)
 {
     resetPath();
     moveTo(dstX1, dstY1);
@@ -1570,12 +1850,13 @@ void Agg2D::transformImage(const Image& img,    int imgX1,    int imgY1,    int 
     lineTo(dstX2, dstY2);
     lineTo(dstX1, dstY2);
     closePolygon();
-    double parallelogram[6] = { dstX1, dstY1, dstX2, dstY1, dstX2, dstY2 };
+    real parallelogram[6] = { dstX1, dstY1, dstX2, dstY1, dstX2, dstY2 };
+    //real parallelogram[6] = { dstX1, dstY2, dstX2, dstY2, dstX2, dstY1 };
     renderImage(img, imgX1, imgY1, imgX2, imgY2, parallelogram);
 }
 
 //------------------------------------------------------------------------
-void Agg2D::transformImage(const Image& img, double dstX1, double dstY1, double dstX2, double dstY2)
+void Agg2D::transformImage(const Image& img, real dstX1, real dstY1, real dstX2, real dstY2)
 {
     resetPath();
     moveTo(dstX1, dstY1);
@@ -1583,19 +1864,20 @@ void Agg2D::transformImage(const Image& img, double dstX1, double dstY1, double 
     lineTo(dstX2, dstY2);
     lineTo(dstX1, dstY2);
     closePolygon();
-    double parallelogram[6] = { dstX1, dstY1, dstX2, dstY1, dstX2, dstY2 };
+    real parallelogram[6] = { dstX1, dstY1, dstX2, dstY1, dstX2, dstY2 };
+    //real parallelogram[6] = { dstX1, dstY2, dstX2, dstY2, dstX2, dstY1 };
     renderImage(img, 0, 0, img.renBuf.width(), img.renBuf.height(), parallelogram);
 }
 
 //------------------------------------------------------------------------
 void Agg2D::transformImage(const Image& img, int imgX1, int imgY1, int imgX2, int imgY2,
-                           const double* parallelogram)
+                           const real* parallelogram)
 {
     resetPath();
     moveTo(parallelogram[0], parallelogram[1]);
     lineTo(parallelogram[2], parallelogram[3]);
     lineTo(parallelogram[4], parallelogram[5]);
-    lineTo(parallelogram[0] + parallelogram[4] - parallelogram[2],
+    lineTo(parallelogram[0] + parallelogram[4] - parallelogram[2], 
            parallelogram[1] + parallelogram[5] - parallelogram[3]);
     closePolygon();
     renderImage(img, imgX1, imgY1, imgX2, imgY2, parallelogram);
@@ -1603,13 +1885,13 @@ void Agg2D::transformImage(const Image& img, int imgX1, int imgY1, int imgX2, in
 
 
 //------------------------------------------------------------------------
-void Agg2D::transformImage(const Image& img, const double* parallelogram)
+void Agg2D::transformImage(const Image& img, const real* parallelogram)
 {
     resetPath();
     moveTo(parallelogram[0], parallelogram[1]);
     lineTo(parallelogram[2], parallelogram[3]);
     lineTo(parallelogram[4], parallelogram[5]);
-    lineTo(parallelogram[0] + parallelogram[4] - parallelogram[2],
+    lineTo(parallelogram[0] + parallelogram[4] - parallelogram[2], 
            parallelogram[1] + parallelogram[5] - parallelogram[3]);
     closePolygon();
     renderImage(img, 0, 0, img.renBuf.width(), img.renBuf.height(), parallelogram);
@@ -1617,28 +1899,28 @@ void Agg2D::transformImage(const Image& img, const double* parallelogram)
 
 //------------------------------------------------------------------------
 void Agg2D::transformImagePath(const Image& img,    int imgX1,    int imgY1,    int imgX2,    int imgY2,
-                                                 double dstX1, double dstY1, double dstX2, double dstY2)
+                                                 real dstX1, real dstY1, real dstX2, real dstY2)
 {
-    double parallelogram[6] = { dstX1, dstY1, dstX2, dstY1, dstX2, dstY2 };
+    real parallelogram[6] = { dstX1, dstY1, dstX2, dstY1, dstX2, dstY2 };
     renderImage(img, imgX1, imgY1, imgX2, imgY2, parallelogram);
 }
 
 //------------------------------------------------------------------------
-void Agg2D::transformImagePath(const Image& img, double dstX1, double dstY1, double dstX2, double dstY2)
+void Agg2D::transformImagePath(const Image& img, real dstX1, real dstY1, real dstX2, real dstY2)
 {
-    double parallelogram[6] = { dstX1, dstY1, dstX2, dstY1, dstX2, dstY2 };
+    real parallelogram[6] = { dstX1, dstY1, dstX2, dstY1, dstX2, dstY2 };
     renderImage(img, 0, 0, img.renBuf.width(), img.renBuf.height(), parallelogram);
 }
 
 //------------------------------------------------------------------------
 void Agg2D::transformImagePath(const Image& img, int imgX1, int imgY1, int imgX2, int imgY2,
-                               const double* parallelogram)
+                               const real* parallelogram)
 {
     renderImage(img, imgX1, imgY1, imgX2, imgY2, parallelogram);
 }
 
 //------------------------------------------------------------------------
-void Agg2D::transformImagePath(const Image& img, const double* parallelogram)
+void Agg2D::transformImagePath(const Image& img, const real* parallelogram)
 {
     renderImage(img, 0, 0, img.renBuf.width(), img.renBuf.height(), parallelogram);
 }
@@ -1658,30 +1940,30 @@ void Agg2D::drawPath(DrawPathFlag flag)
             render(true);
         }
         break;
-
-    case StrokeOnly:
-        if (m_lineColor.a && m_lineWidth > 0.0)
+        
+    case StrokeOnly:        
+        if (m_lineColor.a && m_lineWidth > 0.0f)
         {
             m_rasterizer.add_path(m_strokeTransform);
             render(false);
         }
         break;
-
-    case FillAndStroke:
+        
+    case FillAndStroke:     
         if (m_fillColor.a)
         {
             m_rasterizer.add_path(m_pathTransform);
             render(true);
         }
-
-        if (m_lineColor.a && m_lineWidth > 0.0)
+        
+        if (m_lineColor.a && m_lineWidth > 0.0f)
         {
             m_rasterizer.add_path(m_strokeTransform);
             render(false);
         }
         break;
-
-    case FillWithLineColor:
+        
+    case FillWithLineColor: 
         if (m_lineColor.a)
         {
             m_rasterizer.add_path(m_pathTransform);
@@ -1696,87 +1978,210 @@ void Agg2D::drawPath(DrawPathFlag flag)
 //------------------------------------------------------------------------
 class Agg2DRenderer
 {
+  typedef Agg2D::ColorType        color_type;
+  typedef Agg2D::GradientArray    gradient_lut_type;
+  typedef Agg2D::SpanInterpolator interpolator_type;
+  typedef Agg2D::SpanAllocator    span_allocator_type;
+
+  typedef agg::span_gradient<color_type, 
+                 Agg2D::SpanInterpolator, 
+                 agg::gradient_x,      
+                 gradient_opacity> LinearGradientSpan;
+
+  typedef agg::span_gradient<color_type, 
+                Agg2D::SpanInterpolator, 
+                agg::gradient_radial, 
+                gradient_opacity> RadialGradientSpan;
+  //-------------------------------------------------------------------------
+  template <class GradientFunc, class BaseRenderer>
+  static void render_gradient(Agg2D&                   gr,
+                BaseRenderer&            renBase,
+                const gradient_lut_type& lut, 
+                const GradientFunc&      func, 
+                interpolator_type&       interpolator,
+                real                   D1,
+                real                   D2,
+                real                   opacity)
+  {
+    gradient_opacity lut_with_opacity(lut, opacity);
+
+    typedef agg::span_gradient
+    <
+      color_type, 
+      interpolator_type, 
+      GradientFunc, 
+      gradient_opacity
+    > 
+    gradient_span_type;
+    
+    gradient_span_type span(interpolator, func, lut_with_opacity, D1, D2);
+
+    agg::renderer_scanline_aa
+    <
+      BaseRenderer, 
+      span_allocator_type, 
+      gradient_span_type
+    > 
+    ren(renBase, gr.m_allocator, span);
+
+    agg::render_scanlines(gr.m_rasterizer, gr.m_scanline, ren);
+  }
+  //-------------------------------------------------------------------------
+  template <class GradientFunc, class BaseRenderer>
+  static void render_gradient(Agg2D&                   gr, 
+                BaseRenderer&            renBase,
+                Agg2D::spreadMethod_e    spreadMethod,
+                const gradient_lut_type& lut,
+                const GradientFunc&      func,
+                interpolator_type&       intr,
+                real                   D1,
+                real                   D2,
+                real                   opacity
+                )
+  {
+    agg::gradient_reflect_adaptor<GradientFunc> reflect_func(func);
+    agg::gradient_repeat_adaptor<GradientFunc>  repeat_func(func);
+
+    switch (spreadMethod)
+    {
+    case Agg2D::spreadMethod_pad:
+      render_gradient(gr, renBase, lut, func, intr, D1, D2, opacity);
+      break;
+
+    case Agg2D::spreadMethod_reflect:
+      render_gradient(gr, renBase, lut, reflect_func, intr, D1, D2, opacity);
+      break;
+
+    case Agg2D::spreadMethod_repeat:
+      render_gradient(gr, renBase, lut, repeat_func, intr, D1, D2, opacity);
+      break;
+
+    default:
+      assert(false);
+    }
+  }
+
 public:
     //--------------------------------------------------------------------
     template<class BaseRenderer, class SolidRenderer>
-    void static render(Agg2D& gr, BaseRenderer& renBase, SolidRenderer& renSolid, bool fillColor)
+    static void render(Agg2D&         gr, 
+             BaseRenderer&  renBase, 
+             SolidRenderer& renSolid, 
+             bool           fillColor)
     {
-		// JME
-		typedef agg::span_allocator<agg::rgba8> span_allocator_type;
-        //- typedef agg::renderer_scanline_aa<BaseRenderer, Agg2D::LinearGradientSpan> RendererLinearGradient;
-        typedef agg::renderer_scanline_aa<BaseRenderer,
-										span_allocator_type,
-										Agg2D::LinearGradientSpan> RendererLinearGradient;
-        //- typedef agg::renderer_scanline_aa<BaseRenderer, Agg2D::RadialGradientSpan> RendererRadialGradient;
-		typedef agg::renderer_scanline_aa<BaseRenderer,
-										span_allocator_type,
-										Agg2D::RadialGradientSpan> RendererRadialGradient;
-
-        if ((fillColor && gr.m_fillGradientFlag == Agg2D::Linear) ||
+        if ((fillColor && gr.m_fillGradientFlag == Agg2D::Linear) || 
            (!fillColor && gr.m_lineGradientFlag == Agg2D::Linear))
         {
             if (fillColor)
             {
-                Agg2D::LinearGradientSpan span(/*gr.m_allocator, */
-                                               gr.m_fillGradientInterpolator,
-                                               gr.m_linearGradientFunction,
-                                               gr.m_fillGradient,
+        render_gradient
+        (
+          gr, 
+          renBase, 
+          gr.m_fillGradientSpreadMethod,
+          gr.m_fillGradient,
+          gr.m_linearGradientFunction,
+                                               gr.m_fillGradientInterpolator, 
                                                gr.m_fillGradientD1,
-                                               gr.m_fillGradientD2);
-				//-RendererLinearGradient ren(renBase,span);
-                RendererLinearGradient ren(renBase,gr.m_allocator,span);
-                agg::render_scanlines(gr.m_rasterizer, gr.m_scanline, ren);
+          gr.m_fillGradientD2,
+          gr.m_fillGradientOpacity
+        );
             }
             else
             {
-                Agg2D::LinearGradientSpan span(/*gr.m_allocator,*/
-                                               gr.m_lineGradientInterpolator,
-                                               gr.m_linearGradientFunction,
-                                               gr.m_lineGradient,
+        render_gradient
+        (
+          gr, 
+          renBase, 
+          gr.m_lineGradientSpreadMethod,
+          gr.m_lineGradient,
+          gr.m_linearGradientFunction,
+                                               gr.m_lineGradientInterpolator, 
                                                gr.m_lineGradientD1,
-                                               gr.m_lineGradientD2);
-                //- RendererLinearGradient ren(renBase, span);
-                RendererLinearGradient ren(renBase,gr.m_allocator,span);
-                agg::render_scanlines(gr.m_rasterizer, gr.m_scanline, ren);
+          gr.m_lineGradientD2,
+          gr.m_lineGradientOpacity
+        );
             }
+      return;
         }
-        else
-        {
-            if ((fillColor && gr.m_fillGradientFlag == Agg2D::Radial) ||
+            if ((fillColor && gr.m_fillGradientFlag == Agg2D::Radial) || 
                (!fillColor && gr.m_lineGradientFlag == Agg2D::Radial))
             {
-                if (fillColor)
-                {
-                    Agg2D::RadialGradientSpan span(/*gr.m_allocator, */
-                                                   gr.m_fillGradientInterpolator,
-                                                   gr.m_radialGradientFunction,
-                                                   gr.m_fillGradient,
-                                                   gr.m_fillGradientD1,
-                                                   gr.m_fillGradientD2);
-                    //-RendererRadialGradient ren(renBase, span);
-                    RendererRadialGradient ren(renBase,gr.m_allocator,span);
-                    agg::render_scanlines(gr.m_rasterizer, gr.m_scanline, ren);
-                }
-                else
-                {
-                    Agg2D::RadialGradientSpan span(/*gr.m_allocator,*/
-                                                   gr.m_lineGradientInterpolator,
-                                                   gr.m_radialGradientFunction,
-                                                   gr.m_lineGradient,
-                                                   gr.m_lineGradientD1,
-                                                   gr.m_lineGradientD2);
-                    //-RendererRadialGradient ren(renBase, span);
-                    RendererRadialGradient ren(renBase,gr.m_allocator,span);
-                    agg::render_scanlines(gr.m_rasterizer, gr.m_scanline, ren);
-                }
+              if (fillColor)
+              {
+                render_gradient
+                (
+                  gr, 
+                  renBase, 
+                  gr.m_fillGradientSpreadMethod,
+                  gr.m_fillGradient,
+                  gr.m_radialGradientFunction,
+                  gr.m_fillGradientInterpolator, 
+                  gr.m_fillGradientD1,
+                  gr.m_fillGradientD2,
+                  gr.m_fillGradientOpacity
+                );
+              }
+              else
+              {
+                render_gradient
+                (
+                  gr, 
+                  renBase, 
+                  gr.m_lineGradientSpreadMethod,
+                  gr.m_lineGradient,
+                  gr.m_radialGradientFunction, 
+                  gr.m_lineGradientInterpolator,
+                  gr.m_fillGradientD1,
+                  gr.m_fillGradientD2,
+                  gr.m_lineGradientOpacity
+                );
+              }
+              return;
             }
-            else
-            {
+    if ((fillColor && gr.m_fillGradientFlag == Agg2D::RadialWithFocus) ||
+      (!fillColor && gr.m_lineGradientFlag == Agg2D::RadialWithFocus))
+    {
+      if (fillColor)
+      {
+        agg::gradient_radial_focus gradient_func(100.0f, gr.m_fillGradientD1, gr.m_fillGradientD2);
+
+        render_gradient
+        (
+          gr, 
+          renBase, 
+          gr.m_fillGradientSpreadMethod,
+                                                   gr.m_fillGradient,
+          gradient_func,
+          gr.m_fillGradientInterpolator,
+          0.,
+          100.,
+          gr.m_fillGradientOpacity
+        );
+      }
+      else
+      {
+        agg::gradient_radial_focus gradient_func(100.0f, gr.m_lineGradientD1, gr.m_lineGradientD2);
+
+        render_gradient
+        (
+          gr, 
+          renBase, 
+          gr.m_lineGradientSpreadMethod,
+          gr.m_lineGradient,
+          gradient_func,
+          gr.m_lineGradientInterpolator,
+          0.,
+          100.,
+          gr.m_lineGradientOpacity
+        );
+      }
+      return;
+            }
+      
                 renSolid.color(fillColor ? gr.m_fillColor : gr.m_lineColor);
                 agg::render_scanlines(gr.m_rasterizer, gr.m_scanline, renSolid);
             }
-        }
-    }
 
 
     //--------------------------------------------------------------------
@@ -1798,12 +2203,12 @@ public:
                 typedef agg::comp_op_adaptor_clip_to_dst_rgba_pre<Agg2D::Color, agg::order_rgba> OpType;
                 do
                 {
-                    OpType::blend_pix(m_mode,
+                    OpType::blend_pix(m_mode, 
                                       (Agg2D::Color::value_type*)s2,
-                                      m_color.r,
-                                      m_color.g,
-                                      m_color.b,
-                                      Agg2D::Color::base_mask,
+                                      m_color.r, 
+                                      m_color.g, 
+                                      m_color.b, 
+                                      Agg2D::Color::base_mask, 
                                       agg::cover_full);
                     ++s2;
                 }
@@ -1838,17 +2243,18 @@ public:
     template<class BaseRenderer, class SolidRenderer, class Rasterizer, class Scanline>
     void static render(Agg2D& gr, BaseRenderer& renBase, SolidRenderer& renSolid, Rasterizer& ras, Scanline& sl)
     {
-		// JME
-		typedef agg::span_allocator<agg::rgba8> span_allocator_type;
-        typedef agg::renderer_scanline_aa<BaseRenderer,span_allocator_type,Agg2D::LinearGradientSpan> RendererLinearGradient;
-        typedef agg::renderer_scanline_aa<BaseRenderer,span_allocator_type,Agg2D::RadialGradientSpan> RendererRadialGradient;
+    // JME
+    typedef agg::span_allocator<agg::rgba8> span_allocator_type;
+        typedef agg::renderer_scanline_aa<BaseRenderer,span_allocator_type,LinearGradientSpan> RendererLinearGradient;
+        typedef agg::renderer_scanline_aa<BaseRenderer,span_allocator_type,RadialGradientSpan> RendererRadialGradient;
 
         if(gr.m_fillGradientFlag == Agg2D::Linear)
         {
-            Agg2D::LinearGradientSpan span(
-                                           gr.m_fillGradientInterpolator,
-                                           gr.m_linearGradientFunction,
-                                           gr.m_fillGradient,
+            gradient_opacity lut_with_opacity(gr.m_fillGradient, gr.m_fillGradientOpacity);
+            LinearGradientSpan span(
+                                           gr.m_fillGradientInterpolator, 
+                                           gr.m_linearGradientFunction, 
+                                           lut_with_opacity,
                                            gr.m_fillGradientD1,
                                            gr.m_fillGradientD2);
             RendererLinearGradient ren(renBase,gr.m_allocator,span);
@@ -1856,12 +2262,13 @@ public:
         }
         else
         {
+            gradient_opacity lut_with_opacity(gr.m_fillGradient, gr.m_fillGradientOpacity);
             if(gr.m_fillGradientFlag == Agg2D::Radial)
             {
-                Agg2D::RadialGradientSpan span(
-                                               gr.m_fillGradientInterpolator,
-                                               gr.m_radialGradientFunction,
-                                               gr.m_fillGradient,
+                RadialGradientSpan span(
+                                               gr.m_fillGradientInterpolator, 
+                                               gr.m_radialGradientFunction, 
+                                               lut_with_opacity,
                                                gr.m_fillGradientD1,
                                                gr.m_fillGradientD2);
                 RendererRadialGradient ren(renBase,gr.m_allocator,span);
@@ -1880,39 +2287,38 @@ public:
     //--------------------------------------------------------------------
     //! JME - this is where the bulk of the changes have taken place.
     template<class BaseRenderer, class Interpolator>
-    static void renderImage(Agg2D& gr, const Agg2D::Image& img,
+    static void renderImage(Agg2D& gr, const Agg2D::Image& img, 
                             BaseRenderer& renBase, Interpolator& interpolator)
     {
-		//! JME - have not quite figured which part of this is not const-correct
-		// hence the cast.
-		Agg2D::Image& imgc = const_cast<Agg2D::Image&>(img);
-		Agg2D::PixFormat img_pixf(imgc.renBuf);
-		typedef agg::image_accessor_clone<Agg2D::PixFormat> img_source_type;
-		img_source_type source(img_pixf);
+    //! JME - have not quite figured which part of this is not const-correct
+    // hence the cast.
+        Agg2D::Image& imgc = const_cast<Agg2D::Image&>(img);
+        Agg2D::PixFormat img_pixf(imgc.renBuf);
+        typedef agg::image_accessor_clone<Agg2D::PixFormat> img_source_type;
+        img_source_type source(img_pixf);
 
         SpanConvImageBlend blend(gr.m_imageBlendMode, gr.m_imageBlendColor);
         if(gr.m_imageFilter == Agg2D::NoFilter)
         {
+          typedef agg::span_image_filter_rgba_nn<img_source_type,Interpolator> SpanGenType;
+          typedef agg::span_converter<SpanGenType,SpanConvImageBlend> SpanConvType;
+          typedef agg::renderer_scanline_aa<BaseRenderer,Agg2D::SpanAllocator,SpanGenType> RendererType;
 
-			typedef agg::span_image_filter_rgba_nn<img_source_type,Interpolator> SpanGenType;
-			typedef agg::span_converter<SpanGenType,SpanConvImageBlend> SpanConvType;
-			typedef agg::renderer_scanline_aa<BaseRenderer,Agg2D::SpanAllocator,SpanGenType> RendererType;
-
-			SpanGenType sg(source,interpolator);
-            SpanConvType sc(sg, blend);
-			RendererType ri(renBase,gr.m_allocator,sg);
-            agg::render_scanlines(gr.m_rasterizer, gr.m_scanline, ri);
+          SpanGenType sg(source,interpolator);
+          SpanConvType sc(sg, blend);
+          RendererType ri(renBase,gr.m_allocator,sg);
+          agg::render_scanlines(gr.m_rasterizer, gr.m_scanline, ri);
         }
         else
         {
             bool resample = (gr.m_imageResample == Agg2D::ResampleAlways);
             if(gr.m_imageResample == Agg2D::ResampleOnZoomOut)
             {
-                double sx, sy;
+                real sx, sy;
                 interpolator.transformer().scaling_abs(&sx, &sy);
                 if (sx > 1.125 || sy > 1.125)
                 {
-					resample = true;
+                   resample = true;
                 }
             }
 
@@ -1929,16 +2335,17 @@ public:
             }
             else
             {
-				// this is the AGG2D default
+        // this is the AGG2D default
                 if(gr.m_imageFilter == Agg2D::Bilinear)
                 {
+
                     typedef agg::span_image_filter_rgba_bilinear<img_source_type,Interpolator> SpanGenType;
                     typedef agg::span_converter<SpanGenType,SpanConvImageBlend> SpanConvType;
-					typedef agg::renderer_scanline_aa<BaseRenderer,Agg2D::SpanAllocator,SpanGenType> RendererType;
+                    typedef agg::renderer_scanline_aa<BaseRenderer,Agg2D::SpanAllocator,SpanGenType> RendererType;
 
-					SpanGenType sg(source,interpolator);
+                    SpanGenType sg(source,interpolator);
                     SpanConvType sc(sg, blend);
-					RendererType ri(renBase,gr.m_allocator,sg);
+                    RendererType ri(renBase,gr.m_allocator,sg);
                     agg::render_scanlines(gr.m_rasterizer, gr.m_scanline, ri);
                 }
                 else
@@ -1958,10 +2365,10 @@ public:
                     {
                         typedef agg::span_image_filter_rgba<img_source_type,Interpolator> SpanGenType;
                         typedef agg::span_converter<SpanGenType,SpanConvImageBlend> SpanConvType;
-						typedef agg::renderer_scanline_aa<BaseRenderer,Agg2D::SpanAllocator,SpanGenType> RendererType;
+                        typedef agg::renderer_scanline_aa<BaseRenderer,Agg2D::SpanAllocator,SpanGenType> RendererType;
                         SpanGenType sg(source,interpolator,gr.m_imageFilterLut);
                         SpanConvType sc(sg, blend);
-						RendererType ri(renBase,gr.m_allocator,sg);
+                        RendererType ri(renBase,gr.m_allocator,sg);
                         agg::render_scanlines(gr.m_rasterizer, gr.m_scanline, ri);
                     }
                 }
@@ -2002,13 +2409,13 @@ void Agg2D::render(FontRasterizer& ras, FontScanline& sl)
 
 
 //------------------------------------------------------------------------
-void Agg2D::renderImage(const Image& img, int x1, int y1, int x2, int y2,
-                        const double* parl)
+void Agg2D::renderImage(const Image& img, int x1, int y1, int x2, int y2, 
+                        const real* parl)
 {
-    agg::trans_affine mtx((double)x1,
-                          (double)y1,
-                          (double)x2,
-                          (double)y2,
+    agg::trans_affine mtx((real)x1,
+                          (real)y1, 
+                          (real)x2,
+                          (real)y2, 
                           parl);
     mtx *= m_transform;
     mtx.invert();
@@ -2021,8 +2428,8 @@ void Agg2D::renderImage(const Image& img, int x1, int y1, int x2, int y2,
 
     if(m_blendMode == BlendAlpha)
     {
-		// JME audit -
-        Agg2DRenderer::renderImage(*this, img, m_renBasePre, interpolator);
+    // JME audit -
+         Agg2DRenderer::renderImage(*this, img, m_renBasePre, interpolator);
     }
     else
     {
@@ -2033,11 +2440,11 @@ void Agg2D::renderImage(const Image& img, int x1, int y1, int x2, int y2,
 //------------------------------------------------------------------------
 struct Agg2DRasterizerGamma
 {
-
-    Agg2DRasterizerGamma(double alpha, double gamma) :
+ 
+    Agg2DRasterizerGamma(real alpha, real gamma) :
         m_alpha(alpha), m_gamma(gamma) {}
 
-    double operator() (double x) const
+    real operator() (real x) const
     {
         return m_alpha(m_gamma(x));
     }
@@ -2052,9 +2459,9 @@ void Agg2D::updateRasterizerGamma()
 }
 
 //------------------------------------------------------------------------
-void Agg2D::blendImage(Image& img,
+void Agg2D::blendImage(Image& img, 
                        int imgX1, int imgY1, int imgX2, int imgY2,
-                       double dstX, double dstY, unsigned alpha)
+                       real dstX, real dstY, unsigned alpha)
 {
     worldToScreen(dstX, dstY);
     PixFormat pixF(img.renBuf);
@@ -2073,7 +2480,7 @@ void Agg2D::blendImage(Image& img,
 
 
 //------------------------------------------------------------------------
-void Agg2D::blendImage(Image& img, double dstX, double dstY, unsigned alpha)
+void Agg2D::blendImage(Image& img, real dstX, real dstY, unsigned alpha)
 {
     worldToScreen(dstX, dstY);
     PixFormat pixF(img.renBuf);
@@ -2092,7 +2499,7 @@ void Agg2D::blendImage(Image& img, double dstX, double dstY, unsigned alpha)
 //------------------------------------------------------------------------
 void Agg2D::copyImage(Image& img,
                       int imgX1, int imgY1, int imgX2, int imgY2,
-                      double dstX, double dstY)
+                      real dstX, real dstY)
 {
     worldToScreen(dstX, dstY);
     // JME
@@ -2102,7 +2509,7 @@ void Agg2D::copyImage(Image& img,
 }
 
 //------------------------------------------------------------------------
-void Agg2D::copyImage(Image& img, double dstX, double dstY)
+void Agg2D::copyImage(Image& img, real dstX, real dstY)
 {
     worldToScreen(dstX, dstY);
     m_renBase.copy_from(img.renBuf, 0, int(dstX), int(dstY));
@@ -2121,4 +2528,5 @@ void Agg2D::Image::demultiply()
     PixFormat pixf(renBuf);
     pixf.demultiply();
 }
+
 

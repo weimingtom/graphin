@@ -67,10 +67,10 @@ GRAPHIN_API GRAPHIN_RESULT  GRAPHIN_CALL image_blit( HPLATFORMGFX dst, int dst_x
 #elif defined(XWINDOW)
   agg::rect_i dstr( dst_x, dst_y, dst_x + width, dst_y + height );
   agg::rect_i srcr( src_x, src_y, src_x + width, src_y + height );
-  if( blend )
-    src->pmap.blend(dst->d, dst->w, dst->gc, &dstr, &srcr);
-  else
-    src->pmap.draw(dst->d, dst->w, dst->gc, &dstr, &srcr);
+  //if( blend )
+  //  src->pmap.blend(dst->d, dst->w, dst->gc, &dstr, &srcr);
+  //else
+  //  src->pmap.draw(dst->d, dst->w, dst->gc, &dstr, &srcr);
 #endif
 
   return GRAPHIN_OK;
@@ -568,6 +568,8 @@ bool image_ctor(void* pctorPrm, unsigned int width, unsigned int height, BYTE** 
 
   int   stride = pim->pmap.stride();
   BYTE* ptr    = pim->pmap.buf();
+  if( stride < 0 )
+    ptr += abs(stride) * (height - 1);  
 
   for(unsigned n = 0; n < height; ++n, ptr += stride)
     rowPtrs[n] = ptr;
@@ -590,9 +592,9 @@ GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
 }
 
 GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL // save png/jpeg/etc. image to stream of bytes
-        image_save( HIMG himg, 
+        image_save( HIMG himg,
         image_write_function* pfn, void* prm, /* function and its param passed "as is" */
-        unsigned bpp /*24,32 if alpha needed*/,  
+        unsigned bpp /*24,32 if alpha needed*/,
         unsigned type /* 0 - png, 1 - jpg*/,
         unsigned quality /*  only for jpeg, 10 - 100 */ )
 {

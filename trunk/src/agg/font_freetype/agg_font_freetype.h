@@ -136,8 +136,8 @@ namespace agg
         unsigned        m_data_size;
         glyph_data_type m_data_type;
         rect_i          m_bounds;
-        double          m_advance_x;
-        double          m_advance_y;
+        real            m_advance_x;
+        real            m_advance_y;
         trans_affine    m_affine;
 
         path_storage_integer<int16, 6>              m_path16;

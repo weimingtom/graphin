@@ -24,14 +24,14 @@ namespace agg
 
     //------------------------------------------------------------------------
     arrowhead::arrowhead() :
-        m_head_d1(1.0),
-        m_head_d2(1.0),
-        m_head_d3(1.0),
-        m_head_d4(0.0),
-        m_tail_d1(1.0),
-        m_tail_d2(1.0),
-        m_tail_d3(1.0),
-        m_tail_d4(0.0),
+        m_head_d1(1.0f),
+        m_head_d2(1.0f),
+        m_head_d3(1.0f),
+        m_head_d4(0.0f),
+        m_tail_d1(1.0f),
+        m_tail_d2(1.0f),
+        m_tail_d3(1.0f),
+        m_tail_d4(0.0f),
         m_head_flag(false),
         m_tail_flag(false),
         m_curr_id(0),
@@ -53,10 +53,10 @@ namespace agg
                 m_cmd[0] = path_cmd_stop;
                 return;
             }
-            m_coord[0]  =  m_tail_d1;             m_coord[1]  =  0.0;
+            m_coord[0]  =  m_tail_d1;             m_coord[1]  =  0.0f;
             m_coord[2]  =  m_tail_d1 - m_tail_d4; m_coord[3]  =  m_tail_d3;
             m_coord[4]  = -m_tail_d2 - m_tail_d4; m_coord[5]  =  m_tail_d3;
-            m_coord[6]  = -m_tail_d2;             m_coord[7]  =  0.0;
+            m_coord[6]  = -m_tail_d2;             m_coord[7]  =  0.0f;
             m_coord[8]  = -m_tail_d2 - m_tail_d4; m_coord[9]  = -m_tail_d3;
             m_coord[10] =  m_tail_d1 - m_tail_d4; m_coord[11] = -m_tail_d3;
 
@@ -78,9 +78,9 @@ namespace agg
                 m_cmd[0] = path_cmd_stop;
                 return;
             }
-            m_coord[0]  = -m_head_d1;            m_coord[1]  = 0.0;
+            m_coord[0]  = -m_head_d1;            m_coord[1]  = 0.0f;
             m_coord[2]  = m_head_d2 + m_head_d4; m_coord[3]  = -m_head_d3;
-            m_coord[4]  = m_head_d2;             m_coord[5]  = 0.0;
+            m_coord[4]  = m_head_d2;             m_coord[5]  = 0.0f;
             m_coord[6]  = m_head_d2 + m_head_d4; m_coord[7]  = m_head_d3;
 
             m_cmd[0] = path_cmd_move_to;
@@ -95,7 +95,7 @@ namespace agg
 
 
     //------------------------------------------------------------------------
-    unsigned arrowhead::vertex(double* x, double* y)
+    unsigned arrowhead::vertex(real* x, real* y)
     {
         if(m_curr_id < 2)
         {

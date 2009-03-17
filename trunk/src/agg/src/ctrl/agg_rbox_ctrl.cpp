@@ -24,14 +24,14 @@ namespace agg
 {
   
     //------------------------------------------------------------------------
-    rbox_ctrl_impl::rbox_ctrl_impl(double x1, double y1, 
-                                   double x2, double y2, bool flip_y) :
+    rbox_ctrl_impl::rbox_ctrl_impl(real x1, real y1, 
+                                   real x2, real y2, bool flip_y) :
         ctrl(x1, y1, x2, y2, flip_y),
-        m_border_width(1.0),
-        m_border_extra(0.0),
+        m_border_width(1.0f),
+        m_border_extra(0.0f),
         m_text_thickness(1.5),
-        m_text_height(9.0),
-        m_text_width(0.0),
+        m_text_height(9.0f),
+        m_text_width(0.0f),
         m_num_items(0),
         m_cur_item(-1),
         m_ellipse_poly(m_ellipse),
@@ -66,7 +66,7 @@ namespace agg
 
 
     //------------------------------------------------------------------------
-    void rbox_ctrl_impl::border_width(double t, double extra)
+    void rbox_ctrl_impl::border_width(real t, real extra)
     { 
         m_border_width = t; 
         m_border_extra = extra;
@@ -75,7 +75,7 @@ namespace agg
 
 
     //------------------------------------------------------------------------
-    void rbox_ctrl_impl::text_size(double h, double w) 
+    void rbox_ctrl_impl::text_size(real h, real w) 
     { 
         m_text_width = w; 
         m_text_height = h; 
@@ -87,7 +87,7 @@ namespace agg
     void rbox_ctrl_impl::rewind(unsigned idx)
     {
         m_idx = idx;
-        m_dy = m_text_height * 2.0;
+        m_dy = m_text_height * 2.0f;
         m_draw_item = 0;
 
         switch(idx)
@@ -128,7 +128,7 @@ namespace agg
 
         case 2:                 // Text
             m_text.text(&m_items[0][0]);
-            m_text.start_point(m_xs1 + m_dy * 1.5, m_ys1 + m_dy / 2.0);
+            m_text.start_point(m_xs1 + m_dy * 1.5, m_ys1 + m_dy / 2.0f);
             m_text.size(m_text_height, m_text_width);
             m_text_poly.width(m_text_thickness);
             m_text_poly.line_join(round_join);
@@ -162,7 +162,7 @@ namespace agg
 
 
     //------------------------------------------------------------------------
-    unsigned rbox_ctrl_impl::vertex(double* x, double* y)
+    unsigned rbox_ctrl_impl::vertex(real* x, real* y)
     {
         unsigned cmd = path_cmd_line_to;
         switch(m_idx)
@@ -196,7 +196,7 @@ namespace agg
                 {
                     m_text.text(&m_items[m_draw_item][0]);
                     m_text.start_point(m_xs1 + m_dy * 1.5, 
-                                       m_ys1 + m_dy * (m_draw_item + 1) - m_dy / 2.0);
+                                       m_ys1 + m_dy * (m_draw_item + 1) - m_dy / 2.0f);
 
                     m_text_poly.rewind(0);
                     cmd = m_text_poly.vertex(x, y);
@@ -252,7 +252,7 @@ namespace agg
 
 
     //------------------------------------------------------------------------
-    bool rbox_ctrl_impl::in_rect(double x, double y) const
+    bool rbox_ctrl_impl::in_rect(real x, real y) const
     {
         inverse_transform_xy(&x, &y);
         return x >= m_x1 && x <= m_x2 && y >= m_y1 && y <= m_y2;
@@ -261,14 +261,14 @@ namespace agg
 
 
     //------------------------------------------------------------------------
-    bool rbox_ctrl_impl::on_mouse_button_down(double x, double y)
+    bool rbox_ctrl_impl::on_mouse_button_down(real x, real y)
     {
         inverse_transform_xy(&x, &y);
         unsigned i;
         for(i = 0; i < m_num_items; i++)  
         {
-            double xp = m_xs1 + m_dy / 1.3;
-            double yp = m_ys1 + m_dy * i + m_dy / 1.3;
+            real xp = m_xs1 + m_dy / 1.3;
+            real yp = m_ys1 + m_dy * i + m_dy / 1.3;
             if(calc_distance(x, y, xp, yp) <= m_text_height / 1.5)
             {
                 m_cur_item = int(i);
@@ -321,5 +321,6 @@ namespace agg
 
 
 }
+
 
 

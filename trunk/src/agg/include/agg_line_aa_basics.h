@@ -62,7 +62,7 @@ namespace agg
     //---------------------------------------------------------------line_coord
     struct line_coord
     {
-        AGG_INLINE static int conv(double x)
+        AGG_INLINE static int conv(real x)
         {
             return iround(x * line_subpixel_scale);
         }
@@ -71,7 +71,7 @@ namespace agg
     //-----------------------------------------------------------line_coord_sat
     struct line_coord_sat
     {
-        AGG_INLINE static int conv(double x)
+        AGG_INLINE static int conv(real x)
         {
             return saturation<line_max_coord>::iround(x * line_subpixel_scale);
         }
@@ -160,8 +160,8 @@ namespace agg
     void inline fix_degenerate_bisectrix_start(const line_parameters& lp, 
                                                int* x, int* y)
     {
-        int d = iround((double(*x - lp.x2) * double(lp.y2 - lp.y1) - 
-                        double(*y - lp.y2) * double(lp.x2 - lp.x1)) / lp.len);
+        int d = iround((real(*x - lp.x2) * real(lp.y2 - lp.y1) - 
+                        real(*y - lp.y2) * real(lp.x2 - lp.x1)) / lp.len);
         if(d < line_subpixel_scale/2)
         {
             *x = lp.x1 + (lp.y2 - lp.y1);
@@ -174,8 +174,8 @@ namespace agg
     void inline fix_degenerate_bisectrix_end(const line_parameters& lp, 
                                              int* x, int* y)
     {
-        int d = iround((double(*x - lp.x2) * double(lp.y2 - lp.y1) - 
-                        double(*y - lp.y2) * double(lp.x2 - lp.x1)) / lp.len);
+        int d = iround((real(*x - lp.x2) * real(lp.y2 - lp.y1) - 
+                        real(*y - lp.y2) * real(lp.x2 - lp.x1)) / lp.len);
         if(d < line_subpixel_scale/2)
         {
             *x = lp.x2 + (lp.y2 - lp.y1);

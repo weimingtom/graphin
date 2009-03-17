@@ -26,11 +26,11 @@ namespace agg
 
     //------------------------------------------------------------------------
     vcgen_dash::vcgen_dash() :
-        m_total_dash_len(0.0),
+        m_total_dash_len(0.0f),
         m_num_dashes(0),
-        m_dash_start(0.0),
-        m_shorten(0.0),
-        m_curr_dash_start(0.0),
+        m_dash_start(0.0f),
+        m_shorten(0.0f),
+        m_curr_dash_start(0.0f),
         m_curr_dash(0),
         m_src_vertices(),
         m_closed(0),
@@ -44,15 +44,15 @@ namespace agg
     //------------------------------------------------------------------------
     void vcgen_dash::remove_all_dashes()
     {
-        m_total_dash_len = 0.0;
+        m_total_dash_len = 0.0f;
         m_num_dashes = 0;
-        m_curr_dash_start = 0.0;
+        m_curr_dash_start = 0.0f;
         m_curr_dash = 0;
     }
 
 
     //------------------------------------------------------------------------
-    void vcgen_dash::add_dash(double dash_len, double gap_len)
+    void vcgen_dash::add_dash(real dash_len, real gap_len)
     {
         if(m_num_dashes < max_dashes)
         {
@@ -64,31 +64,31 @@ namespace agg
 
 
     //------------------------------------------------------------------------
-    void vcgen_dash::dash_start(double ds)
+    void vcgen_dash::dash_start(real ds)
     {
         m_dash_start = ds;
-        calc_dash_start(fabs(ds));
+        calc_dash_start(FABS(ds));
     }
 
 
     //------------------------------------------------------------------------
-    void vcgen_dash::calc_dash_start(double ds)
+    void vcgen_dash::calc_dash_start(real ds)
     {
         m_curr_dash = 0;
-        m_curr_dash_start = 0.0;
-        while(ds > 0.0)
+        m_curr_dash_start = 0.0f;
+        while(ds > 0.0f)
         {
             if(ds > m_dashes[m_curr_dash])
             {
                 ds -= m_dashes[m_curr_dash];
                 ++m_curr_dash;
-                m_curr_dash_start = 0.0;
+                m_curr_dash_start = 0.0f;
                 if(m_curr_dash >= m_num_dashes) m_curr_dash = 0;
             }
             else
             {
                 m_curr_dash_start = ds;
-                ds = 0.0;
+                ds = 0.0f;
             }
         }
     }
@@ -104,7 +104,7 @@ namespace agg
 
 
     //------------------------------------------------------------------------
-    void vcgen_dash::add_vertex(double x, double y, unsigned cmd)
+    void vcgen_dash::add_vertex(real x, real y, unsigned cmd)
     {
         m_status = initial;
         if(is_move_to(cmd))
@@ -139,7 +139,7 @@ namespace agg
 
 
     //------------------------------------------------------------------------
-    unsigned vcgen_dash::vertex(double* x, double* y)
+    unsigned vcgen_dash::vertex(real* x, real* y)
     {
         unsigned cmd = path_cmd_move_to;
         while(!is_stop(cmd))
@@ -162,12 +162,12 @@ namespace agg
                 m_curr_rest = m_v1->dist;
                 *x = m_v1->x;
                 *y = m_v1->y;
-                if(m_dash_start >= 0.0) calc_dash_start(m_dash_start);
+                if(m_dash_start >= 0.0f) calc_dash_start(m_dash_start);
                 return path_cmd_move_to;
 
             case polyline:
                 {
-                    double dash_rest = m_dashes[m_curr_dash] - m_curr_dash_start;
+                    real dash_rest = m_dashes[m_curr_dash] - m_curr_dash_start;
 
                     unsigned cmd = (m_curr_dash & 1) ? 
                                    path_cmd_move_to : 
@@ -178,7 +178,7 @@ namespace agg
                         m_curr_rest -= dash_rest;
                         ++m_curr_dash;
                         if(m_curr_dash >= m_num_dashes) m_curr_dash = 0;
-                        m_curr_dash_start = 0.0;
+                        m_curr_dash_start = 0.0f;
                         *x = m_v2->x - (m_v2->x - m_v1->x) * m_curr_rest / m_v1->dist;
                         *y = m_v2->y - (m_v2->y - m_v1->y) * m_curr_rest / m_v1->dist;
                     }
@@ -232,4 +232,5 @@ namespace agg
 
 
 }
+
 

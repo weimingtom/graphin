@@ -22,8 +22,8 @@ namespace agg
 
     //------------------------------------------------------------------------
     trans_single_path::trans_single_path() :
-        m_base_length(0.0),
-        m_kindex(0.0),
+        m_base_length(0.0f),
+        m_kindex(0.0f),
         m_status(initial),
         m_preserve_x_scale(true)
     {
@@ -33,12 +33,12 @@ namespace agg
     void trans_single_path::reset()
     {
         m_src_vertices.remove_all();
-        m_kindex = 0.0;
+        m_kindex = 0.0f;
         m_status = initial;
     }
 
     //------------------------------------------------------------------------
-    void trans_single_path::move_to(double x, double y)
+    void trans_single_path::move_to(real x, real y)
     {
         if(m_status == initial)
         {
@@ -52,7 +52,7 @@ namespace agg
     }
 
     //------------------------------------------------------------------------
-    void trans_single_path::line_to(double x, double y)
+    void trans_single_path::line_to(real x, real y)
     {
         if(m_status == making_path)
         {
@@ -67,13 +67,13 @@ namespace agg
         if(m_status == making_path && m_src_vertices.size() > 1)
         {
             unsigned i;
-            double dist;
-            double d;
+            real dist;
+            real d;
 
             m_src_vertices.close(false);
             if(m_src_vertices.size() > 2)
             {
-                if(m_src_vertices[m_src_vertices.size() - 2].dist * 10.0 < 
+                if(m_src_vertices[m_src_vertices.size() - 2].dist * 10.0f < 
                    m_src_vertices[m_src_vertices.size() - 3].dist)
                 {
                     d = m_src_vertices[m_src_vertices.size() - 3].dist + 
@@ -87,11 +87,11 @@ namespace agg
                 }
             }
 
-            dist = 0.0;
+            dist = 0.0f;
             for(i = 0; i < m_src_vertices.size(); i++)
             {
                 vertex_dist& v = m_src_vertices[i];
-                double d = v.dist;
+                real d = v.dist;
                 v.dist = dist;
                 dist += d;
             }
@@ -103,17 +103,17 @@ namespace agg
 
 
     //------------------------------------------------------------------------
-    double trans_single_path::total_length() const
+    real trans_single_path::total_length() const
     {
         if(m_base_length >= 1e-10) return m_base_length;
         return (m_status == ready) ? 
             m_src_vertices[m_src_vertices.size() - 1].dist :
-            0.0;
+            0.0f;
     }
 
 
     //------------------------------------------------------------------------
-    void trans_single_path::transform(double *x, double *y) const
+    void trans_single_path::transform(real *x, real *y) const
     {
         if(m_status == ready)
         {
@@ -123,13 +123,13 @@ namespace agg
                       m_base_length;
             }
 
-            double x1 = 0.0;
-            double y1 = 0.0;
-            double dx = 1.0;
-            double dy = 1.0;
-            double d  = 0.0;
-            double dd = 1.0;
-            if(*x < 0.0)
+            real x1 = 0.0f;
+            real y1 = 0.0f;
+            real dx = 1.0f;
+            real dy = 1.0f;
+            real d  = 0.0f;
+            real dd = 1.0f;
+            if(*x < 0.0f)
             {
                 // Extrapolation on the left
                 //--------------------------
@@ -190,8 +190,8 @@ namespace agg
                 dx = m_src_vertices[j].x - x1;
                 dy = m_src_vertices[j].y - y1;
             }
-            double x2 = x1 + dx * d / dd;
-            double y2 = y1 + dy * d / dd;
+            real x2 = x1 + dx * d / dd;
+            real y2 = y1 + dy * d / dd;
             *x = x2 - *y * dy / dd;
             *y = y2 + *y * dx / dd;
         }
@@ -199,4 +199,5 @@ namespace agg
 
 
 }
+
 

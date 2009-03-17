@@ -24,7 +24,7 @@ namespace agg
     //===============================================================gamma_none
     struct gamma_none
     {
-        double operator()(double x) const { return x; }
+        real operator()(real x) const { return x; }
     };
 
 
@@ -32,19 +32,19 @@ namespace agg
     class gamma_power
     {
     public:
-        gamma_power() : m_gamma(1.0) {}
-        gamma_power(double g) : m_gamma(g) {}
+        gamma_power() : m_gamma(1.0f) {}
+        gamma_power(real g) : m_gamma(g) {}
 
-        void gamma(double g) { m_gamma = g; }
-        double gamma() const { return m_gamma; }
+        void gamma(real g) { m_gamma = g; }
+        real gamma() const { return m_gamma; }
 
-        double operator() (double x) const
+        real operator() (real x) const
         {
-            return pow(x, m_gamma);
+            return (real)pow(x, m_gamma);
         }
 
     private:
-        double m_gamma;
+        real m_gamma;
     };
 
 
@@ -52,19 +52,19 @@ namespace agg
     class gamma_threshold
     {
     public:
-        gamma_threshold() : m_threshold(0.5) {}
-        gamma_threshold(double t) : m_threshold(t) {}
+        gamma_threshold() : m_threshold(0.5f) {}
+        gamma_threshold(real t) : m_threshold(t) {}
 
-        void threshold(double t) { m_threshold = t; }
-        double threshold() const { return m_threshold; }
+        void threshold(real t) { m_threshold = t; }
+        real threshold() const { return m_threshold; }
 
-        double operator() (double x) const
+        real operator() (real x) const
         {
-            return (x < m_threshold) ? 0.0 : 1.0;
+            return (x < m_threshold) ? 0.0f : 1.0f;
         }
 
     private:
-        double m_threshold;
+        real m_threshold;
     };
 
 
@@ -72,25 +72,25 @@ namespace agg
     class gamma_linear
     {
     public:
-        gamma_linear() : m_start(0.0), m_end(1.0) {}
-        gamma_linear(double s, double e) : m_start(s), m_end(e) {}
+        gamma_linear() : m_start(0.0f), m_end(1.0f) {}
+        gamma_linear(real s, real e) : m_start(s), m_end(e) {}
 
-        void set(double s, double e) { m_start = s; m_end = e; }
-        void start(double s) { m_start = s; }
-        void end(double e) { m_end = e; }
-        double start() const { return m_start; }
-        double end() const { return m_end; }
+        void set(real s, real e) { m_start = s; m_end = e; }
+        void start(real s) { m_start = s; }
+        void end(real e) { m_end = e; }
+        real start() const { return m_start; }
+        real end() const { return m_end; }
 
-        double operator() (double x) const
+        real operator() (real x) const
         {
-            if(x < m_start) return 0.0;
-            if(x > m_end) return 1.0;
+            if(x < m_start) return 0.0f;
+            if(x > m_end) return 1.0f;
             return (x - m_start) / (m_end - m_start);
         }
 
     private:
-        double m_start;
-        double m_end;
+        real m_start;
+        real m_end;
     };
 
 
@@ -98,26 +98,27 @@ namespace agg
     class gamma_multiply
     {
     public:
-        gamma_multiply() : m_mul(1.0) {}
-        gamma_multiply(double v) : m_mul(v) {}
+        gamma_multiply() : m_mul(1.0f) {}
+        gamma_multiply(real v) : m_mul(v) {}
 
-        void value(double v) { m_mul = v; }
-        double value() const { return m_mul; }
+        void value(real v) { m_mul = v; }
+        real value() const { return m_mul; }
 
-        double operator() (double x) const
+        real operator() (real x) const
         {
-            double y = x * m_mul;
-            if(y > 1.0) y = 1.0;
+            real y = x * m_mul;
+            if(y > 1.0f) y = 1.0f;
             return y;
         }
 
     private:
-        double m_mul;
+        real m_mul;
     };
 
 }
 
 #endif
+
 
 
 

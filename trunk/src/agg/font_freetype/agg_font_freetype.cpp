@@ -153,7 +153,7 @@ namespace agg
         FT_Vector   v_last;
         FT_Vector   v_control;
         FT_Vector   v_start;
-        double x1, y1, x2, y2, x3, y3;
+        real x1, y1, x2, y2, x3, y3;
 
         FT_Vector*  point;
         FT_Vector*  limit;
@@ -853,7 +853,7 @@ namespace agg
                m_glyph_rendering == glyph_ren_agg_mono ||
                m_glyph_rendering == glyph_ren_agg_gray8)
             {
-                double mtx[6];
+                real mtx[6];
                 char buf[100];
                 m_affine.store_to(mtx);
                 sprintf(buf, ",%08X%08X%08X%08X%08X%08X", 
@@ -1124,8 +1124,8 @@ namespace agg
             FT_Vector delta;
             FT_Get_Kerning(m_cur_face, first, second,
                            FT_KERNING_DEFAULT, &delta);
-            double dx = int26p6_to_dbl(delta.x);
-            double dy = int26p6_to_dbl(delta.y);
+            real dx = int26p6_to_dbl(delta.x);
+            real dy = int26p6_to_dbl(delta.y);
             if(m_glyph_rendering == glyph_ren_outline ||
                m_glyph_rendering == glyph_ren_agg_mono ||
                m_glyph_rendering == glyph_ren_agg_gray8)
@@ -1143,5 +1143,6 @@ namespace agg
 
 
 }
+
 
 

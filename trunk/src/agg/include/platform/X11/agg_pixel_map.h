@@ -51,8 +51,8 @@ namespace agg
               int   stride() const { return (_bpp / 8) * _width; }
      unsigned int   bpp() const { return _bpp; }
 
-     void draw(Display* d, Window w, int gc, agg::rect_i* dst, agg::rect_i* src );
-     void blend(Display* d, Window w, int gc, agg::rect_i* dst, agg::rect_i* src );
+     //void draw(Display* d, Window w, int gc, agg::rect_i* dst, agg::rect_i* src );
+     //void blend(Display* d, Window w, int gc, agg::rect_i* dst, agg::rect_i* src );
    };
 
 }

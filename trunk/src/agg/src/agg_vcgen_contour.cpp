@@ -47,7 +47,7 @@ namespace agg
     }
 
     //------------------------------------------------------------------------
-    void vcgen_contour::add_vertex(double x, double y, unsigned cmd)
+    void vcgen_contour::add_vertex(real x, real y, unsigned cmd)
     {
         m_status = initial;
         if(is_move_to(cmd))
@@ -84,7 +84,7 @@ namespace agg
             {
                 if(!is_oriented(m_orientation))
                 {
-                    m_orientation = (calc_polygon_area(m_src_vertices) > 0.0) ? 
+                    m_orientation = (calc_polygon_area(m_src_vertices) > 0.0f) ? 
                                     path_flags_ccw : 
                                     path_flags_cw;
                 }
@@ -99,7 +99,7 @@ namespace agg
     }
 
     //------------------------------------------------------------------------
-    unsigned vcgen_contour::vertex(double* x, double* y)
+    unsigned vcgen_contour::vertex(real* x, real* y)
     {
         unsigned cmd = path_cmd_line_to;
         while(!is_stop(cmd))

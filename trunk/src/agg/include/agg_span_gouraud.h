@@ -30,8 +30,8 @@ namespace agg
 
         struct coord_type
         {
-            double x;
-            double y;
+            real x;
+            real y;
             color_type color;
         };
 
@@ -46,10 +46,10 @@ namespace agg
         span_gouraud(const color_type& c1,
                      const color_type& c2,
                      const color_type& c3,
-                     double x1, double y1,
-                     double x2, double y2,
-                     double x3, double y3,
-                     double d) : 
+                     real x1, real y1,
+                     real x2, real y2,
+                     real x3, real y3,
+                     real d) : 
             m_vertex(0)
         {
             colors(c1, c2, c3);
@@ -71,10 +71,10 @@ namespace agg
         // It's necessary to achieve numerical stability. 
         // However, the coordinates to interpolate colors are calculated
         // as miter joins (calc_intersection).
-        void triangle(double x1, double y1, 
-                      double x2, double y2,
-                      double x3, double y3,
-                      double d)
+        void triangle(real x1, real y1, 
+                      real x2, real y2,
+                      real x3, real y3,
+                      real d)
         {
             m_coord[0].x = m_x[0] = x1; 
             m_coord[0].y = m_y[0] = y1;
@@ -87,7 +87,7 @@ namespace agg
             m_cmd[2] = path_cmd_line_to;
             m_cmd[3] = path_cmd_stop;
 
-            if(d != 0.0)
+            if(d != 0.0f)
             {   
                 dilate_triangle(m_coord[0].x, m_coord[0].y,
                                 m_coord[1].x, m_coord[1].y,
@@ -120,7 +120,7 @@ namespace agg
         }
 
         //--------------------------------------------------------------------
-        unsigned vertex(double* x, double* y)
+        unsigned vertex(real* x, real* y)
         {
             *x = m_x[m_vertex];
             *y = m_y[m_vertex];
@@ -160,8 +160,8 @@ namespace agg
     private:
         //--------------------------------------------------------------------
         coord_type m_coord[3];
-        double m_x[8];
-        double m_y[8];
+        real m_x[8];
+        real m_y[8];
         unsigned m_cmd[8];
         unsigned m_vertex;
     };
@@ -169,4 +169,5 @@ namespace agg
 }
 
 #endif
+
 

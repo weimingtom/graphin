@@ -132,28 +132,28 @@ namespace agg
         //--------------------------------------------------------------------
         void reset(); 
         void reset_clipping();
-        void clip_box(double x1, double y1, double x2, double y2);
+        void clip_box(real x1, real y1, real x2, real y2);
         void filling_rule(filling_rule_e filling_rule);
         void layer_order(layer_order_e order);
-        void master_alpha(int style, double alpha);
+        void master_alpha(int style, real alpha);
 
         //--------------------------------------------------------------------
         void styles(int left, int right);
         void move_to(int x, int y);
         void line_to(int x, int y);
-        void move_to_d(double x, double y);
-        void line_to_d(double x, double y);
-        void add_vertex(double x, double y, unsigned cmd);
+        void move_to_d(real x, real y);
+        void line_to_d(real x, real y);
+        void add_vertex(real x, real y, unsigned cmd);
 
         void edge(int x1, int y1, int x2, int y2);
-        void edge_d(double x1, double y1, double x2, double y2);
+        void edge_d(real x1, real y1, real x2, real y2);
 
         //-------------------------------------------------------------------
         template<class VertexSource>
         void add_path(VertexSource& vs, unsigned path_id=0)
         {
-            double x;
-            double y;
+            real x;
+            real y;
 
             unsigned cmd;
             vs.rewind(path_id);
@@ -334,8 +334,8 @@ namespace agg
 
     //------------------------------------------------------------------------
     template<class Clip> 
-    void rasterizer_compound_aa<Clip>::clip_box(double x1, double y1, 
-                                                double x2, double y2)
+    void rasterizer_compound_aa<Clip>::clip_box(real x1, real y1, 
+                                                real x2, real y2)
     {
         reset();
         m_clipper.clip_box(conv_type::upscale(x1), conv_type::upscale(y1), 
@@ -385,7 +385,7 @@ namespace agg
 
     //------------------------------------------------------------------------
     template<class Clip> 
-    void rasterizer_compound_aa<Clip>::move_to_d(double x, double y) 
+    void rasterizer_compound_aa<Clip>::move_to_d(real x, real y) 
     { 
         if(m_outline.sorted()) reset();
         m_clipper.move_to(m_start_x = conv_type::upscale(x), 
@@ -394,7 +394,7 @@ namespace agg
 
     //------------------------------------------------------------------------
     template<class Clip> 
-    void rasterizer_compound_aa<Clip>::line_to_d(double x, double y) 
+    void rasterizer_compound_aa<Clip>::line_to_d(real x, real y) 
     { 
         m_clipper.line_to(m_outline, 
                           conv_type::upscale(x), 
@@ -403,7 +403,7 @@ namespace agg
 
     //------------------------------------------------------------------------
     template<class Clip> 
-    void rasterizer_compound_aa<Clip>::add_vertex(double x, double y, unsigned cmd)
+    void rasterizer_compound_aa<Clip>::add_vertex(real x, real y, unsigned cmd)
     {
         if(is_move_to(cmd)) 
         {
@@ -434,8 +434,8 @@ namespace agg
     
     //------------------------------------------------------------------------
     template<class Clip> 
-    void rasterizer_compound_aa<Clip>::edge_d(double x1, double y1, 
-                                              double x2, double y2)
+    void rasterizer_compound_aa<Clip>::edge_d(real x1, real y1, 
+                                              real x2, real y2)
     {
         if(m_outline.sorted()) reset();
         m_clipper.move_to(conv_type::upscale(x1), conv_type::upscale(y1)); 
@@ -678,7 +678,7 @@ namespace agg
 
     //------------------------------------------------------------------------ 
     template<class Clip> 
-    void rasterizer_compound_aa<Clip>::master_alpha(int style, double alpha)
+    void rasterizer_compound_aa<Clip>::master_alpha(int style, real alpha)
     {
         if(style >= 0)
         {
@@ -695,4 +695,5 @@ namespace agg
 
 
 #endif
+
 

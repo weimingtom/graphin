@@ -41,7 +41,7 @@ namespace agg
         span_interpolator_trans() {}
         span_interpolator_trans(const trans_type& trans) : m_trans(&trans) {}
         span_interpolator_trans(const trans_type& trans,
-                                double x, double y, unsigned) :
+                                real x, real y, unsigned) :
             m_trans(&trans)
         {
             begin(x, y, 0);
@@ -52,7 +52,7 @@ namespace agg
         void transformer(const trans_type& trans) { m_trans = &trans; }
 
         //----------------------------------------------------------------
-        void begin(double x, double y, unsigned)
+        void begin(real x, real y, unsigned)
         {
             m_x = x;
             m_y = y;
@@ -64,9 +64,9 @@ namespace agg
         //----------------------------------------------------------------
         void operator++()
         {
-            m_x += 1.0;
-            double x = m_x;
-            double y = m_y;
+            m_x += 1.0f;
+            real x = m_x;
+            real y = m_y;
             m_trans->transform(&x, &y);
             m_ix = iround(x * subpixel_scale);
             m_iy = iround(y * subpixel_scale);
@@ -81,8 +81,8 @@ namespace agg
 
     private:
         const trans_type* m_trans;
-        double            m_x;
-        double            m_y;
+        real            m_x;
+        real            m_y;
         int               m_ix;
         int               m_iy;
     };

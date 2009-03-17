@@ -15,8 +15,6 @@
   } *HPLATFORMGFX;
 #endif
 
-
-
 // The following ifdef block is the standard way of creating macros which make exporting
 // from a DLL simpler. All files within this DLL are compiled with the GRAPHIN_EXPORTS
 // symbol defined on the command line. this symbol should not be defined on any project
@@ -41,13 +39,20 @@
   #endif
 #endif
 
-
+enum GRAPHIN_RESULT
+{
+  GRAPHIN_PANIC = -1,       // e.g. not enough memory
+  GRAPHIN_OK = 0,           // ok
+  GRAPHIN_OK_FALSE = 2,     // ok but false
+  GRAPHIN_BAD_PARAM = 3,    // bad parameter
+  GRAPHIN_FAILURE = 4,      // operation failed, e.g. restore() without save()
+};
 
 struct graphics;
 struct image;
 
-typedef graphics* HGFX;
-typedef image*    HIMG;
+typedef struct graphics* HGFX;
+typedef struct image*    HIMG;
 
 #ifndef BYTE
   typedef unsigned char   BYTE;
@@ -57,13 +62,6 @@ typedef double DIM;         // dimention
 typedef double ANGLE;       // angle (radians)
 typedef unsigned int COLOR; // guess what?
 
-enum GRAPHIN_RESULT
-{
-  GRAPHIN_PANIC = -1, // e.g. not enough memory
-  GRAPHIN_OK = 0,
-  GRAPHIN_BAD_PARAM = 1,  // bad parameter
-  GRAPHIN_FAILURE = 2,    // operation failed, e.g. restore() without save()
-};
 
 // image primitives
 
@@ -92,11 +90,11 @@ GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
 typedef bool GRAPHIN_CALL image_write_function(void* prm, unsigned char* data, unsigned int data_length);
 
 GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL // save png/jpeg/etc. image to stream of bytes
-        image_save( HIMG himg, 
+        image_save( HIMG himg,
         image_write_function* pfn, void* prm, /* function and its param passed "as is" */
-        unsigned bpp /*24,32 if alpha needed*/,  
+        unsigned bpp /*24,32 if alpha needed*/,
         unsigned type /* 0 - png, 1 - jpg*/,
-        unsigned quality /*  only for jpeg, 10 - 100 */ ); 
+        unsigned quality /*  only for jpeg, 10 - 100 */ );
 
 
 // SECTION: graphics primitives and drawing operations

@@ -25,18 +25,18 @@ namespace agg
 {
 
     //------------------------------------------------------------------------
-    slider_ctrl_impl::slider_ctrl_impl(double x1, double y1, 
-                                       double x2, double y2, bool flip_y) :
+    slider_ctrl_impl::slider_ctrl_impl(real x1, real y1, 
+                                       real x2, real y2, bool flip_y) :
         ctrl(x1, y1, x2, y2, flip_y),
-        m_border_width(1.0),
+        m_border_width(1.0f),
         m_border_extra((y2 - y1) / 2),
-        m_text_thickness(1.0),
-        m_pdx(0.0),
+        m_text_thickness(1.0f),
+        m_pdx(0.0f),
         m_mouse_move(false),
-        m_value(0.5),
-        m_preview_value(0.5),
-        m_min(0.0),
-        m_max(1.0),
+        m_value(0.5f),
+        m_preview_value(0.5f),
+        m_min(0.0f),
+        m_max(1.0f),
         m_num_steps(0),
         m_descending(false),
         m_text_poly(m_text)
@@ -62,9 +62,9 @@ namespace agg
         bool ret = true;
         if(m_num_steps)
         {
-            int step = int(m_preview_value * m_num_steps + 0.5);
-            ret = m_value != step / double(m_num_steps);
-            m_value = step / double(m_num_steps);
+            int step = int(m_preview_value * m_num_steps + 0.5f);
+            ret = m_value != step / real(m_num_steps);
+            m_value = step / real(m_num_steps);
         }
         else
         {
@@ -80,7 +80,7 @@ namespace agg
 
 
     //------------------------------------------------------------------------
-    void slider_ctrl_impl::border_width(double t, double extra)
+    void slider_ctrl_impl::border_width(real t, real extra)
     { 
         m_border_width = t; 
         m_border_extra = extra;
@@ -89,11 +89,11 @@ namespace agg
 
 
     //------------------------------------------------------------------------
-    void slider_ctrl_impl::value(double value) 
+    void slider_ctrl_impl::value(real value) 
     { 
         m_preview_value = (value - m_min) / (m_max - m_min); 
-        if(m_preview_value > 1.0) m_preview_value = 1.0;
-        if(m_preview_value < 0.0) m_preview_value = 0.0;
+        if(m_preview_value > 1.0f) m_preview_value = 1.0f;
+        if(m_preview_value < 0.0f) m_preview_value = 0.0f;
         normalize_value(true);
     }
 
@@ -197,11 +197,11 @@ namespace agg
             if(m_num_steps)
             {
                 unsigned i;
-                double d = (m_xs2 - m_xs1) / m_num_steps;
+                real d = (m_xs2 - m_xs1) / m_num_steps;
                 if(d > 0.004) d = 0.004;
                 for(i = 0; i < m_num_steps + 1; i++)
                 {
-                    double x = m_xs1 + (m_xs2 - m_xs1) * i / m_num_steps;
+                    real x = m_xs1 + (m_xs2 - m_xs1) * i / m_num_steps;
                     m_storage.move_to(x, m_y1);
                     m_storage.line_to(x - d * (m_x2 - m_x1), m_y1 - m_border_extra);
                     m_storage.line_to(x + d * (m_x2 - m_x1), m_y1 - m_border_extra);
@@ -212,7 +212,7 @@ namespace agg
 
 
     //------------------------------------------------------------------------
-    unsigned slider_ctrl_impl::vertex(double* x, double* y)
+    unsigned slider_ctrl_impl::vertex(real* x, real* y)
     {
         unsigned cmd = path_cmd_line_to;
         switch(m_idx)
@@ -262,7 +262,7 @@ namespace agg
 
 
     //------------------------------------------------------------------------
-    bool slider_ctrl_impl::in_rect(double x, double y) const
+    bool slider_ctrl_impl::in_rect(real x, real y) const
     {
         inverse_transform_xy(&x, &y);
         return x >= m_x1 && x <= m_x2 && y >= m_y1 && y <= m_y2;
@@ -270,12 +270,12 @@ namespace agg
 
 
     //------------------------------------------------------------------------
-    bool slider_ctrl_impl::on_mouse_button_down(double x, double y)
+    bool slider_ctrl_impl::on_mouse_button_down(real x, real y)
     {
         inverse_transform_xy(&x, &y);
 
-        double xp = m_xs1 + (m_xs2 - m_xs1) * m_value;
-        double yp = (m_ys1 + m_ys2) / 2.0;
+        real xp = m_xs1 + (m_xs2 - m_xs1) * m_value;
+        real yp = (m_ys1 + m_ys2) / 2.0f;
 
         if(calc_distance(x, y, xp, yp) <= m_y2 - m_y1)
         {
@@ -288,7 +288,7 @@ namespace agg
 
 
     //------------------------------------------------------------------------
-    bool slider_ctrl_impl::on_mouse_move(double x, double y, bool button_flag)
+    bool slider_ctrl_impl::on_mouse_move(real x, real y, bool button_flag)
     {
         inverse_transform_xy(&x, &y);
         if(!button_flag)
@@ -299,10 +299,10 @@ namespace agg
 
         if(m_mouse_move)
         {
-            double xp = x + m_pdx;
+            real xp = x + m_pdx;
             m_preview_value = (xp - m_xs1) / (m_xs2 - m_xs1);
-            if(m_preview_value < 0.0) m_preview_value = 0.0;
-            if(m_preview_value > 1.0) m_preview_value = 1.0;
+            if(m_preview_value < 0.0f) m_preview_value = 0.0f;
+            if(m_preview_value > 1.0f) m_preview_value = 1.0f;
             return true;
         }
         return false;
@@ -310,7 +310,7 @@ namespace agg
 
 
     //------------------------------------------------------------------------
-    bool slider_ctrl_impl::on_mouse_button_up(double, double)
+    bool slider_ctrl_impl::on_mouse_button_up(real, real)
     {
         m_mouse_move = false;
         normalize_value(true);
@@ -321,16 +321,16 @@ namespace agg
     //------------------------------------------------------------------------
     bool slider_ctrl_impl::on_arrow_keys(bool left, bool right, bool down, bool up)
     {
-        double d = 0.005;
+        real d = 0.005;
         if(m_num_steps)
         {
-            d = 1.0 / m_num_steps;
+            d = 1.0f / m_num_steps;
         }
         
         if(right || up)
         {
             m_preview_value += d;
-            if(m_preview_value > 1.0) m_preview_value = 1.0;
+            if(m_preview_value > 1.0f) m_preview_value = 1.0f;
             normalize_value(true);
             return true;
         }
@@ -338,7 +338,7 @@ namespace agg
         if(left || down)
         {
             m_preview_value -= d;
-            if(m_preview_value < 0.0) m_preview_value = 0.0;
+            if(m_preview_value < 0.0f) m_preview_value = 0.0f;
             normalize_value(true);
             return true;
         }
@@ -346,4 +346,5 @@ namespace agg
     }
 
 }
+
 

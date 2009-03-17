@@ -1071,32 +1071,32 @@ namespace agg
         typedef typename calculator_type::value_type calc_type;
 
         //--------------------------------------------------------------------
-        template<class Img> void blur_x(Img& img, double radius)
+        template<class Img> void blur_x(Img& img, real radius)
         {
             if(radius < 0.62) return;
             if(img.width() < 3) return;
 
-            calc_type s = calc_type(radius * 0.5);
+            calc_type s = calc_type(radius * 0.5f);
             calc_type q = calc_type((s < 2.5) ?
-                                    3.97156 - 4.14554 * sqrt(1 - 0.26891 * s) :
-                                    0.98711 * s - 0.96330);
+                                    3.97156f - 4.14554 * SQRT(1 - 0.26891f * s) :
+                                    0.98711f * s - 0.96330f);
 
             calc_type q2 = calc_type(q * q);
             calc_type q3 = calc_type(q2 * q);
 
-            calc_type b0 = calc_type(1.0 / (1.578250 + 
-                                            2.444130 * q + 
-                                            1.428100 * q2 + 
-                                            0.422205 * q3));
+            calc_type b0 = calc_type(1.0f / (1.578250f + 
+                                            2.444130f * q + 
+                                            1.428100f * q2 + 
+                                            0.422205f * q3));
 
-            calc_type b1 = calc_type( 2.44413 * q + 
-                                      2.85619 * q2 + 
-                                      1.26661 * q3);
+            calc_type b1 = calc_type( 2.44413f * q + 
+                                      2.85619f * q2 + 
+                                      1.26661f * q3);
 
-            calc_type b2 = calc_type(-1.42810 * q2 + 
-                                     -1.26661 * q3);
+            calc_type b2 = calc_type(-1.42810f * q2 + 
+                                     -1.26661f * q3);
 
-            calc_type b3 = calc_type(0.422205 * q3);
+            calc_type b3 = calc_type(0.422205f * q3);
 
             calc_type b  = calc_type(1 - (b1 + b2 + b3) * b0);
 
@@ -1146,14 +1146,14 @@ namespace agg
         }
 
         //--------------------------------------------------------------------
-        template<class Img> void blur_y(Img& img, double radius)
+        template<class Img> void blur_y(Img& img, real radius)
         {
             pixfmt_transposer<Img> img2(img);
             blur_x(img2, radius);
         }
 
         //--------------------------------------------------------------------
-        template<class Img> void blur(Img& img, double radius)
+        template<class Img> void blur(Img& img, real radius)
         {
             blur_x(img, radius);
             pixfmt_transposer<Img> img2(img);

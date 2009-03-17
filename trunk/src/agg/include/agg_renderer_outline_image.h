@@ -31,21 +31,21 @@ namespace agg
     public:
         typedef typename Source::color_type color_type;
 
-        line_image_scale(const Source& src, double height) :
+        line_image_scale(const Source& src, real height) :
             m_source(src), 
             m_height(height),
             m_scale(src.height() / height)
         {
         }
 
-        double width()  const { return m_source.width(); }
-        double height() const { return m_height; }
+        real width()  const { return m_source.width(); }
+        real height() const { return m_height; }
 
         color_type pixel(int x, int y) const 
         { 
-            double src_y = (y + 0.5) * m_scale - 0.5;
+            real src_y = (y + 0.5f) * m_scale - 0.5f;
             int h  = m_source.height() - 1;
-            int y1 = ufloor(src_y);
+            int y1 = ufloorf(src_y);
             int y2 = y1 + 1;
             color_type pix1 = (y1 < 0) ? color_type::no_color() : m_source.pixel(x, y1);
             color_type pix2 = (y2 > h) ? color_type::no_color() : m_source.pixel(x, y2);
@@ -57,8 +57,8 @@ namespace agg
         const line_image_scale<Source>& operator = (const line_image_scale<Source>&);
 
         const Source& m_source;
-        double        m_height;
-        double        m_scale;
+        real        m_height;
+        real        m_scale;
     };
 
 
@@ -105,8 +105,8 @@ namespace agg
         //--------------------------------------------------------------------
         template<class Source> void create(const Source& src)
         {
-            m_height = uceil(src.height());
-            m_width  = uceil(src.width());
+            m_height = uceilf(src.height());
+            m_width  = uceilf(src.width());
             m_width_hr = uround(src.width() * line_subpixel_scale);
             m_half_height_hr = uround(src.height() * line_subpixel_scale/2);
             m_offset_y_hr = m_dilation_hr + m_half_height_hr - line_subpixel_scale/2;
@@ -165,7 +165,7 @@ namespace agg
         //--------------------------------------------------------------------
         int pattern_width() const { return m_width_hr; }
         int line_width()    const { return m_half_height_hr; }
-        double width()      const { return m_height; }
+        real width()      const { return m_height; }
 
         //--------------------------------------------------------------------
         void pixel(color_type* p, int x, int y) const
@@ -210,7 +210,7 @@ namespace agg
         typedef Filter filter_type;
         typedef typename filter_type::color_type color_type;
         typedef line_image_pattern<Filter> base_type;
-	
+  
         //--------------------------------------------------------------------
         line_image_pattern_pow2(const Filter& filter) :
             line_image_pattern<Filter>(filter), m_mask(line_subpixel_mask) {}
@@ -265,7 +265,7 @@ namespace agg
         distance_interpolator4() {}
         distance_interpolator4(int x1,  int y1, int x2, int y2,
                                int sx,  int sy, int ex, int ey, 
-                               int len, double scale, int x, int y) :
+                               int len, real scale, int x, int y) :
             m_dx(x2 - x1),
             m_dy(y2 - y1),
             m_dx_start(line_mr(sx) - line_mr(x1)),
@@ -273,8 +273,8 @@ namespace agg
             m_dx_end(line_mr(ex) - line_mr(x2)),
             m_dy_end(line_mr(ey) - line_mr(y2)),
 
-            m_dist(iround(double(x + line_subpixel_scale/2 - x2) * double(m_dy) - 
-                          double(y + line_subpixel_scale/2 - y2) * double(m_dx))),
+            m_dist(iround(real(x + line_subpixel_scale/2 - x2) * real(m_dy) - 
+                          real(y + line_subpixel_scale/2 - y2) * real(m_dx))),
 
             m_dist_start((line_mr(x + line_subpixel_scale/2) - line_mr(sx)) * m_dy_start - 
                          (line_mr(y + line_subpixel_scale/2) - line_mr(sy)) * m_dx_start),
@@ -283,7 +283,7 @@ namespace agg
                        (line_mr(y + line_subpixel_scale/2) - line_mr(ey)) * m_dx_end),
             m_len(uround(len / scale))
         {
-            double d = len * scale;
+            real d = len * scale;
             int dx = iround(((x2 - x1) << line_subpixel_shift) / d);
             int dy = iround(((y2 - y1) << line_subpixel_shift) / d);
             m_dx_pict   = -dy;
@@ -484,7 +484,7 @@ namespace agg
         line_interpolator_image(renderer_type& ren, const line_parameters& lp,
                                 int sx, int sy, int ex, int ey, 
                                 int pattern_start,
-                                double scale_x) :
+                                real scale_x) :
             m_lp(lp),
             m_li(lp.vertical ? line_dbl_hr(lp.x2 - lp.x1) :
                                line_dbl_hr(lp.y2 - lp.y1),
@@ -820,7 +820,7 @@ namespace agg
             m_ren(&ren),
             m_pattern(&patt),
             m_start(0),
-            m_scale_x(1.0),
+            m_scale_x(1.0f),
             m_clip_box(0,0,0,0),
             m_clipping(false)
         {}
@@ -832,7 +832,7 @@ namespace agg
 
         //---------------------------------------------------------------------
         void reset_clipping() { m_clipping = false; }
-        void clip_box(double x1, double y1, double x2, double y2)
+        void clip_box(real x1, real y1, real x2, real y2)
         {
             m_clip_box.x1 = line_coord_sat::conv(x1);
             m_clip_box.y1 = line_coord_sat::conv(y1);
@@ -842,17 +842,17 @@ namespace agg
         }
 
         //---------------------------------------------------------------------
-        void   scale_x(double s) { m_scale_x = s; }
-        double scale_x() const   { return m_scale_x; }
+        void   scale_x(real s) { m_scale_x = s; }
+        real scale_x() const   { return m_scale_x; }
 
         //---------------------------------------------------------------------
-        void   start_x(double s) { m_start = iround(s * line_subpixel_scale); }
-        double start_x() const   { return double(m_start) / line_subpixel_scale; }
+        void   start_x(real s) { m_start = iround(s * line_subpixel_scale); }
+        real start_x() const   { return real(m_start) / line_subpixel_scale; }
 
         //---------------------------------------------------------------------
         int subpixel_width() const { return m_pattern->line_width(); }
         int pattern_width() const { return m_pattern->pattern_width(); }
-        double width() const { return double(subpixel_width()) / line_subpixel_scale; }
+        real width() const { return real(subpixel_width()) / line_subpixel_scale; }
 
         //-------------------------------------------------------------------------
         void pixel(color_type* p, int x, int y) const
@@ -997,7 +997,7 @@ namespace agg
         base_ren_type*      m_ren;
         const pattern_type* m_pattern;
         int                 m_start;
-        double              m_scale_x;
+        real              m_scale_x;
         rect_i              m_clip_box;
         bool                m_clipping;
     };

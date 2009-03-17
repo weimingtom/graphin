@@ -32,8 +32,8 @@ namespace agg
         conv_segmentator(VertexSource& vs) : 
             conv_adaptor_vpgen<VertexSource, vpgen_segmentator>(vs) {}
 
-        void approximation_scale(double s) { base_type::vpgen().approximation_scale(s);        }
-        double approximation_scale() const { return base_type::vpgen().approximation_scale();  }
+        void approximation_scale(real s) { base_type::vpgen().approximation_scale(s);        }
+        real approximation_scale() const { return base_type::vpgen().approximation_scale();  }
 
     private:
         conv_segmentator(const conv_segmentator<VertexSource>&);
@@ -45,4 +45,5 @@ namespace agg
 }
 
 #endif
+
 

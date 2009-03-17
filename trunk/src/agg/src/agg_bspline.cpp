@@ -43,7 +43,7 @@ namespace agg
     }
 
     //------------------------------------------------------------------------
-    bspline::bspline(int num, const double* x, const double* y) :
+    bspline::bspline(int num, const real* x, const real* y) :
         m_max(0),
         m_num(0),
         m_x(0),
@@ -70,7 +70,7 @@ namespace agg
 
 
     //------------------------------------------------------------------------
-    void bspline::add_point(double x, double y)
+    void bspline::add_point(real x, real y)
     {
         if(m_num < m_max)
         {
@@ -87,14 +87,14 @@ namespace agg
         if(m_num > 2)
         {
             int i, k, n1;
-            double* temp; 
-            double* r; 
-            double* s;
-            double h, p, d, f, e;
+            real* temp; 
+            real* r; 
+            real* s;
+            real h, p, d, f, e;
     
             for(k = 0; k < m_num; k++) 
             {
-                m_am[k] = 0.0;
+                m_am[k] = 0.0f;
             }
 
             n1 = 3 * m_num;
@@ -104,7 +104,7 @@ namespace agg
 
             for(k = 0; k < n1; k++) 
             {
-                temp[k] = 0.0;
+                temp[k] = 0.0f;
             }
 
             r = temp + m_num;
@@ -121,18 +121,18 @@ namespace agg
                 f     = e;
                 e     = (m_y[k + 1] - m_y[k]) / d;
                 al[k] = d / (d + h);
-                r[k]  = 1.0 - al[k];
-                s[k]  = 6.0 * (e - f) / (h + d);
+                r[k]  = 1.0f - al[k];
+                s[k]  = 6.0f * (e - f) / (h + d);
             }
 
             for(k = 1; k < n1; k++) 
             {
-                p = 1.0 / (r[k] * al[k - 1] + 2.0);
+                p = 1.0f / (r[k] * al[k - 1] + 2.0f);
                 al[k] *= -p;
                 s[k] = (s[k] - r[k] * s[k - 1]) * p; 
             }
 
-            m_am[n1]     = 0.0;
+            m_am[n1]     = 0.0f;
             al[n1 - 1]   = s[n1 - 1];
             m_am[n1 - 1] = al[n1 - 1];
 
@@ -148,7 +148,7 @@ namespace agg
 
 
     //------------------------------------------------------------------------
-    void bspline::init(int num, const double* x, const double* y)
+    void bspline::init(int num, const real* x, const real* y)
     {
         if(num > 2)
         {
@@ -165,7 +165,7 @@ namespace agg
 
 
     //------------------------------------------------------------------------
-    void bspline::bsearch(int n, const double *x, double x0, int *i) 
+    void bspline::bsearch(int n, const real *x, real x0, int *i) 
     {
         int j = n - 1;
         int k;
@@ -180,38 +180,38 @@ namespace agg
 
 
     //------------------------------------------------------------------------
-    double bspline::interpolation(double x, int i) const
+    real bspline::interpolation(real x, int i) const
     {
         int j = i + 1;
-        double d = m_x[i] - m_x[j];
-        double h = x - m_x[j];
-        double r = m_x[i] - x;
-        double p = d * d / 6.0;
-        return (m_am[j] * r * r * r + m_am[i] * h * h * h) / 6.0 / d +
+        real d = m_x[i] - m_x[j];
+        real h = x - m_x[j];
+        real r = m_x[i] - x;
+        real p = d * d / 6.0f;
+        return (m_am[j] * r * r * r + m_am[i] * h * h * h) / 6.0f / d +
                ((m_y[j] - m_am[j] * p) * r + (m_y[i] - m_am[i] * p) * h) / d;
     }
 
 
     //------------------------------------------------------------------------
-    double bspline::extrapolation_left(double x) const
+    real bspline::extrapolation_left(real x) const
     {
-        double d = m_x[1] - m_x[0];
+        real d = m_x[1] - m_x[0];
         return (-d * m_am[1] / 6 + (m_y[1] - m_y[0]) / d) * 
                (x - m_x[0]) + 
                m_y[0];
     }
 
     //------------------------------------------------------------------------
-    double bspline::extrapolation_right(double x) const
+    real bspline::extrapolation_right(real x) const
     {
-        double d = m_x[m_num - 1] - m_x[m_num - 2];
+        real d = m_x[m_num - 1] - m_x[m_num - 2];
         return (d * m_am[m_num - 2] / 6 + (m_y[m_num - 1] - m_y[m_num - 2]) / d) * 
                (x - m_x[m_num - 1]) + 
                m_y[m_num - 1];
     }
 
     //------------------------------------------------------------------------
-    double bspline::get(double x) const
+    real bspline::get(real x) const
     {
         if(m_num > 2)
         {
@@ -227,12 +227,12 @@ namespace agg
             bsearch(m_num, m_x, x, &i);
             return interpolation(x, i);
         }
-        return 0.0;
+        return 0.0f;
     }
 
 
     //------------------------------------------------------------------------
-    double bspline::get_stateful(double x) const
+    real bspline::get_stateful(real x) const
     {
         if(m_num > 2)
         {
@@ -277,8 +277,9 @@ namespace agg
                 return interpolation(x, m_last_idx);
             }
         }
-        return 0.0;
+        return 0.0f;
     }
 
 }
+
 

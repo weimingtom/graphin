@@ -96,7 +96,7 @@ namespace agg
 
         // Vertex Source Interface
         void     rewind(unsigned path_id);
-        unsigned vertex(double* x, double* y);
+        unsigned vertex(real* x, real* y);
 
     private:
         conv_gpc(const conv_gpc<VSA, VSB>&);
@@ -107,21 +107,21 @@ namespace agg
         void free_result();
         void free_gpc_data();
         void start_contour();
-        void add_vertex(double x, double y);
+        void add_vertex(real x, real y);
         void end_contour(unsigned orientation);
         void make_polygon(gpc_polygon& p);
         void start_extracting();
         bool next_contour();
-        bool next_vertex(double* x, double* y);
+        bool next_vertex(real* x, real* y);
 
 
         //--------------------------------------------------------------------
         template<class VS> void add(VS& src, gpc_polygon& p)
         {
             unsigned cmd;
-            double x, y;
-            double start_x = 0.0;
-            double start_y = 0.0;
+            real x, y;
+            real start_x = 0.0f;
+            real start_y = 0.0f;
             bool line_to = false;
             unsigned orientation = 0;
 
@@ -234,7 +234,7 @@ namespace agg
 
     //------------------------------------------------------------------------
     template<class VSA, class VSB> 
-    inline void conv_gpc<VSA, VSB>::add_vertex(double x, double y)
+    inline void conv_gpc<VSA, VSB>::add_vertex(real x, real y)
     {
         gpc_vertex v;
         v.x = x;
@@ -329,7 +329,7 @@ namespace agg
 
     //------------------------------------------------------------------------
     template<class VSA, class VSB> 
-    inline bool conv_gpc<VSA, VSB>::next_vertex(double* x, double* y)
+    inline bool conv_gpc<VSA, VSB>::next_vertex(real* x, real* y)
     {
         const gpc_vertex_list& vlist = m_result.contour[m_contour];
         if(++m_vertex < vlist.num_vertices)
@@ -395,7 +395,7 @@ namespace agg
 
     //------------------------------------------------------------------------
     template<class VSA, class VSB> 
-    unsigned conv_gpc<VSA, VSB>::vertex(double* x, double* y)
+    unsigned conv_gpc<VSA, VSB>::vertex(real* x, real* y)
     {
         if(m_status == status_move_to)
         {

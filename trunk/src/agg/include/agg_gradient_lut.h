@@ -46,7 +46,7 @@ namespace agg
 
         color_type color() const
         {
-            return m_c1.gradient(m_c2, double(m_count) / m_len);
+            return m_c1.gradient(m_c2, real(m_count) / m_len);
         }
 
     private:
@@ -132,11 +132,11 @@ namespace agg
         // in range [0...1] and defines a color stop as it is described 
         // in SVG specification, section Gradients and Patterns. 
         // The simplest linear gradient is:
-        //    gradient_lut.add_color(0.0, start_color);
-        //    gradient_lut.add_color(1.0, end_color);
+        //    gradient_lut.add_color(0.0f, start_color);
+        //    gradient_lut.add_color(1.0f, end_color);
         //--------------------------------------------------------------------
         void remove_all();
-        void add_color(double offset, const color_type& color);
+        void add_color(real offset, const color_type& color);
         void build_lut();
 
         // Size-index Interface. This class can be used directly as the 
@@ -156,15 +156,15 @@ namespace agg
         //--------------------------------------------------------------------
         struct color_point
         {
-            double     offset;
+            real     offset;
             color_type color;
 
             color_point() {}
-            color_point(double off, const color_type& c) : 
+            color_point(real off, const color_type& c) : 
                 offset(off), color(c)
             {
-                if(offset < 0.0) offset = 0.0;
-                if(offset > 1.0) offset = 1.0;
+                if(offset < 0.0f) offset = 0.0f;
+                if(offset > 1.0f) offset = 1.0f;
             }
         };
         typedef agg::pod_bvector<color_point, 4> color_profile_type;
@@ -195,7 +195,7 @@ namespace agg
 
     //------------------------------------------------------------------------
     template<class T, unsigned S>
-    void gradient_lut<T,S>::add_color(double offset, const color_type& color)
+    void gradient_lut<T,S>::add_color(real offset, const color_type& color)
     {
         m_color_profile.add(color_point(offset, color));
     }

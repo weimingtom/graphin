@@ -35,8 +35,8 @@ namespace agg
         {
         }
 
-        void shorten(double s) { base_type::generator().shorten(s); }
-        double shorten() const { return base_type::generator().shorten(); }
+        void shorten(real s) { base_type::generator().shorten(s); }
+        real shorten() const { return base_type::generator().shorten(); }
 
     private:
         conv_shorten_path(const conv_shorten_path<VertexSource>&);

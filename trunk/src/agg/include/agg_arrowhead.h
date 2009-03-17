@@ -33,7 +33,7 @@ namespace agg
     public:
         arrowhead();
 
-        void head(double d1, double d2, double d3, double d4)
+        void head(real d1, real d2, real d3, real d4)
         {
             m_head_d1 = d1;
             m_head_d2 = d2;
@@ -45,7 +45,7 @@ namespace agg
         void head()    { m_head_flag = true; }
         void no_head() { m_head_flag = false; }
 
-        void tail(double d1, double d2, double d3, double d4)
+        void tail(real d1, real d2, real d3, real d4)
         {
             m_tail_d1 = d1;
             m_tail_d2 = d2;
@@ -58,20 +58,20 @@ namespace agg
         void no_tail() { m_tail_flag = false; }
 
         void rewind(unsigned path_id);
-        unsigned vertex(double* x, double* y);
+        unsigned vertex(real* x, real* y);
 
     private:
-        double   m_head_d1;
-        double   m_head_d2;
-        double   m_head_d3;
-        double   m_head_d4;
-        double   m_tail_d1;
-        double   m_tail_d2;
-        double   m_tail_d3;
-        double   m_tail_d4;
+        real   m_head_d1;
+        real   m_head_d2;
+        real   m_head_d3;
+        real   m_head_d4;
+        real   m_tail_d1;
+        real   m_tail_d2;
+        real   m_tail_d3;
+        real   m_tail_d4;
         bool     m_head_flag;
         bool     m_tail_flag;
-        double   m_coord[16];
+        real   m_coord[16];
         unsigned m_cmd[8];
         unsigned m_curr_id;
         unsigned m_curr_coord;

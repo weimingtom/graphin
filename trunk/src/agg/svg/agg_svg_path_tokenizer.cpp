@@ -35,7 +35,7 @@ namespace svg
 
     //------------------------------------------------------------------------
     path_tokenizer::path_tokenizer()
-        : m_path(0), m_last_command(0), m_last_number(0.0)
+        : m_path(0), m_last_command(0), m_last_number(0.0f)
     {
         init_char_mask(m_commands_mask,   s_commands);
         init_char_mask(m_numeric_mask,    s_numeric);
@@ -48,7 +48,7 @@ namespace svg
     {
         m_path = str;
         m_last_command = 0;
-        m_last_number = 0.0;
+        m_last_number = 0.0f;
     }
 
 
@@ -100,7 +100,7 @@ namespace svg
 
 
     //------------------------------------------------------------------------
-    double path_tokenizer::next(char cmd)
+    real path_tokenizer::next(char cmd)
     {
         if(!next()) throw exception("parse_path: Unexpected end of path");
         if(last_command() != cmd)
@@ -138,6 +138,7 @@ namespace svg
 
 } //namespace svg
 } //namespace agg
+
 
 
 

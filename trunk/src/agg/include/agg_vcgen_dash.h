@@ -50,34 +50,34 @@ namespace agg
         vcgen_dash();
 
         void remove_all_dashes();
-        void add_dash(double dash_len, double gap_len);
-        void dash_start(double ds);
+        void add_dash(real dash_len, real gap_len);
+        void dash_start(real ds);
 
-        void shorten(double s) { m_shorten = s; }
-        double shorten() const { return m_shorten; }
+        void shorten(real s) { m_shorten = s; }
+        real shorten() const { return m_shorten; }
 
         // Vertex Generator Interface
         void remove_all();
-        void add_vertex(double x, double y, unsigned cmd);
+        void add_vertex(real x, real y, unsigned cmd);
 
         // Vertex Source Interface
         void     rewind(unsigned path_id);
-        unsigned vertex(double* x, double* y);
+        unsigned vertex(real* x, real* y);
 
     private:
         vcgen_dash(const vcgen_dash&);
         const vcgen_dash& operator = (const vcgen_dash&);
 
-        void calc_dash_start(double ds);
+        void calc_dash_start(real ds);
 
-        double             m_dashes[max_dashes];
-        double             m_total_dash_len;
+        real             m_dashes[max_dashes];
+        real             m_total_dash_len;
         unsigned           m_num_dashes;
-        double             m_dash_start;
-        double             m_shorten;
-        double             m_curr_dash_start;
+        real             m_dash_start;
+        real             m_shorten;
+        real             m_curr_dash_start;
         unsigned           m_curr_dash;
-        double             m_curr_rest;
+        real             m_curr_rest;
         const vertex_dist* m_v1;
         const vertex_dist* m_v2;
 

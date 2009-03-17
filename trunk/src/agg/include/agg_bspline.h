@@ -42,30 +42,30 @@ namespace agg
     public:
         bspline();
         bspline(int num);
-        bspline(int num, const double* x, const double* y);
+        bspline(int num, const real* x, const real* y);
 
         void   init(int num);
-        void   add_point(double x, double y);
+        void   add_point(real x, real y);
         void   prepare();
 
-        void   init(int num, const double* x, const double* y);
+        void   init(int num, const real* x, const real* y);
 
-        double get(double x) const;
-        double get_stateful(double x) const;
+        real get(real x) const;
+        real get_stateful(real x) const;
     
     private:
         bspline(const bspline&);
         const bspline& operator = (const bspline&);
 
-        static void bsearch(int n, const double *x, double x0, int *i);
-        double extrapolation_left(double x) const;
-        double extrapolation_right(double x) const;
-        double interpolation(double x, int i) const;
+        static void bsearch(int n, const real *x, real x0, int *i);
+        real extrapolation_left(real x) const;
+        real extrapolation_right(real x) const;
+        real interpolation(real x, int i) const;
 
         int               m_max;
         int               m_num;
-        double*           m_x;
-        double*           m_y;
+        real*           m_x;
+        real*           m_y;
         pod_array<double> m_am;
         mutable int       m_last_idx;
     };

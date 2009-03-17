@@ -43,18 +43,18 @@ namespace agg
             base_type::generator().remove_all_dashes(); 
         }
 
-        void add_dash(double dash_len, double gap_len) 
+        void add_dash(real dash_len, real gap_len) 
         { 
             base_type::generator().add_dash(dash_len, gap_len); 
         }
 
-        void dash_start(double ds) 
+        void dash_start(real ds) 
         { 
             base_type::generator().dash_start(ds); 
         }
 
-        void shorten(double s) { base_type::generator().shorten(s); }
-        double shorten() const { return base_type::generator().shorten(); }
+        void shorten(real s) { base_type::generator().shorten(s); }
+        real shorten() const { return base_type::generator().shorten(); }
 
     private:
         conv_dash(const conv_dash<VertexSource, Markers>&);

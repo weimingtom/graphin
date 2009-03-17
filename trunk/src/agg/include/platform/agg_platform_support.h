@@ -268,7 +268,7 @@ namespace agg
         }
 
         //--------------------------------------------------------------------
-        bool in_rect(double x, double y)
+        bool in_rect(real x, real y)
         {
             unsigned i;
             for(i = 0; i < m_num_ctrl; i++)
@@ -279,7 +279,7 @@ namespace agg
         }
 
         //--------------------------------------------------------------------
-        bool on_mouse_button_down(double x, double y)
+        bool on_mouse_button_down(real x, real y)
         {
             unsigned i;
             for(i = 0; i < m_num_ctrl; i++)
@@ -290,7 +290,7 @@ namespace agg
         }
 
         //--------------------------------------------------------------------
-        bool on_mouse_button_up(double x, double y)
+        bool on_mouse_button_up(real x, real y)
         {
             unsigned i;
             bool flag = false;
@@ -302,7 +302,7 @@ namespace agg
         }
 
         //--------------------------------------------------------------------
-        bool on_mouse_move(double x, double y, bool button_flag)
+        bool on_mouse_move(real x, real y, bool button_flag)
         {
             unsigned i;
             for(i = 0; i < m_num_ctrl; i++)
@@ -323,7 +323,7 @@ namespace agg
         }
 
         //--------------------------------------------------------------------
-        bool set_cur(double x, double y)
+        bool set_cur(real x, real y)
         {
             unsigned i;
             for(i = 0; i < m_num_ctrl; i++)
@@ -575,12 +575,12 @@ namespace agg
         {
             if(m_window_flags & window_keep_aspect_ratio)
             {
-                //double sx = double(width) / double(m_initial_width);
-                //double sy = double(height) / double(m_initial_height);
+                //real sx = real(width) / real(m_initial_width);
+                //real sy = real(height) / real(m_initial_height);
                 //if(sy < sx) sx = sy;
                 //m_resize_mtx = trans_affine_scaling(sx, sx);
                 trans_viewport vp;
-                vp.preserve_aspect_ratio(0.5, 0.5, aspect_ratio_meet);
+                vp.preserve_aspect_ratio(0.5f, 0.5f, aspect_ratio_meet);
                 vp.device_viewport(0, 0, width, height);
                 vp.world_viewport(0, 0, m_initial_width, m_initial_height);
                 m_resize_mtx = vp.to_affine();
@@ -588,15 +588,15 @@ namespace agg
             else
             {
                 m_resize_mtx = trans_affine_scaling(
-                    double(width) / double(m_initial_width),
-                    double(height) / double(m_initial_height));
+                    real(width) / real(m_initial_width),
+                    real(height) / real(m_initial_height));
             }
         }
         const    trans_affine& trans_affine_resizing() const { return m_resize_mtx; }
-        double   width()  const { return m_rbuf_window.width(); }
-        double   height() const { return m_rbuf_window.height(); }
-        double   initial_width()  const { return m_initial_width; }
-        double   initial_height() const { return m_initial_height; }
+        real   width()  const { return m_rbuf_window.width(); }
+        real   height() const { return m_rbuf_window.height(); }
+        real   initial_width()  const { return m_initial_width; }
+        real   initial_height() const { return m_initial_height; }
         unsigned window_flags() const { return m_window_flags; }
 
         //--------------------------------------------------------------------
@@ -620,7 +620,7 @@ namespace agg
         // The resolutoin depends on the implementation. 
         // In Win32 it uses QueryPerformanceFrequency() / QueryPerformanceCounter().
         void   start_timer();
-        double elapsed_time() const;
+        real elapsed_time() const;
 
         //--------------------------------------------------------------------
         // Get the full file name. In most cases it simply returns
@@ -668,4 +668,5 @@ namespace agg
 
 
 #endif
+
 

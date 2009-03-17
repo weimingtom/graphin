@@ -23,7 +23,7 @@ namespace agg
         m_src_vertices(),
         m_spline_x(),
         m_spline_y(),
-        m_interpolation_step(1.0/50.0),
+        m_interpolation_step(1.0/50.0f),
         m_closed(0),
         m_status(initial),
         m_src_vertex(0)
@@ -42,7 +42,7 @@ namespace agg
 
 
     //------------------------------------------------------------------------
-    void vcgen_bspline::add_vertex(double x, double y, unsigned cmd)
+    void vcgen_bspline::add_vertex(real x, real y, unsigned cmd)
     {
         m_status = initial;
         if(is_move_to(cmd))
@@ -66,8 +66,8 @@ namespace agg
     //------------------------------------------------------------------------
     void vcgen_bspline::rewind(unsigned)
     {
-        m_cur_abscissa = 0.0;
-        m_max_abscissa = 0.0;
+        m_cur_abscissa = 0.0f;
+        m_max_abscissa = 0.0f;
         m_src_vertex = 0;
         if(m_status == initial && m_src_vertices.size() > 2)
         {
@@ -75,10 +75,10 @@ namespace agg
             {
                 m_spline_x.init(m_src_vertices.size() + 8);
                 m_spline_y.init(m_src_vertices.size() + 8);
-                m_spline_x.add_point(0.0, m_src_vertices.prev(m_src_vertices.size() - 3).x);
-                m_spline_y.add_point(0.0, m_src_vertices.prev(m_src_vertices.size() - 3).y);
-                m_spline_x.add_point(1.0, m_src_vertices[m_src_vertices.size() - 3].x);
-                m_spline_y.add_point(1.0, m_src_vertices[m_src_vertices.size() - 3].y);
+                m_spline_x.add_point(0.0f, m_src_vertices.prev(m_src_vertices.size() - 3).x);
+                m_spline_y.add_point(0.0f, m_src_vertices.prev(m_src_vertices.size() - 3).y);
+                m_spline_x.add_point(1.0f, m_src_vertices[m_src_vertices.size() - 3].x);
+                m_spline_y.add_point(1.0f, m_src_vertices[m_src_vertices.size() - 3].y);
                 m_spline_x.add_point(2.0, m_src_vertices[m_src_vertices.size() - 2].x);
                 m_spline_y.add_point(2.0, m_src_vertices[m_src_vertices.size() - 2].y);
                 m_spline_x.add_point(3.0, m_src_vertices[m_src_vertices.size() - 1].x);
@@ -92,16 +92,16 @@ namespace agg
             unsigned i;
             for(i = 0; i < m_src_vertices.size(); i++)
             {
-                double x = m_closed ? i + 4 : i;
+                real x = m_closed ? i + 4 : i;
                 m_spline_x.add_point(x, m_src_vertices[i].x);
                 m_spline_y.add_point(x, m_src_vertices[i].y);
             }
-            m_cur_abscissa = 0.0;
+            m_cur_abscissa = 0.0f;
             m_max_abscissa = m_src_vertices.size() - 1;
             if(m_closed)
             {
-                m_cur_abscissa = 4.0;
-                m_max_abscissa += 5.0;
+                m_cur_abscissa = 4.0f;
+                m_max_abscissa += 5.0f;
                 m_spline_x.add_point(m_src_vertices.size() + 4, m_src_vertices[0].x);
                 m_spline_y.add_point(m_src_vertices.size() + 4, m_src_vertices[0].y);
                 m_spline_x.add_point(m_src_vertices.size() + 5, m_src_vertices[1].x);
@@ -123,7 +123,7 @@ namespace agg
 
 
     //------------------------------------------------------------------------
-    unsigned vcgen_bspline::vertex(double* x, double* y)
+    unsigned vcgen_bspline::vertex(real* x, real* y)
     {
         unsigned cmd = path_cmd_line_to;
         while(!is_stop(cmd))
@@ -191,4 +191,5 @@ namespace agg
 
 
 }
+
 

@@ -40,12 +40,12 @@ namespace agg
         trans_double_path();
 
         //--------------------------------------------------------------------
-        void   base_length(double v)  { m_base_length = v; }
-        double base_length() const { return m_base_length; }
+        void   base_length(real v)  { m_base_length = v; }
+        real base_length() const { return m_base_length; }
 
         //--------------------------------------------------------------------
-        void   base_height(double v)  { m_base_height = v; }
-        double base_height() const { return m_base_height; }
+        void   base_height(real v)  { m_base_height = v; }
+        real base_height() const { return m_base_height; }
 
         //--------------------------------------------------------------------
         void preserve_x_scale(bool f) { m_preserve_x_scale = f;    }
@@ -53,10 +53,10 @@ namespace agg
 
         //--------------------------------------------------------------------
         void reset();
-        void move_to1(double x, double y);
-        void line_to1(double x, double y);
-        void move_to2(double x, double y);
-        void line_to2(double x, double y);
+        void move_to1(real x, real y);
+        void line_to1(real x, real y);
+        void move_to2(real x, real y);
+        void line_to2(real x, real y);
         void finalize_paths();
 
         //--------------------------------------------------------------------
@@ -64,8 +64,8 @@ namespace agg
         void add_paths(VertexSource1& vs1, VertexSource2& vs2, 
                        unsigned path1_id=0, unsigned path2_id=0)
         {
-            double x;
-            double y;
+            real x;
+            real y;
 
             unsigned cmd;
 
@@ -104,22 +104,22 @@ namespace agg
         }
 
         //--------------------------------------------------------------------
-        double total_length1() const;
-        double total_length2() const;
-        void transform(double *x, double *y) const;
+        real total_length1() const;
+        real total_length2() const;
+        void transform(real *x, real *y) const;
 
     private:
-        double finalize_path(vertex_storage& vertices);
+        real finalize_path(vertex_storage& vertices);
         void transform1(const vertex_storage& vertices, 
-                        double kindex, double kx,
-                        double *x, double* y) const;
+                        real kindex, real kx,
+                        real *x, real* y) const;
 
         vertex_storage m_src_vertices1;
         vertex_storage m_src_vertices2;
-        double         m_base_length;
-        double         m_base_height;
-        double         m_kindex1;
-        double         m_kindex2;
+        real         m_base_length;
+        real         m_base_height;
+        real         m_kindex1;
+        real         m_kindex2;
         status_e       m_status1;
         status_e       m_status2;
         bool           m_preserve_x_scale;

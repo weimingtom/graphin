@@ -29,27 +29,27 @@ namespace agg
     class vpgen_segmentator
     {
     public:
-        vpgen_segmentator() : m_approximation_scale(1.0) {}
+        vpgen_segmentator() : m_approximation_scale(1.0f) {}
 
-        void approximation_scale(double s) { m_approximation_scale = s;     }
-        double approximation_scale() const { return m_approximation_scale;  }
+        void approximation_scale(real s) { m_approximation_scale = s;     }
+        real approximation_scale() const { return m_approximation_scale;  }
 
         static bool auto_close()   { return false; }
         static bool auto_unclose() { return false; }
 
         void reset() { m_cmd = path_cmd_stop; }
-        void move_to(double x, double y);
-        void line_to(double x, double y);
-        unsigned vertex(double* x, double* y);
+        void move_to(real x, real y);
+        void line_to(real x, real y);
+        unsigned vertex(real* x, real* y);
 
     private:
-        double   m_approximation_scale;
-        double   m_x1;
-        double   m_y1;
-        double   m_dx;
-        double   m_dy;
-        double   m_dl;
-        double   m_ddl;
+        real   m_approximation_scale;
+        real   m_x1;
+        real   m_y1;
+        real   m_dx;
+        real   m_dy;
+        real   m_dl;
+        real   m_ddl;
         unsigned m_cmd;
     };
 
@@ -58,4 +58,5 @@ namespace agg
 }
 
 #endif
+
 

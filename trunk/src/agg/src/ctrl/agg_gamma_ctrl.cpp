@@ -25,22 +25,22 @@ namespace agg
 {
 
     //------------------------------------------------------------------------
-    gamma_ctrl_impl::gamma_ctrl_impl(double x1, double y1, double x2, double y2, bool flip_y) :
+    gamma_ctrl_impl::gamma_ctrl_impl(real x1, real y1, real x2, real y2, bool flip_y) :
         ctrl(x1, y1, x2, y2, flip_y),
-        m_border_width(2.0),
-        m_border_extra(0.0),
-        m_curve_width(2.0),
+        m_border_width(2.0f),
+        m_border_extra(0.0f),
+        m_curve_width(2.0f),
         m_grid_width(0.2),
         m_text_thickness(1.5),
-        m_point_size(5.0),
-        m_text_height(9.0),
-        m_text_width(0.0),
+        m_point_size(5.0f),
+        m_text_height(9.0f),
+        m_text_width(0.0f),
         m_xc1(x1),
         m_yc1(y1),
         m_xc2(x2),
-        m_yc2(y2 - m_text_height * 2.0),
+        m_yc2(y2 - m_text_height * 2.0f),
         m_xt1(x1),
-        m_yt1(y2 - m_text_height * 2.0),
+        m_yt1(y2 - m_text_height * 2.0f),
         m_xt2(x2),
         m_yt2(y2),
         m_curve_poly(m_gamma_spline),
@@ -49,8 +49,8 @@ namespace agg
         m_vertex(0),
         m_p1_active(true),
         m_mouse_point(0),
-        m_pdx(0.0),
-        m_pdy(0.0)
+        m_pdx(0.0f),
+        m_pdy(0.0f)
     {
         calc_spline_box();
     }
@@ -62,14 +62,14 @@ namespace agg
         m_xs1 = m_xc1 + m_border_width;
         m_ys1 = m_yc1 + m_border_width;
         m_xs2 = m_xc2 - m_border_width;
-        m_ys2 = m_yc2 - m_border_width * 0.5;
+        m_ys2 = m_yc2 - m_border_width * 0.5f;
     }
 
 
     //------------------------------------------------------------------------
     void gamma_ctrl_impl::calc_points()
     {
-        double kx1, ky1, kx2, ky2;
+        real kx1, ky1, kx2, ky2;
         m_gamma_spline.values(&kx1, &ky1, &kx2, &ky2);
         m_xp1 = m_xs1 + (m_xs2 - m_xs1) * kx1 * 0.25;
         m_yp1 = m_ys1 + (m_ys2 - m_ys1) * ky1 * 0.25;
@@ -81,29 +81,29 @@ namespace agg
     //------------------------------------------------------------------------
     void gamma_ctrl_impl::calc_values()
     {
-        double kx1, ky1, kx2, ky2;
+        real kx1, ky1, kx2, ky2;
 
-        kx1 = (m_xp1 - m_xs1) * 4.0 / (m_xs2 - m_xs1);
-        ky1 = (m_yp1 - m_ys1) * 4.0 / (m_ys2 - m_ys1);
-        kx2 = (m_xs2 - m_xp2) * 4.0 / (m_xs2 - m_xs1);
-        ky2 = (m_ys2 - m_yp2) * 4.0 / (m_ys2 - m_ys1);
+        kx1 = (m_xp1 - m_xs1) * 4.0f / (m_xs2 - m_xs1);
+        ky1 = (m_yp1 - m_ys1) * 4.0f / (m_ys2 - m_ys1);
+        kx2 = (m_xs2 - m_xp2) * 4.0f / (m_xs2 - m_xs1);
+        ky2 = (m_ys2 - m_yp2) * 4.0f / (m_ys2 - m_ys1);
         m_gamma_spline.values(kx1, ky1, kx2, ky2);
     }
 
 
     //------------------------------------------------------------------------
-    void gamma_ctrl_impl::text_size(double h, double w) 
+    void gamma_ctrl_impl::text_size(real h, real w) 
     { 
         m_text_width = w; 
         m_text_height = h; 
-        m_yc2 = m_y2 - m_text_height * 2.0;
-        m_yt1 = m_y2 - m_text_height * 2.0;
+        m_yc2 = m_y2 - m_text_height * 2.0f;
+        m_yt1 = m_y2 - m_text_height * 2.0f;
         calc_spline_box();
     }
 
 
     //------------------------------------------------------------------------
-    void gamma_ctrl_impl::border_width(double t, double extra)
+    void gamma_ctrl_impl::border_width(real t, real extra)
     { 
         m_border_width = t; 
         m_border_extra = extra;
@@ -111,14 +111,14 @@ namespace agg
     }
 
     //------------------------------------------------------------------------
-    void gamma_ctrl_impl::values(double kx1, double ky1, double kx2, double ky2)
+    void gamma_ctrl_impl::values(real kx1, real ky1, real kx2, real ky2)
     {
         m_gamma_spline.values(kx1, ky1, kx2, ky2);
     }
 
 
     //------------------------------------------------------------------------
-    void gamma_ctrl_impl::values(double* kx1, double* ky1, double* kx2, double* ky2) const
+    void gamma_ctrl_impl::values(real* kx1, real* ky1, real* kx2, real* ky2) const
     {
         m_gamma_spline.values(kx1, ky1, kx2, ky2);
     }
@@ -126,7 +126,7 @@ namespace agg
     //------------------------------------------------------------------------
     void  gamma_ctrl_impl::rewind(unsigned idx)
     {
-        double kx1, ky1, kx2, ky2;
+        real kx1, ky1, kx2, ky2;
         char tbuf[32];
 
         m_idx = idx;
@@ -166,13 +166,13 @@ namespace agg
             m_vx[7] = m_x2 - m_border_width; 
             m_vy[7] = m_y1 + m_border_width; 
             m_vx[8] = m_xc1 + m_border_width;
-            m_vy[8] = m_yc2 - m_border_width * 0.5;
+            m_vy[8] = m_yc2 - m_border_width * 0.5f;
             m_vx[9] = m_xc2 - m_border_width;
-            m_vy[9] = m_yc2 - m_border_width * 0.5;
+            m_vy[9] = m_yc2 - m_border_width * 0.5f;
             m_vx[10] = m_xc2 - m_border_width;
-            m_vy[10] = m_yc2 + m_border_width * 0.5;
+            m_vy[10] = m_yc2 + m_border_width * 0.5f;
             m_vx[11] = m_xc1 + m_border_width;
-            m_vy[11] = m_yc2 + m_border_width * 0.5;
+            m_vy[11] = m_yc2 + m_border_width * 0.5f;
             break;
 
         case 2:                 // Curve
@@ -184,46 +184,46 @@ namespace agg
         case 3:                 // Grid
             m_vertex = 0;
             m_vx[0] = m_xs1;
-            m_vy[0] = (m_ys1 + m_ys2) * 0.5 - m_grid_width * 0.5;
+            m_vy[0] = (m_ys1 + m_ys2) * 0.5 - m_grid_width * 0.5f;
             m_vx[1] = m_xs2;
-            m_vy[1] = (m_ys1 + m_ys2) * 0.5 - m_grid_width * 0.5;
+            m_vy[1] = (m_ys1 + m_ys2) * 0.5 - m_grid_width * 0.5f;
             m_vx[2] = m_xs2;
-            m_vy[2] = (m_ys1 + m_ys2) * 0.5 + m_grid_width * 0.5;
+            m_vy[2] = (m_ys1 + m_ys2) * 0.5 + m_grid_width * 0.5f;
             m_vx[3] = m_xs1;
-            m_vy[3] = (m_ys1 + m_ys2) * 0.5 + m_grid_width * 0.5;
-            m_vx[4] = (m_xs1 + m_xs2) * 0.5 - m_grid_width * 0.5;
+            m_vy[3] = (m_ys1 + m_ys2) * 0.5 + m_grid_width * 0.5f;
+            m_vx[4] = (m_xs1 + m_xs2) * 0.5 - m_grid_width * 0.5f;
             m_vy[4] = m_ys1;
-            m_vx[5] = (m_xs1 + m_xs2) * 0.5 - m_grid_width * 0.5;
+            m_vx[5] = (m_xs1 + m_xs2) * 0.5 - m_grid_width * 0.5f;
             m_vy[5] = m_ys2;
-            m_vx[6] = (m_xs1 + m_xs2) * 0.5 + m_grid_width * 0.5;
+            m_vx[6] = (m_xs1 + m_xs2) * 0.5 + m_grid_width * 0.5f;
             m_vy[6] = m_ys2;
-            m_vx[7] = (m_xs1 + m_xs2) * 0.5 + m_grid_width * 0.5;
+            m_vx[7] = (m_xs1 + m_xs2) * 0.5 + m_grid_width * 0.5f;
             m_vy[7] = m_ys1;
             calc_points();
             m_vx[8] = m_xs1;
-            m_vy[8] = m_yp1 - m_grid_width * 0.5;
-            m_vx[9] = m_xp1 - m_grid_width * 0.5;
-            m_vy[9] = m_yp1 - m_grid_width * 0.5;
-            m_vx[10] = m_xp1 - m_grid_width * 0.5;
+            m_vy[8] = m_yp1 - m_grid_width * 0.5f;
+            m_vx[9] = m_xp1 - m_grid_width * 0.5f;
+            m_vy[9] = m_yp1 - m_grid_width * 0.5f;
+            m_vx[10] = m_xp1 - m_grid_width * 0.5f;
             m_vy[10] = m_ys1;
-            m_vx[11] = m_xp1 + m_grid_width * 0.5;
+            m_vx[11] = m_xp1 + m_grid_width * 0.5f;
             m_vy[11] = m_ys1;
-            m_vx[12] = m_xp1 + m_grid_width * 0.5;
-            m_vy[12] = m_yp1 + m_grid_width * 0.5;
+            m_vx[12] = m_xp1 + m_grid_width * 0.5f;
+            m_vy[12] = m_yp1 + m_grid_width * 0.5f;
             m_vx[13] = m_xs1;
-            m_vy[13] = m_yp1 + m_grid_width * 0.5;
+            m_vy[13] = m_yp1 + m_grid_width * 0.5f;
             m_vx[14] = m_xs2;
-            m_vy[14] = m_yp2 + m_grid_width * 0.5;
-            m_vx[15] = m_xp2 + m_grid_width * 0.5;
-            m_vy[15] = m_yp2 + m_grid_width * 0.5;
-            m_vx[16] = m_xp2 + m_grid_width * 0.5;
+            m_vy[14] = m_yp2 + m_grid_width * 0.5f;
+            m_vx[15] = m_xp2 + m_grid_width * 0.5f;
+            m_vy[15] = m_yp2 + m_grid_width * 0.5f;
+            m_vx[16] = m_xp2 + m_grid_width * 0.5f;
             m_vy[16] = m_ys2;
-            m_vx[17] = m_xp2 - m_grid_width * 0.5;
+            m_vx[17] = m_xp2 - m_grid_width * 0.5f;
             m_vy[17] = m_ys2;
-            m_vx[18] = m_xp2 - m_grid_width * 0.5;
-            m_vy[18] = m_yp2 - m_grid_width * 0.5;
+            m_vx[18] = m_xp2 - m_grid_width * 0.5f;
+            m_vy[18] = m_yp2 - m_grid_width * 0.5f;
             m_vx[19] = m_xs2;
-            m_vy[19] = m_yp2 - m_grid_width * 0.5;
+            m_vy[19] = m_yp2 - m_grid_width * 0.5f;
             break;
 
         case 4:                 // Point1
@@ -243,7 +243,7 @@ namespace agg
             sprintf(tbuf, "%5.3f %5.3f %5.3f %5.3f", kx1, ky1, kx2, ky2);
             m_text.text(tbuf);
             m_text.size(m_text_height, m_text_width);
-            m_text.start_point(m_xt1 + m_border_width * 2.0, (m_yt1 + m_yt2) * 0.5 - m_text_height * 0.5);
+            m_text.start_point(m_xt1 + m_border_width * 2.0, (m_yt1 + m_yt2) * 0.5 - m_text_height * 0.5f);
             m_text_poly.width(m_text_thickness);
             m_text_poly.line_join(round_join);
             m_text_poly.line_cap(round_cap);
@@ -254,7 +254,7 @@ namespace agg
 
 
     //------------------------------------------------------------------------
-    unsigned gamma_ctrl_impl::vertex(double* x, double* y)
+    unsigned gamma_ctrl_impl::vertex(real* x, real* y)
     {
         unsigned cmd = path_cmd_line_to;
         switch(m_idx)
@@ -318,7 +318,7 @@ namespace agg
     //------------------------------------------------------------------------
     bool gamma_ctrl_impl::on_arrow_keys(bool left, bool right, bool down, bool up)
     {
-        double kx1, ky1, kx2, ky2;
+        real kx1, ky1, kx2, ky2;
         bool ret = false;
         m_gamma_spline.values(&kx1, &ky1, &kx2, &ky2);
         if(m_p1_active)
@@ -354,7 +354,7 @@ namespace agg
 
 
     //------------------------------------------------------------------------
-    bool gamma_ctrl_impl::in_rect(double x, double y) const
+    bool gamma_ctrl_impl::in_rect(real x, real y) const
     {
         inverse_transform_xy(&x, &y);
         return x >= m_x1 && x <= m_x2 && y >= m_y1 && y <= m_y2;
@@ -362,7 +362,7 @@ namespace agg
 
 
     //------------------------------------------------------------------------
-    bool gamma_ctrl_impl::on_mouse_button_down(double x, double y)
+    bool gamma_ctrl_impl::on_mouse_button_down(real x, real y)
     {
         inverse_transform_xy(&x, &y);
         calc_points();
@@ -402,7 +402,7 @@ namespace agg
 
 
     //------------------------------------------------------------------------
-    bool gamma_ctrl_impl::on_mouse_move(double x, double y, bool button_flag)
+    bool gamma_ctrl_impl::on_mouse_move(real x, real y, bool button_flag)
     {
         inverse_transform_xy(&x, &y);
         if(!button_flag)
@@ -430,4 +430,5 @@ namespace agg
 
 
 }
+
 

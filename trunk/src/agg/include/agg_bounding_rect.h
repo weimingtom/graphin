@@ -31,8 +31,8 @@ namespace agg
                        CoordT* x1, CoordT* y1, CoordT* x2, CoordT* y2)
     {
         unsigned i;
-        double x;
-        double y;
+        real x;
+        real y;
         bool first = true;
 
         *x1 = CoordT(1);
@@ -75,8 +75,8 @@ namespace agg
     bool bounding_rect_single(VertexSource& vs, unsigned path_id,
                               CoordT* x1, CoordT* y1, CoordT* x2, CoordT* y2)
     {
-        double x;
-        double y;
+        real x;
+        real y;
         bool first = true;
 
         *x1 = CoordT(1);

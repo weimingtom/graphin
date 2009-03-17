@@ -175,7 +175,7 @@ namespace agg
                                          unsigned cover)
         {
             alpha = color_type::base_mask - alpha;
-            cover = (cover + 1) << (base_shift - 8);
+            cover <<= (base_shift - 8);
             p[Order::R] = (value_type)((p[Order::R] * alpha + cr * cover) >> base_shift);
             p[Order::G] = (value_type)((p[Order::G] * alpha + cg * cover) >> base_shift);
             p[Order::B] = (value_type)((p[Order::B] * alpha + cb * cover) >> base_shift);
@@ -1139,7 +1139,7 @@ namespace agg
         // otherwise if 8.Dca <= Da
         //   Dca' = Dca.(Sa + (1 - Dca/Da).(2.Sca - Sa).(3 - 8.Dca/Da)) + Sca.(1 - Da) + Dca.(1 - Sa)
         // otherwise
-        //   Dca' = (Dca.Sa + ((Dca/Da)^(0.5).Da - Dca).(2.Sca - Sa)) + Sca.(1 - Da) + Dca.(1 - Sa)
+        //   Dca' = (Dca.Sa + ((Dca/Da)^(0.5f).Da - Dca).(2.Sca - Sa)) + Sca.(1 - Da) + Dca.(1 - Sa)
         // 
         // Da'  = Sa + Da - Sa.Da 
 
@@ -1147,16 +1147,16 @@ namespace agg
                                          unsigned r, unsigned g, unsigned b, 
                                          unsigned a, unsigned cover)
         {
-            double sr = double(r * cover) / (base_mask * 255);
-            double sg = double(g * cover) / (base_mask * 255);
-            double sb = double(b * cover) / (base_mask * 255);
-            double sa = double(a * cover) / (base_mask * 255);
+            real sr = real(r * cover) / (base_mask * 255);
+            real sg = real(g * cover) / (base_mask * 255);
+            real sb = real(b * cover) / (base_mask * 255);
+            real sa = real(a * cover) / (base_mask * 255);
             if(sa > 0)
             {
-                double dr = double(p[Order::R]) / base_mask;
-                double dg = double(p[Order::G]) / base_mask;
-                double db = double(p[Order::B]) / base_mask;
-                double da = double(p[Order::A] ? p[Order::A] : 1) / base_mask;
+                real dr = real(p[Order::R]) / base_mask;
+                real dg = real(p[Order::G]) / base_mask;
+                real db = real(p[Order::B]) / base_mask;
+                real da = real(p[Order::A] ? p[Order::A] : 1) / base_mask;
                 if(cover < 255)
                 {
                     a = (a * cover + 255) >> 8;
@@ -1164,15 +1164,15 @@ namespace agg
 
                 if(2*sr < sa)       dr = dr*(sa + (1 - dr/da)*(2*sr - sa)) + sr*(1 - da) + dr*(1 - sa);
                 else if(8*dr <= da) dr = dr*(sa + (1 - dr/da)*(2*sr - sa)*(3 - 8*dr/da)) + sr*(1 - da) + dr*(1 - sa);
-                else                dr = (dr*sa + (sqrt(dr/da)*da - dr)*(2*sr - sa)) + sr*(1 - da) + dr*(1 - sa);
+                else                dr = (dr*sa + (SQRT(dr/da)*da - dr)*(2*sr - sa)) + sr*(1 - da) + dr*(1 - sa);
 
                 if(2*sg < sa)       dg = dg*(sa + (1 - dg/da)*(2*sg - sa)) + sg*(1 - da) + dg*(1 - sa);
                 else if(8*dg <= da) dg = dg*(sa + (1 - dg/da)*(2*sg - sa)*(3 - 8*dg/da)) + sg*(1 - da) + dg*(1 - sa);
-                else                dg = (dg*sa + (sqrt(dg/da)*da - dg)*(2*sg - sa)) + sg*(1 - da) + dg*(1 - sa);
+                else                dg = (dg*sa + (SQRT(dg/da)*da - dg)*(2*sg - sa)) + sg*(1 - da) + dg*(1 - sa);
 
                 if(2*sb < sa)       db = db*(sa + (1 - db/da)*(2*sb - sa)) + sb*(1 - da) + db*(1 - sa);
                 else if(8*db <= da) db = db*(sa + (1 - db/da)*(2*sb - sa)*(3 - 8*db/da)) + sb*(1 - da) + db*(1 - sa);
-                else                db = (db*sa + (sqrt(db/da)*da - db)*(2*sb - sa)) + sb*(1 - da) + db*(1 - sa);
+                else                db = (db*sa + (SQRT(db/da)*da - db)*(2*sb - sa)) + sb*(1 - da) + db*(1 - sa);
 
                 p[Order::R] = (value_type)uround(dr * base_mask);
                 p[Order::G] = (value_type)uround(dg * base_mask);
@@ -1718,28 +1718,28 @@ namespace agg
                                                  unsigned alpha,
                                                  unsigned cover)
         {
-            if(cover == 255)
-            {
-                copy_or_blend_pix(p, cr, cg, cb, alpha);
-            }
-            else
-            {
-                if(alpha)
-                {
-                    alpha = (alpha * (cover + 1)) >> 8;
-                    if(alpha == base_mask)
-                    {
-                        p[order_type::R] = cr;
-                        p[order_type::G] = cg;
-                        p[order_type::B] = cb;
-                        p[order_type::A] = base_mask;
-                    }
-                    else
-                    {
-                        Blender::blend_pix(p, cr, cg, cb, alpha, cover);
-                    }
-                }
-            }
+            //AF: removed this as it causes erroneous results in Graphics.blendImage
+            //if(cover == 255)
+            //{
+            //    copy_or_blend_pix(p, cr, cg, cb, alpha);
+            //}
+            //else
+            //{
+              if(alpha == 0)
+                return;
+              alpha = (alpha * (cover + 1)) >> 8;
+              if(alpha == base_mask)
+              {
+                  p[order_type::R] = cr;
+                  p[order_type::G] = cg;
+                  p[order_type::B] = cb;
+                  p[order_type::A] = base_mask;
+              }
+              else
+              {
+                  Blender::blend_pix(p, cr, cg, cb, alpha, alpha);
+              }
+            //}
         }
     };
 
@@ -2293,6 +2293,7 @@ namespace agg
                     incp = -4;
                 }
 
+                /*AF: some strange logic was here here, removed:
                 if(cover == 255)
                 {
                     do 
@@ -2307,7 +2308,7 @@ namespace agg
                     }
                     while(--len);
                 }
-                else
+                else*/
                 {
                     do 
                     {
@@ -2899,4 +2900,9 @@ namespace agg
 }
 
 #endif
+
+
+
+
+
 

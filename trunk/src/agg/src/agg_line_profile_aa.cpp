@@ -19,28 +19,28 @@ namespace agg
 {
 
     //---------------------------------------------------------------------
-    void line_profile_aa::width(double w)
+    void line_profile_aa::width(real w)
     {
-        if(w < 0.0) w = 0.0;
+        if(w < 0.0f) w = 0.0f;
 
         if(w < m_smoother_width) w += w;
         else                     w += m_smoother_width;
 
-        w *= 0.5;
+        w *= 0.5f;
 
         w -= m_smoother_width;
-        double s = m_smoother_width;
-        if(w < 0.0) 
+        real s = m_smoother_width;
+        if(w < 0.0f) 
         {
             s += w;
-            w = 0.0;
+            w = 0.0f;
         }
         set(w, s);
     }
 
 
     //---------------------------------------------------------------------
-    line_profile_aa::value_type* line_profile_aa::profile(double w)
+    line_profile_aa::value_type* line_profile_aa::profile(real w)
     {
         m_subpixel_width = uround(w * subpixel_scale);
         unsigned size = m_subpixel_width + subpixel_scale * 6;
@@ -53,16 +53,16 @@ namespace agg
 
 
     //---------------------------------------------------------------------
-    void line_profile_aa::set(double center_width, double smoother_width)
+    void line_profile_aa::set(real center_width, real smoother_width)
     {
-        double base_val = 1.0;
-        if(center_width == 0.0)   center_width = 1.0 / subpixel_scale;
-        if(smoother_width == 0.0) smoother_width = 1.0 / subpixel_scale;
+        real base_val = 1.0f;
+        if(center_width == 0.0f)   center_width = 1.0f / subpixel_scale;
+        if(smoother_width == 0.0f) smoother_width = 1.0f / subpixel_scale;
 
-        double width = center_width + smoother_width;
+        real width = center_width + smoother_width;
         if(width < m_min_width)
         {
-            double k = width / m_min_width;
+            real k = width / m_min_width;
             base_val *= k;
             center_width /= k;
             smoother_width /= k;
@@ -90,7 +90,7 @@ namespace agg
             *ch_smoother++ = 
                 m_gamma[unsigned((base_val - 
                                   base_val * 
-                                  (double(i) / subpixel_smoother_width)) * aa_mask)];
+                                  (real(i) / subpixel_smoother_width)) * aa_mask)];
         }
 
         unsigned n_smoother = profile_size() - 
@@ -113,4 +113,5 @@ namespace agg
 
 
 }
+
 

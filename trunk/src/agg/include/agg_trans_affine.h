@@ -24,7 +24,7 @@
 
 namespace agg
 {
-    const double affine_epsilon = 1e-14; 
+    const real affine_epsilon = 1e-14; 
 
     //============================================================trans_affine
     //
@@ -52,12 +52,12 @@ namespace agg
     //       * move to (100, 100). 
     //    The result will depend on the order of these transformations, 
     //    and the advantage of matrix is that the sequence of discret calls:
-    //    rotate(30), scaleX(2.0), scaleY(1.5), move(100,100) 
+    //    rotate(30), scaleX(2.0f), scaleY(1.5), move(100,100) 
     //    will have exactly the same result as the following matrix transformations:
     //   
     //    affine_matrix m;
     //    m *= rotate_matrix(30); 
-    //    m *= scaleX_matrix(2.0);
+    //    m *= scaleX_matrix(2.0f);
     //    m *= scaleY_matrix(1.5);
     //    m *= move_matrix(100,100);
     //
@@ -71,56 +71,56 @@ namespace agg
     // let us write a correct example:
     //
     // agg::trans_affine m;
-    // m *= agg::trans_affine_rotation(30.0 * 3.1415926 / 180.0);
+    // m *= agg::trans_affine_rotation(30.0f * 3.1415926 / 180.0f);
     // m *= agg::trans_affine_scaling(2.0, 1.5);
-    // m *= agg::trans_affine_translation(100.0, 100.0);
+    // m *= agg::trans_affine_translation(100.0f, 100.0f);
     // m.transform(&x, &y);
     //
     // The affine matrix is all you need to perform any linear transformation,
     // but all transformations have origin point (0,0). It means that we need to 
     // use 2 translations if we want to rotate someting around (100,100):
     // 
-    // m *= agg::trans_affine_translation(-100.0, -100.0);         // move to (0,0)
-    // m *= agg::trans_affine_rotation(30.0 * 3.1415926 / 180.0);  // rotate
-    // m *= agg::trans_affine_translation(100.0, 100.0);           // move back to (100,100)
+    // m *= agg::trans_affine_translation(-100.0f, -100.0f);         // move to (0,0)
+    // m *= agg::trans_affine_rotation(30.0f * 3.1415926 / 180.0f);  // rotate
+    // m *= agg::trans_affine_translation(100.0f, 100.0f);           // move back to (100,100)
     //----------------------------------------------------------------------
     struct trans_affine
     {
-        double sx, shy, shx, sy, tx, ty;
+        real sx, shy, shx, sy, tx, ty;
 
         //------------------------------------------ Construction
         // Identity matrix
         trans_affine() :
-            sx(1.0), shy(0.0), shx(0.0), sy(1.0), tx(0.0), ty(0.0)
+            sx(1.0f), shy(0.0f), shx(0.0f), sy(1.0f), tx(0.0f), ty(0.0f)
         {}
 
         // Custom matrix. Usually used in derived classes
-        trans_affine(double v0, double v1, double v2, 
-                     double v3, double v4, double v5) :
+        trans_affine(real v0, real v1, real v2, 
+                     real v3, real v4, real v5) :
             sx(v0), shy(v1), shx(v2), sy(v3), tx(v4), ty(v5)
         {}
 
         // Custom matrix from m[6]
-        explicit trans_affine(const double* m) :
+        explicit trans_affine(const real* m) :
             sx(m[0]), shy(m[1]), shx(m[2]), sy(m[3]), tx(m[4]), ty(m[5])
         {}
 
         // Rectangle to a parallelogram.
-        trans_affine(double x1, double y1, double x2, double y2, 
-                     const double* parl)
+        trans_affine(real x1, real y1, real x2, real y2, 
+                     const real* parl)
         {
             rect_to_parl(x1, y1, x2, y2, parl);
         }
 
         // Parallelogram to a rectangle.
-        trans_affine(const double* parl, 
-                     double x1, double y1, double x2, double y2)
+        trans_affine(const real* parl, 
+                     real x1, real y1, real x2, real y2)
         {
             parl_to_rect(parl, x1, y1, x2, y2);
         }
 
         // Arbitrary parallelogram transformation.
-        trans_affine(const double* src, const double* dst)
+        trans_affine(const real* src, const real* dst)
         {
             parl_to_parl(src, dst);
         }
@@ -136,16 +136,16 @@ namespace agg
         //      /                 /
         //     /(x1,y1)   (x2,y2)/
         //    *-----------------*
-        const trans_affine& parl_to_parl(const double* src, 
-                                         const double* dst);
+        const trans_affine& parl_to_parl(const real* src, 
+                                         const real* dst);
 
-        const trans_affine& rect_to_parl(double x1, double y1, 
-                                         double x2, double y2, 
-                                         const double* parl);
+        const trans_affine& rect_to_parl(real x1, real y1, 
+                                         real x2, real y2, 
+                                         const real* parl);
 
-        const trans_affine& parl_to_rect(const double* parl, 
-                                         double x1, double y1, 
-                                         double x2, double y2);
+        const trans_affine& parl_to_rect(const real* parl, 
+                                         real x1, real y1, 
+                                         real x2, real y2);
 
 
         //------------------------------------------ Operations
@@ -153,10 +153,10 @@ namespace agg
         const trans_affine& reset();
 
         // Direct transformations operations
-        const trans_affine& translate(double x, double y);
-        const trans_affine& rotate(double a);
-        const trans_affine& scale(double s);
-        const trans_affine& scale(double x, double y);
+        const trans_affine& translate(real x, real y);
+        const trans_affine& rotate(real a);
+        const trans_affine& scale(real s);
+        const trans_affine& scale(real x, real y);
 
         // Multiply matrix to another one
         const trans_affine& multiply(const trans_affine& m);
@@ -183,13 +183,13 @@ namespace agg
 
         //------------------------------------------- Load/Store
         // Store matrix to an array [6] of double
-        void store_to(double* m) const
+        void store_to(real* m) const
         {
             *m++ = sx; *m++ = shy; *m++ = shx; *m++ = sy; *m++ = tx; *m++ = ty;
         }
 
         // Load matrix from an array [6] of double
-        const trans_affine& load_from(const double* m)
+        const trans_affine& load_from(const real* m)
         {
             sx = *m++; shy = *m++; shx = *m++; sy = *m++; tx = *m++;  ty = *m++;
             return *this;
@@ -244,87 +244,87 @@ namespace agg
 
         //-------------------------------------------- Transformations
         // Direct transformation of x and y
-        void transform(double* x, double* y) const;
+        void transform(real* x, real* y) const;
 
         // Direct transformation of x and y, 2x2 matrix only, no translation
-        void transform_2x2(double* x, double* y) const;
+        void transform_2x2(real* x, real* y) const;
 
         // Inverse transformation of x and y. It works slower than the 
         // direct transformation. For massive operations it's better to 
         // invert() the matrix and then use direct transformations. 
-        void inverse_transform(double* x, double* y) const;
+        void inverse_transform(real* x, real* y) const;
 
         //-------------------------------------------- Auxiliary
         // Calculate the determinant of matrix
-        double determinant() const
+        real determinant() const
         {
             return sx * sy - shy * shx;
         }
 
         // Calculate the reciprocal of the determinant
-        double determinant_reciprocal() const
+        real determinant_reciprocal() const
         {
-            return 1.0 / (sx * sy - shy * shx);
+            return 1.0f / (sx * sy - shy * shx);
         }
 
         // Get the average scale (by X and Y). 
         // Basically used to calculate the approximation_scale when
         // decomposinting curves into line segments.
-        double scale() const;
+        real scale() const;
 
         // Check to see if the matrix is not degenerate
-        bool is_valid(double epsilon = affine_epsilon) const;
+        bool is_valid(real epsilon = affine_epsilon) const;
 
         // Check to see if it's an identity matrix
-        bool is_identity(double epsilon = affine_epsilon) const;
+        bool is_identity(real epsilon = affine_epsilon) const;
 
         // Check to see if two matrices are equal
-        bool is_equal(const trans_affine& m, double epsilon = affine_epsilon) const;
+        bool is_equal(const trans_affine& m, real epsilon = affine_epsilon) const;
 
         // Determine the major parameters. Use with caution considering 
         // possible degenerate cases.
-        double rotation() const;
-        void   translation(double* dx, double* dy) const;
-        void   scaling(double* x, double* y) const;
-        void   scaling_abs(double* x, double* y) const;
+        real rotation() const;
+        void   translation(real* dx, real* dy) const;
+        void   scaling(real* x, real* y) const;
+        void   scaling_abs(real* x, real* y) const;
     };
 
     //------------------------------------------------------------------------
-    inline void trans_affine::transform(double* x, double* y) const
+    inline void trans_affine::transform(real* x, real* y) const
     {
-        register double tmp = *x;
+        register real tmp = *x;
         *x = tmp * sx  + *y * shx + tx;
         *y = tmp * shy + *y * sy  + ty;
     }
 
     //------------------------------------------------------------------------
-    inline void trans_affine::transform_2x2(double* x, double* y) const
+    inline void trans_affine::transform_2x2(real* x, real* y) const
     {
-        register double tmp = *x;
+        register real tmp = *x;
         *x = tmp * sx  + *y * shx;
         *y = tmp * shy + *y * sy;
     }
 
     //------------------------------------------------------------------------
-    inline void trans_affine::inverse_transform(double* x, double* y) const
+    inline void trans_affine::inverse_transform(real* x, real* y) const
     {
-        register double d = determinant_reciprocal();
-        register double a = (*x - tx) * d;
-        register double b = (*y - ty) * d;
+        register real d = determinant_reciprocal();
+        register real a = (*x - tx) * d;
+        register real b = (*y - ty) * d;
         *x = a * sy - b * shx;
         *y = b * sx - a * shy;
     }
 
     //------------------------------------------------------------------------
-    inline double trans_affine::scale() const
+    inline real trans_affine::scale() const
     {
-        double x = 0.707106781 * sx  + 0.707106781 * shx;
-        double y = 0.707106781 * shy + 0.707106781 * sy;
-        return sqrt(x*x + y*y);
+        real x = real(0.707106781) * sx  + real(0.707106781) * shx;
+        real y = real(0.707106781) * shy + real(0.707106781) * sy;
+        return SQRT(x*x + y*y);
     }
 
     //------------------------------------------------------------------------
-    inline const trans_affine& trans_affine::translate(double x, double y) 
+    inline const trans_affine& trans_affine::translate(real x, real y) 
     { 
         tx += x;
         ty += y; 
@@ -332,13 +332,13 @@ namespace agg
     }
 
     //------------------------------------------------------------------------
-    inline const trans_affine& trans_affine::rotate(double a) 
+    inline const trans_affine& trans_affine::rotate(real a) 
     {
-        double ca = cos(a); 
-        double sa = sin(a);
-        double t0 = sx  * ca - shy * sa;
-        double t2 = shx * ca - sy * sa;
-        double t4 = tx  * ca - ty * sa;
+        real ca = (real)cos(a); 
+        real sa = (real)sin(a);
+        real t0 = sx  * ca - shy * sa;
+        real t2 = shx * ca - sy * sa;
+        real t4 = tx  * ca - ty * sa;
         shy = sx  * sa + shy * ca;
         sy  = shx * sa + sy * ca; 
         ty  = tx  * sa + ty * ca;
@@ -349,10 +349,10 @@ namespace agg
     }
 
     //------------------------------------------------------------------------
-    inline const trans_affine& trans_affine::scale(double x, double y) 
+    inline const trans_affine& trans_affine::scale(real x, real y) 
     {
-        double mm0 = x; // Possible hint for the optimizer
-        double mm3 = y; 
+        real mm0 = x; // Possible hint for the optimizer
+        real mm3 = y; 
         sx  *= mm0;
         shx *= mm0;
         tx  *= mm0;
@@ -363,9 +363,9 @@ namespace agg
     }
 
     //------------------------------------------------------------------------
-    inline const trans_affine& trans_affine::scale(double s) 
+    inline const trans_affine& trans_affine::scale(real s) 
     {
-        double m = s; // Possible hint for the optimizer
+        real m = s; // Possible hint for the optimizer
         sx  *= m;
         shx *= m;
         tx  *= m;
@@ -399,25 +399,25 @@ namespace agg
     }
 
     //------------------------------------------------------------------------
-    inline void trans_affine::scaling_abs(double* x, double* y) const
+    inline void trans_affine::scaling_abs(real* x, real* y) const
     {
         // Used to calculate scaling coefficients in image resampling. 
         // When there is considerable shear this method gives us much
         // better estimation than just sx, sy.
-        *x = sqrt(sx  * sx  + shx * shx);
-        *y = sqrt(shy * shy + sy  * sy);
+        *x = SQRT(sx  * sx  + shx * shx);
+        *y = SQRT(shy * shy + sy  * sy);
     }
 
     //====================================================trans_affine_rotation
-    // Rotation matrix. sin() and cos() are calculated twice for the same angle.
-    // There's no harm because the performance of sin()/cos() is very good on all
+    // Rotation matrix. (real)sin() and (real)cos() are calculated twice for the same angle.
+    // There's no harm because the performance of (real)sin()/(real)cos() is very good on all
     // modern processors. Besides, this operation is not going to be invoked too 
     // often.
     class trans_affine_rotation : public trans_affine
     {
     public:
-        trans_affine_rotation(double a) : 
-          trans_affine(cos(a), sin(a), -sin(a), cos(a), 0.0, 0.0)
+        trans_affine_rotation(real a) : 
+          trans_affine((real)cos(a), (real)sin(a), -(real)sin(a), (real)cos(a), 0.0f, 0.0f)
         {}
     };
 
@@ -426,12 +426,12 @@ namespace agg
     class trans_affine_scaling : public trans_affine
     {
     public:
-        trans_affine_scaling(double x, double y) : 
-          trans_affine(x, 0.0, 0.0, y, 0.0, 0.0)
+        trans_affine_scaling(real x, real y) : 
+          trans_affine(x, 0.0f, 0.0f, y, 0.0f, 0.0f)
         {}
 
-        trans_affine_scaling(double s) : 
-          trans_affine(s, 0.0, 0.0, s, 0.0, 0.0)
+        trans_affine_scaling(real s) : 
+          trans_affine(s, 0.0f, 0.0f, s, 0.0f, 0.0f)
         {}
     };
 
@@ -440,8 +440,8 @@ namespace agg
     class trans_affine_translation : public trans_affine
     {
     public:
-        trans_affine_translation(double x, double y) : 
-          trans_affine(1.0, 0.0, 0.0, 1.0, x, y)
+        trans_affine_translation(real x, real y) : 
+          trans_affine(1.0f, 0.0f, 0.0f, 1.0f, x, y)
         {}
     };
 
@@ -450,8 +450,8 @@ namespace agg
     class trans_affine_skewing : public trans_affine
     {
     public:
-        trans_affine_skewing(double x, double y) : 
-          trans_affine(1.0, tan(y), tan(x), 1.0, 0.0, 0.0)
+        trans_affine_skewing(real x, real y) : 
+          trans_affine(1.0f, (real)tan(y), (real)tan(x), 1.0f, 0.0f, 0.0f)
         {}
     };
 
@@ -462,16 +462,16 @@ namespace agg
     class trans_affine_line_segment : public trans_affine
     {
     public:
-        trans_affine_line_segment(double x1, double y1, double x2, double y2, 
-                                  double dist)
+        trans_affine_line_segment(real x1, real y1, real x2, real y2, 
+                                  real dist)
         {
-            double dx = x2 - x1;
-            double dy = y2 - y1;
-            if(dist > 0.0)
+            real dx = x2 - x1;
+            real dy = y2 - y1;
+            if(dist > 0.0f)
             {
-                multiply(trans_affine_scaling(sqrt(dx * dx + dy * dy) / dist));
+                multiply(trans_affine_scaling(SQRT(dx * dx + dy * dy) / dist));
             }
-            multiply(trans_affine_rotation(atan2(dy, dx)));
+            multiply(trans_affine_rotation((real)atan2(dy, dx)));
             multiply(trans_affine_translation(x1, y1));
         }
     };
@@ -484,12 +484,12 @@ namespace agg
     class trans_affine_reflection_unit : public trans_affine
     {
     public:
-        trans_affine_reflection_unit(double ux, double uy) :
-          trans_affine(2.0 * ux * ux - 1.0, 
-                       2.0 * ux * uy, 
-                       2.0 * ux * uy, 
-                       2.0 * uy * uy - 1.0, 
-                       0.0, 0.0)
+        trans_affine_reflection_unit(real ux, real uy) :
+          trans_affine(2.0f * ux * ux - 1.0f, 
+                       2.0f * ux * uy, 
+                       2.0f * ux * uy, 
+                       2.0f * uy * uy - 1.0f, 
+                       0.0f, 0.0f)
         {}
     };
 
@@ -501,13 +501,13 @@ namespace agg
     class trans_affine_reflection : public trans_affine_reflection_unit
     {
     public:
-        trans_affine_reflection(double a) :
-          trans_affine_reflection_unit(cos(a), sin(a))
+        trans_affine_reflection(real a) :
+          trans_affine_reflection_unit((real)cos(a), (real)sin(a))
         {}
 
 
-        trans_affine_reflection(double x, double y) :
-          trans_affine_reflection_unit(x / sqrt(x * x + y * y), y / sqrt(x * x + y * y))
+        trans_affine_reflection(real x, real y) :
+          trans_affine_reflection_unit(x / SQRT(x * x + y * y), y / SQRT(x * x + y * y))
         {}
     };
 
@@ -515,4 +515,5 @@ namespace agg
 
 
 #endif
+
 

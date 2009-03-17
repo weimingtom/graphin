@@ -29,13 +29,13 @@ namespace agg
     struct ras_conv_int
     {
         typedef int coord_type;
-        static AGG_INLINE int mul_div(double a, double b, double c)
+        static AGG_INLINE int mul_div(real a, real b, real c)
         {
             return iround(a * b / c);
         }
         static int xi(int v) { return v; }
         static int yi(int v) { return v; }
-        static int upscale(double v) { return iround(v * poly_subpixel_scale); }
+        static int upscale(real v) { return iround(v * poly_subpixel_scale); }
         static int downscale(int v)  { return v; }
     };
 
@@ -43,13 +43,13 @@ namespace agg
     struct ras_conv_int_sat
     {
         typedef int coord_type;
-        static AGG_INLINE int mul_div(double a, double b, double c)
+        static AGG_INLINE int mul_div(real a, real b, real c)
         {
             return saturation<poly_max_coord>::iround(a * b / c);
         }
         static int xi(int v) { return v; }
         static int yi(int v) { return v; }
-        static int upscale(double v) 
+        static int upscale(real v) 
         { 
             return saturation<poly_max_coord>::iround(v * poly_subpixel_scale); 
         }
@@ -60,42 +60,42 @@ namespace agg
     struct ras_conv_int_3x
     {
         typedef int coord_type;
-        static AGG_INLINE int mul_div(double a, double b, double c)
+        static AGG_INLINE int mul_div(real a, real b, real c)
         {
             return iround(a * b / c);
         }
         static int xi(int v) { return v * 3; }
         static int yi(int v) { return v; }
-        static int upscale(double v) { return iround(v * poly_subpixel_scale); }
+        static int upscale(real v) { return iround(v * poly_subpixel_scale); }
         static int downscale(int v)  { return v; }
     };
 
     //-----------------------------------------------------------ras_conv_dbl
     struct ras_conv_dbl
     {
-        typedef double coord_type;
-        static AGG_INLINE double mul_div(double a, double b, double c)
+        typedef real coord_type;
+        static AGG_INLINE real mul_div(real a, real b, real c)
         {
             return a * b / c;
         }
-        static int xi(double v) { return iround(v * poly_subpixel_scale); }
-        static int yi(double v) { return iround(v * poly_subpixel_scale); }
-        static double upscale(double v) { return v; }
-        static double downscale(int v)  { return v / double(poly_subpixel_scale); }
+        static int xi(real v) { return iround(v * poly_subpixel_scale); }
+        static int yi(real v) { return iround(v * poly_subpixel_scale); }
+        static real upscale(real v) { return v; }
+        static real downscale(int v)  { return v / real(poly_subpixel_scale); }
     };
 
     //--------------------------------------------------------ras_conv_dbl_3x
     struct ras_conv_dbl_3x
     {
-        typedef double coord_type;
-        static AGG_INLINE double mul_div(double a, double b, double c)
+        typedef real coord_type;
+        static AGG_INLINE real mul_div(real a, real b, real c)
         {
             return a * b / c;
         }
-        static int xi(double v) { return iround(v * poly_subpixel_scale * 3); }
-        static int yi(double v) { return iround(v * poly_subpixel_scale); }
-        static double upscale(double v) { return v; }
-        static double downscale(int v)  { return v / double(poly_subpixel_scale); }
+        static int xi(real v) { return iround(v * poly_subpixel_scale * 3); }
+        static int yi(real v) { return iround(v * poly_subpixel_scale); }
+        static real upscale(real v) { return v; }
+        static real downscale(int v)  { return v / real(poly_subpixel_scale); }
     };
 
 
