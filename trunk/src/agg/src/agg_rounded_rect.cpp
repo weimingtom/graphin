@@ -67,26 +67,27 @@ namespace agg
         m_ry3 = m_ry4 = ry_top; 
     }
 
+    inline real max( real r1, real r2 ) { return r1>r2?r1:r2; }
     //--------------------------------------------------------------------
     void rounded_rect::radius(real rx1, real ry1, real rx2, real ry2, 
                               real rx3, real ry3, real rx4, real ry4)
     {
-        m_rx1 = rx1; m_ry1 = ry1; m_rx2 = rx2; m_ry2 = ry2; 
-        m_rx3 = rx3; m_ry3 = ry3; m_rx4 = rx4; m_ry4 = ry4;
+        m_rx1 = max(0,rx1); m_ry1 = max(0,ry1); m_rx2 = max(0,rx2); m_ry2 = max(0,ry2); 
+        m_rx3 = max(0,rx3); m_ry3 = max(0,ry3); m_rx4 = max(0,rx4); m_ry4 = max(0,ry4);
     }
 
     //--------------------------------------------------------------------
     void rounded_rect::normalize_radius()
     {
-        real dx = FABS(m_y2 - m_y1);
-        real dy = FABS(m_x2 - m_x1);
+        real dx = FABS(m_x2 - m_x1);
+        real dy = FABS(m_y2 - m_y1);
 
         real k = 1.0f;
-        real t;
-        t = dx / (m_rx1 + m_rx2); if(t < k) k = t; 
-        t = dx / (m_rx3 + m_rx4); if(t < k) k = t; 
-        t = dy / (m_ry1 + m_ry2); if(t < k) k = t; 
-        t = dy / (m_ry3 + m_ry4); if(t < k) k = t; 
+        real t = 0;
+        if(m_rx1 + m_rx2) { t = dx / (m_rx1 + m_rx2); if(t < k) k = t; }
+        if(m_rx3 + m_rx4) { t = dx / (m_rx3 + m_rx4); if(t < k) k = t; }
+        if(m_ry1 + m_ry4) { t = dy / (m_ry1 + m_ry4); if(t < k) k = t; }
+        if(m_ry2 + m_ry3) { t = dy / (m_ry2 + m_ry3); if(t < k) k = t; }
 
         if(k < 1.0f)
         {

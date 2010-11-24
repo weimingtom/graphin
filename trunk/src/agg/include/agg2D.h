@@ -38,6 +38,7 @@
 #include "agg_conv_stroke.h"
 #include "agg_conv_transform.h"
 #include "agg_conv_curve.h"
+#include "agg_conv_dash.h"
 #include "agg_rendering_buffer.h"
 #include "agg_renderer_base.h"
 #include "agg_renderer_scanline.h"
@@ -55,6 +56,8 @@
 #include "agg_rounded_rect.h"
 #include "agg_font_cache_manager.h"
 #include "agg_math_stroke.h"
+#include "agg_span_pattern_rgb.h"
+#include "agg_renderer_scanline.h"
 
 #ifdef AGG2D_USE_FREETYPE
 #include "../font_freetype/agg_font_freetype.h"
@@ -68,6 +71,14 @@
 
 class Agg2D
 {
+    struct Dash
+    {
+        real dash_len;
+        real gap_len;
+        Dash() {}
+        Dash( real d_, real g_ ) : dash_len(d_), gap_len(g_) {}
+    };
+
     typedef agg::order_bgra ComponentOrder; // Platform dependent!
 
     typedef agg::rgba8                                               ColorType;
@@ -102,6 +113,8 @@ class Agg2D
 
     typedef agg::span_interpolator_linear<>     SpanInterpolator;
 
+    typedef agg::pod_auto_vector<Dash, 16>          DashArray;
+
 
 #ifdef AGG2D_USE_FREETYPE
     typedef agg::font_engine_freetype_int32       FontEngine;
@@ -114,9 +127,11 @@ class Agg2D
 
     typedef agg::conv_curve<agg::path_storage>    ConvCurve;
     typedef agg::conv_stroke<ConvCurve>           ConvStroke;
+    typedef agg::conv_dash<ConvCurve>               ConvDash;
+    typedef agg::conv_stroke<agg::conv_dash<ConvCurve> > ConvDashStroke;
     typedef agg::conv_transform<ConvCurve>        PathTransform;
     typedef agg::conv_transform<ConvStroke>       StrokeTransform;
-
+    typedef agg::conv_transform<ConvDashStroke>     DashStrokeTransform;
 public:
 
     enum Gradient
@@ -124,7 +139,8 @@ public:
         Solid,
         Linear,
         Radial,
-        RadialWithFocus
+        RadialWithFocus,
+        Pattern,
     };
 
     friend class Agg2DRenderer;
@@ -287,12 +303,23 @@ public:
         BlendSoftLight  = agg::comp_op_soft_light,
         BlendDifference = agg::comp_op_difference,
         BlendExclusion  = agg::comp_op_exclusion,
-        BlendContrast   = agg::comp_op_contrast
+        BlendContrast   = agg::comp_op_contrast,
+        BlendInvert     = agg::comp_op_invert,
+        BlendInvertRGB  = agg::comp_op_invert_rgb,
     };
 
     enum Direction
     {
         CW, CCW
+    };
+
+    struct PatternFillDesc
+    {
+        spreadMethod_e      spreadMethod;
+        Image               pattern; 
+        int                 offset_x;
+        int                 offset_y;
+        unsigned            opacity;  // [0..255]
     };
 
     struct State
@@ -338,6 +365,10 @@ public:
       agg::trans_affine               m_transform;
       agg::trans_affine               m_affine;
 
+      real                            m_dashStart;
+      DashArray                       m_dashes;
+
+      PatternFillDesc                 m_fillPattern;
     };
 
     class gradient
@@ -522,6 +553,8 @@ public:
     void fillColor(unsigned r, unsigned g, unsigned b, unsigned a = 255);
     void noFill();
     //-------------------------------------------------------------------------
+    void fillPattern(const Image& img, unsigned opacity = 255, int offset_x = 0, int offset_y = 0);
+    //-------------------------------------------------------------------------
     void lineColor(Color c);
     void lineColor(unsigned r, unsigned g, unsigned b, unsigned a = 255);
     void noLine();
@@ -529,35 +562,35 @@ public:
     Color fillColor() const;
     Color lineColor() const;
     //-------------------------------------------------------------------------
-  void fillLinearGradient(const gradient_lut_type&,
-                real x1, real y1, real x2, real y2,
-              const agg::trans_affine& gradientTransform,
-              spreadMethod_e,
-              gradientUnits_e units,
-              real opacity);
+  void fillLinearGradient( const gradient_lut_type&
+                         , real x1, real y1, real x2, real y2
+                         , const agg::trans_affine& gradientTransform
+                         , spreadMethod_e
+                         , gradientUnits_e units
+                         , real opacity );
     //-------------------------------------------------------------------------
-  void lineLinearGradient(const gradient_lut_type&,
-                real x1, real y1, real x2, real y2,
-              const agg::trans_affine& gradientTransform,
-              spreadMethod_e,
-              gradientUnits_e units,
-              real opacity);
+  void lineLinearGradient( const gradient_lut_type&
+                         , real x1, real y1, real x2, real y2
+                         , const agg::trans_affine& gradientTransform
+                         , spreadMethod_e
+                         , gradientUnits_e units
+                         , real opacity );
     //-------------------------------------------------------------------------
-  void fillRadialGradient(const gradient_lut_type&,
-                real cx, real cy, real r,
-              real fx, real fy,
-              const agg::trans_affine& gradientTransform,
-              spreadMethod_e,
-              gradientUnits_e units,
-              real opacity);
+  void fillRadialGradient( const gradient_lut_type&
+                         , real cx, real cy, real r
+                         , real fx, real fy
+                         , const agg::trans_affine& gradientTransform
+                         , spreadMethod_e
+                         , gradientUnits_e units
+                         , real opacity );
     //-------------------------------------------------------------------------
-  void lineRadialGradient(const gradient_lut_type&,
-                real cx, real cy, real r,
-              real fx, real fy,
-              const agg::trans_affine& gradientTransform,
-              spreadMethod_e,
-              gradientUnits_e units,
-              real opacity);
+  void lineRadialGradient( const gradient_lut_type&
+                         , real cx, real cy, real r
+                         , real fx, real fy
+                         , const agg::trans_affine& gradientTransform
+                         , spreadMethod_e
+                         , gradientUnits_e units
+                         , real opacity);
     //-------------------------------------------------------------------------
     void fillLinearGradient(real x1, real y1, real x2, real y2, Color c1, Color c2, real profile=1.0f);
     void lineLinearGradient(real x1, real y1, real x2, real y2, Color c1, Color c2, real profile=1.0f);
@@ -608,6 +641,8 @@ public:
     // Basic Shapes
     //-----------------------
     void line(real x1, real y1, real x2, real y2);
+    bool arrow_bone(real x_from, real y_from, real x_to, real y_to, real sz, real angle_ext);
+    bool arrow(real x_from, real y_from, real x_to, real y_to, real sz, real angle_ext, real offset_int);
     void triangle(real x1, real y1, real x2, real y2, real x3, real y3);
     void rectangle(real x1, real y1, real x2, real y2);
     void roundedRect(real x1, real y1, real x2, real y2, real r);
@@ -765,12 +800,20 @@ public:
                    real dstX, real dstY);
     void copyImage(Image& img, real dstX, real dstY);
 
+
+    // Line dashes
+    //-----------------------
+    
+    void dashAdd( real dash_len, real gap_len );
+    void dashStart( real dash_start );
+    real dashStart()          const { return m_dashStart; }
+    void dashClear();
+
     // State
     //-----------------------
 
     void saveStateTo(State& st);
     void restoreStateFrom(const State& st);
-
 
 
     // Auxiliary
@@ -791,6 +834,8 @@ private:
     void renderImage(const Image& img, int x1, int y1, int x2, int y2, const real* parl);
 
     void updateTransformations();
+
+    void addStrokePath();
 
     agg::rendering_buffer           m_rbuf;
     PixFormat                       m_pixFormat;
@@ -871,9 +916,17 @@ private:
 
     ConvCurve                       m_convCurve;
     ConvStroke                      m_convStroke;
+    ConvDash                        m_convDash;
+    ConvDashStroke                  m_convDashStroke;
 
     PathTransform                   m_pathTransform;
     StrokeTransform                 m_strokeTransform;
+    DashStrokeTransform             m_dashStrokeTransform;
+
+    real                            m_dashStart;
+    DashArray                       m_dashes;
+
+    PatternFillDesc                 m_fillPattern;
 
 #ifndef AGG2D_USE_FREETYPE
     HDC                             m_fontDC;

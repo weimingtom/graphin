@@ -14,6 +14,7 @@
 #undef GRAPHIN_API
 #define GRAPHIN_API
 
+
 // this is an example of an exported function.
 GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL image_create( unsigned int width, unsigned int height, HIMG* pout_img )
 {
@@ -90,6 +91,92 @@ GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL graphics_create(HIMG img, HGFX* pout_gfx
   return GRAPHIN_PANIC;
 }
 
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL graphics_blend_mode( HGFX gfx, GRAPHIN_BLEND_MODE mode )
+{
+  if(gfx == 0 || mode < 0 || mode >= GBlend_count)
+  {
+    return GRAPHIN_BAD_PARAM;
+  }
+
+  gfx->blendMode( (Agg2D::BlendMode)(int)mode );
+
+  return GRAPHIN_OK;
+}
+
+GRAPHIN_API GRAPHIN_BLEND_MODE GRAPHIN_CALL graphics_blend_mode_get( HGFX gfx )
+{
+  return gfx ? (GRAPHIN_BLEND_MODE)(int)gfx->blendMode(): GBlend_count;
+}
+
+
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL graphics_gamma( HGFX gfx, REAL gamma_value )
+{
+  if(gfx)
+  {
+    gfx->antiAliasGamma(gamma_value);
+    return GRAPHIN_OK;
+  }
+
+  return GRAPHIN_BAD_PARAM;
+}
+
+GRAPHIN_API REAL GRAPHIN_CALL graphics_gamma_get( HGFX gfx )
+{
+  if(gfx)
+  {
+    return gfx->antiAliasGamma();
+  }
+
+  return 0.0;
+}
+
+// dahed lines
+
+// add one dash
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL graphics_dashes_add( HGFX gfx, POS dash_len, POS gap_len )
+{
+  if(gfx)
+  {
+    gfx->dashAdd( dash_len, gap_len );
+    return GRAPHIN_OK;
+  }
+
+  return GRAPHIN_BAD_PARAM;
+}
+
+// remove all dashes, now line-style is solid
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL graphics_dashes_clear( HGFX gfx )
+{
+  if(gfx)
+  {
+    gfx->dashClear();
+    return GRAPHIN_OK;
+  }
+
+  return GRAPHIN_BAD_PARAM;
+}
+
+
+// set dash start offset
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL graphics_dashes_start( HGFX gfx, POS dash_start )
+{
+  if( gfx )
+  {
+    gfx->dashStart(dash_start);
+    return GRAPHIN_OK;
+  }
+
+  return GRAPHIN_BAD_PARAM;
+}
+
+// set dash start offset
+GRAPHIN_API POS GRAPHIN_CALL graphics_dashes_start_get( HGFX gfx )
+{
+  return gfx ? gfx->dashStart() : 0;
+}
+
+
+
 GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL graphics_release( HGFX hgfx )
 {
   if(hgfx) hgfx->release();
@@ -104,6 +191,22 @@ GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
     return GRAPHIN_BAD_PARAM;
   hgfx->line(x1,y1,x2,y2);
   return GRAPHIN_OK;
+}
+
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+        graphics_arrow_bone ( HGFX hgfx, POS x_from, POS y_from, POS x_to, POS y_to, POS sz, ANGLE angle )
+{
+  bool res = hgfx ? hgfx->arrow_bone( x_from, y_from, x_to, y_to, sz, angle ) : false;
+
+  return res ? GRAPHIN_OK : GRAPHIN_BAD_PARAM;
+}
+
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+        graphics_arrow ( HGFX hgfx, POS x_from, POS y_from, POS x_to, POS y_to, POS sz, ANGLE angle, REAL offset )
+{
+  bool res = hgfx ? hgfx->arrow( x_from, y_from, x_to, y_to, sz, angle, offset ) : false;
+
+  return res ? GRAPHIN_OK : GRAPHIN_BAD_PARAM;
 }
 
 GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
@@ -423,6 +526,18 @@ GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
   else
     hgfx->fillColor(AGG_COLOR(color));
   return GRAPHIN_OK;
+}
+
+// image for pattern fills
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+      graphics_fill_pattern ( HGFX hgfx, HIMG pattern, unsigned opacity, int offset_x, int offset_y )
+{
+    if(!hgfx||!pattern)
+      return GRAPHIN_BAD_PARAM;
+
+    hgfx->fillPattern(*pattern, opacity, offset_x, offset_y);
+
+    return GRAPHIN_OK;
 }
 
 GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL

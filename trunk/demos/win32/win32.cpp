@@ -36,10 +36,57 @@ void frame::on_paint(PAINT_EVT& evt)
   unsigned int width = evt.view_w;
   unsigned int height = evt.view_h;
 
+  //graphics_gamma( g, 1.0 );
+  //graphics_blend_mode( g, GBlendContrast );
+
+  // dotted test 
+  {
+    graphics_state_save(g);
+    graphics_dashes_add(g, 15, 5);
+    
+    {
+      graphics_state_save(g);
+
+      graphics_line_width(g, 3);
+      graphics_dashes_clear(g);
+      graphics_dashes_add(g, 5, 5);
+      graphics_line(g, 10,10, 100, 100);
+      graphics_state_restore(g);
+    }
+
+    graphics_line(g, 20,10, 110, 100);
+    graphics_state_restore(g);
+  }
+
+  // arrow test
+  {
+    graphics_state_save(g);
+
+    graphics_line_width(g,2);
+
+    graphics_line( g, 100, 80, 200, 180 );
+    graphics_arrow_bone(g, 100, 80, 200, 180, 20, (40. / 360.) * 2. * 3.14 ); 
+
+    graphics_line( g, 140, 80, 240, 180 );
+    graphics_arrow(g, 140, 80, 240, 180, 40, (20. / 360.) * 2. * 3.14, 0.5 ); 
+
+    graphics_line( g, 180, 80, 280, 180 );
+    graphics_arrow(g, 180, 80, 280, 180, 40, (20. / 360.) * 2. * 3.14, 0.0 ); 
+
+    graphics_arrow(g, 280, 180, 180, 80, 40, (20. / 360.) * 2. * 3.14, 0.0 ); 
+
+    graphics_fill_color(g, graphics_rgbt(255,255,255,0) );
+    graphics_line( g, 230, 80, 330, 180 );
+    graphics_arrow(g, 230, 80, 330, 180, 40, (40. / 360.) * 2. * 3.14, 0.5 ); 
+
+    graphics_state_restore(g);
+  }
+
   graphics_state_save(g);
 
   graphics_scale(g,0.5,0.5);
   graphics_translate(g,0,0);
+    
     
   // first quadrant, basic drawing functions
     graphics_line(g, 0,0, width,height);
@@ -92,6 +139,12 @@ void frame::on_paint(PAINT_EVT& evt)
 
       graphics_rounded_rectangle(g, 200, 30, 200 + 100, 30 + 100, 10, 10);
 
+      graphics_line_color( g, graphics_rgbt(0,200,0,0) );
+      graphics_fill_color( g, graphics_rgbt(150,230,150,80) );
+
+      graphics_ellipse( g, 190, 60, 50, 30 ); 
+
+
   graphics_state_restore(g);
 
 
@@ -143,6 +196,33 @@ void frame::on_paint(PAINT_EVT& evt)
       DIM h = height - 20;
       graphics_draw_image ( g, img, 10, 10, &w, &h );
     }
+
+    // pattern fill test
+    {
+        graphics_fill_color(g, graphics_rgbt(0xFF,0xdd,0) );
+
+        graphics_state_save(g);
+
+        static HIMG pat = 0;
+
+        if(!pat)
+        {
+          tool::mm_file mf;
+          if( mf.open("../cubes.png") )
+            image_load( (BYTE*) mf.data(), mf.size(), &pat ); // load png/jpeg/etc. image from stream of bytes
+        }
+
+        if(pat)
+        {
+          graphics_fill_pattern(g, pat, 255, -width/2, 0);
+          graphics_ellipse( g, 400, 40, 120, 100 ); 
+        }
+
+        graphics_state_restore(g);
+
+        graphics_ellipse( g, 100, 40, 60, 50 ); 
+    }
+
   graphics_state_restore(g);
 
 

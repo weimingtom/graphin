@@ -48,6 +48,42 @@ enum GRAPHIN_RESULT
   GRAPHIN_FAILURE = 4,      // operation failed, e.g. restore() without save()
 };
 
+enum GRAPHIN_BLEND_MODE
+{
+  GBlendClear,
+  GBlendSrc,
+  GBlendDst,
+  GBlendSrcOver,
+  GBlendDstOver,
+  GBlendSrcIn,
+  GBlendDstIn,
+  GBlendSrcOut,
+  GBlendDstOut,
+  GBlendSrcAtop,
+  GBlendDstAtop,
+  GBlendXor,
+  GBlendAdd,
+  GBlendSub,
+  GBlendMultiply,
+  GBlendScreen,
+  GBlendOverlay,
+  GBlendDarken,
+  GBlendLighten,
+  GBlendColorDodge,
+  GBlendColorBurn,
+  GBlendHardLight,
+  GBlendSoftLight,
+  GBlendDifference,
+  GBlendExclusion,
+  GBlendContrast,
+  GBlendInvert,
+  GBlendInvertRGB,
+
+  GBlendAlpha,
+
+  GBlend_count,
+};
+
 struct graphics;
 struct image;
 
@@ -57,6 +93,7 @@ typedef struct image*    HIMG;
 #ifndef BYTE
   typedef unsigned char   BYTE;
 #endif
+typedef double REAL;        // any floating point value
 typedef double POS;         // position
 typedef double DIM;         // dimention
 typedef double ANGLE;       // angle (radians)
@@ -107,6 +144,47 @@ GRAPHIN_API COLOR GRAPHIN_CALL
 GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
         graphics_create(HIMG img, HGFX* pout_gfx );
 
+// blending mode
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+        graphics_blend_mode( HGFX gfx, GRAPHIN_BLEND_MODE mode );
+
+GRAPHIN_API GRAPHIN_BLEND_MODE GRAPHIN_CALL
+        graphics_blend_mode_get( HGFX gfx );
+
+// antialiasing gamma
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+        graphics_gamma( HGFX gfx, REAL gamma_value );
+
+GRAPHIN_API REAL GRAPHIN_CALL
+        graphics_gamma_get( HGFX gfx );
+
+// --- Dashes -------------------------------------------------------------
+
+// dahed lines
+
+// add one dash
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+        graphics_dashes_add( HGFX gfx, POS dash_len, POS gap_len );
+
+// remove all dashes
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+        graphics_dashes_clear( HGFX gfx );
+
+// set dash start offset
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+        graphics_dashes_start( HGFX gfx, POS dash_start );
+
+// set dash start offset
+GRAPHIN_API POS GRAPHIN_CALL
+        graphics_dashes_start_get( HGFX gfx );
+
+// --- Dashes (end) --------------------------------------------------------
+
+
+GRAPHIN_API GRAPHIN_BLEND_MODE GRAPHIN_CALL
+        graphics_blend_mode_get( HGFX gfx );
+
+
 GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
         graphics_release(HGFX gfx);
 
@@ -117,6 +195,16 @@ GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
 // Draws line from x1,y1 to x2,y2 using current lineColor and lineGradient.
 GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
         graphics_line ( HGFX hgfx, POS x1, POS y1, POS x2, POS y2 );
+
+// Draws not filled arrow directed from point (x_from,y_from) to (x_to,y_to), 
+// "sz" -- size of arrow side, "angle" -- angle of between main sides of arrow.
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+        graphics_arrow_bone ( HGFX hgfx, POS x_from, POS y_from, POS x_to, POS y_to, POS sz, ANGLE angle );
+
+// Draws not filled arrow directed from point (x_from,y_from) to (x_to,y_to), 
+// "sz" -- size of arrow side, "angle" -- angle of between main sides of arrow.
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+        graphics_arrow ( HGFX hgfx, POS x_from, POS y_from, POS x_to, POS y_to, POS sz, ANGLE angle, REAL offset );
 
 // Draws triangle using current lineColor/lineGradient and fillColor/fillGradient.
 GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
@@ -244,6 +332,10 @@ GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
 
 inline void
       graphics_no_fill ( HGFX hgfx ) { graphics_fill_color(hgfx, graphics_rgbt(0,0,0,0xFF)); }
+
+// image for pattern fills
+GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
+      graphics_fill_pattern ( HGFX hgfx, HIMG pattern, unsigned opacity, int offset_x, int offset_y );
 
 // setup parameters of linear gradient of lines.
 GRAPHIN_API GRAPHIN_RESULT GRAPHIN_CALL
