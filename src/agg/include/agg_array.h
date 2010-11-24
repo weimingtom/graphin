@@ -16,6 +16,7 @@
 #define AGG_ARRAY_INCLUDED
 
 #include <stddef.h>
+#include <assert.h>
 #include <string.h>
 #include "agg_basics.h"
 
@@ -63,8 +64,10 @@ namespace agg
         }
 
         static unsigned size() { return Size; }
-        const T& operator [] (unsigned i) const { return m_array[i]; }
-              T& operator [] (unsigned i)       { return m_array[i]; }
+        const T& operator [] (unsigned i) const { assert(i < Size);
+                                                  return i >= Size? m_array[Size-1]:m_array[i]; }
+              T& operator [] (unsigned i)       { assert(i < Size);
+                                                  return i >= Size? m_array[Size-1]:m_array[i]; }
         const T& at(unsigned i) const           { return m_array[i]; }
               T& at(unsigned i)                 { return m_array[i]; }
         T  value_at(unsigned i) const           { return m_array[i]; }

@@ -145,9 +145,12 @@ Agg2D::Agg2D() :
 
     m_convCurve(m_path),
     m_convStroke(m_convCurve),
+    m_convDash(m_convCurve),
+    m_convDashStroke(m_convDash),
 
     m_pathTransform(m_convCurve, m_transform),
     m_strokeTransform(m_convStroke, m_transform),
+    m_dashStrokeTransform(m_convDashStroke, m_transform),
 
 #ifdef AGG2D_USE_FREETYPE
     m_fontEngine(),
@@ -159,6 +162,24 @@ Agg2D::Agg2D() :
 {
     lineCap(m_lineCap);
     lineJoin(m_lineJoin);
+}
+
+void Agg2D::dashAdd( real dash_len, real gap_len )
+{
+    m_convDash.add_dash( dash_len, gap_len );
+    m_dashes.push_back( Dash( dash_len, gap_len ) );
+}
+
+void Agg2D::dashStart( real dash_start )
+{
+    m_dashStart = dash_start;
+    m_convDash.dash_start( dash_start );
+}
+
+void Agg2D::dashClear()
+{
+    m_convDash.remove_all_dashes();
+    m_dashes.clear();
 }
 
 void Agg2D::saveStateTo(State& st)
@@ -204,6 +225,9 @@ void Agg2D::saveStateTo(State& st)
 
   st.m_transform           = m_transform;
   st.m_affine              = m_affine;
+
+  st.m_dashStart           = m_dashStart;
+  st.m_dashes              = m_dashes;
 
 }
 
@@ -251,6 +275,16 @@ void Agg2D::restoreStateFrom(const State& st)
   m_affine              = st.m_affine;
   m_transform           = st.m_transform;
 
+  m_dashStart           = st.m_dashStart;
+  m_dashes              = st.m_dashes;
+
+  m_convDash.dash_start( m_dashStart );
+  m_convDash.remove_all_dashes();
+
+  for( unsigned i = 0; i < m_dashes.size(); ++i )
+  {
+    m_convDash.add_dash( m_dashes[i].dash_len, m_dashes[i].gap_len );
+  }
 }
 
 
@@ -280,6 +314,9 @@ void Agg2D::attach(unsigned char* buf, unsigned width, unsigned height, int stri
     m_antiAliasGamma = 1.0f;
     m_rasterizer.gamma(agg::gamma_none());
     m_blendMode = BlendAlpha;
+
+    m_dashStart = 0;
+    m_dashes.clear();
 }
 
 
@@ -484,9 +521,12 @@ void Agg2D::affine(const Affine& af)
 //------------------------------------------------------------------------
 void Agg2D::transformations(const Transformations& tr)
 {
+    real s = worldToScreen(1.0f) * g_approxScale;
+
     m_transform.load_from(tr.affineMatrix);
-    m_convCurve.approximation_scale(worldToScreen(1.0f) * g_approxScale);
-    m_convStroke.approximation_scale(worldToScreen(1.0f) * g_approxScale);
+    m_convCurve.approximation_scale(s);
+    m_convStroke.approximation_scale(s);
+    m_convDashStroke.approximation_scale(s);
 }
 //------------------------------------------------------------------------
 void Agg2D::resetTransformations()
@@ -496,10 +536,21 @@ void Agg2D::resetTransformations()
 //------------------------------------------------------------------------
 void Agg2D::updateTransformations()
 {
+   real s = worldToScreen(1.0f) * g_approxScale;
+
    m_transform  = m_affine;
    m_transform *= m_viewport;
-   m_convCurve.approximation_scale(worldToScreen(1.0f) * g_approxScale);
-   m_convStroke.approximation_scale(worldToScreen(1.0f) * g_approxScale);
+   m_convCurve.approximation_scale(s);
+   m_convStroke.approximation_scale(s);
+   m_convDashStroke.approximation_scale(s);
+}
+//------------------------------------------------------------------------
+void Agg2D::addStrokePath()
+{
+    if( m_dashes.size() )
+        m_rasterizer.add_path(m_dashStrokeTransform);
+    else
+        m_rasterizer.add_path(m_strokeTransform);
 }
 //------------------------------------------------------------------------
 void Agg2D::rotate(real angle)
@@ -609,6 +660,19 @@ void Agg2D::noFill()
 }
 
 //------------------------------------------------------------------------
+void Agg2D::fillPattern(const Image& img, unsigned opacity, int offset_x, int offset_y)
+{
+    m_fillGradientFlag = Pattern;
+
+    m_fillPattern.pattern = img;
+    m_fillPattern.offset_x = offset_x;
+    m_fillPattern.offset_y = offset_y;
+    m_fillPattern.opacity  = opacity > 255 ? 255 : opacity;
+
+    m_fillColor = Color(0, 255, 255, m_fillPattern.opacity);
+}
+
+//------------------------------------------------------------------------
 void Agg2D::lineColor(Color c)
 {
     m_lineColor = c;
@@ -638,6 +702,7 @@ Agg2D::Color Agg2D::lineColor() const
 {
     return m_lineColor;
 }
+
 //------------------------------------------------------------------------
 void Agg2D::fillLinearGradient(const gradient_lut_type& lut,
                 real x1, real y1, real x2, real y2,
@@ -1063,6 +1128,7 @@ void Agg2D::lineWidth(real w)
 {
     m_lineWidth = w;
     m_convStroke.width(w);
+    m_convDashStroke.width(w);
 }
 
 
@@ -1093,6 +1159,7 @@ void Agg2D::lineCap(LineCap cap)
 {
     m_lineCap = cap;
     m_convStroke.line_cap((agg::line_cap_e)cap);
+    m_convDashStroke.line_cap((agg::line_cap_e)cap);
 }
 
 
@@ -1108,6 +1175,7 @@ void Agg2D::lineJoin(LineJoin join)
 {
     m_lineJoin = join;
     m_convStroke.line_join((agg::line_join_e)join);
+    m_convDashStroke.line_join((agg::line_join_e)join);
 }
 
 
@@ -1132,6 +1200,97 @@ void Agg2D::line(real x1, real y1, real x2, real y2)
     m_path.remove_all();
     addLine(x1, y1, x2, y2);
     drawPath(StrokeOnly);
+}
+
+
+//------------------------------------------------------------------------
+bool Agg2D::arrow_bone(real x_from, real y_from, real x_to, real y_to, real sz, real angle_ext)
+{
+    const real dx = x_to-x_from;
+    const real dy = y_to-y_from;
+    const real len = sqrt(dx*dx+dy*dy);
+
+    if( len == 0 )
+        return false;
+
+    const real k = sz / len;
+    const real dx0 = dx * k;
+    const real dy0 = dy * k;
+
+    const real a = angle_ext / 2;
+
+    // turn 
+
+    const real cos_a1 = cos( a);
+    const real cos_a2 = cos(-a);
+    const real sin_a1 = sin( a);
+    const real sin_a2 = -sin_a1;
+
+    const real dx1 = dx0*cos_a1 - dy0*sin_a1;
+    const real dy1 = dx0*sin_a1 + dy0*cos_a1;
+
+    const real dx2 = dx0*cos_a2 - dy0*sin_a2;
+    const real dy2 = dx0*sin_a2 + dy0*cos_a2;
+
+
+    //lineJoin(MiterJoin);
+
+    m_path.remove_all();
+    m_path.move_to( x_to-dx1, y_to-dy1 );
+    m_path.line_to( x_to,     y_to );
+    m_path.line_to( x_to-dx2, y_to-dy2 );
+
+    drawPath(StrokeOnly);
+
+    return true;
+}
+
+//------------------------------------------------------------------------
+bool Agg2D::arrow(real x_from, real y_from, real x_to, real y_to, real sz, real angle_ext, real offset_int)
+{
+    const real dx = x_to-x_from;
+    const real dy = y_to-y_from;
+    const real len = sqrt(dx*dx+dy*dy);
+
+    if( len == 0 )
+        return false;
+
+    const real k = sz / len;
+    const real dx0 = dx * k;
+    const real dy0 = dy * k;
+
+    const real a = angle_ext / 2;
+
+    const real sz_int = cos(a)*sz;
+    const real k_int = sz_int / len;
+    const real dx3 = dx * k_int * offset_int;
+    const real dy3 = dy * k_int * offset_int;
+
+    // turn 
+
+    const real cos_a1 = cos( a);
+    const real cos_a2 = cos(-a);
+    const real sin_a1 = sin( a);
+    const real sin_a2 = -sin_a1;
+
+    const real dx1 = dx0*cos_a1 - dy0*sin_a1;
+    const real dy1 = dx0*sin_a1 + dy0*cos_a1;
+
+    const real dx2 = dx0*cos_a2 - dy0*sin_a2;
+    const real dy2 = dx0*sin_a2 + dy0*cos_a2;
+
+
+
+    m_path.remove_all();
+    m_path.move_to( x_to-dx1, y_to-dy1 );
+    m_path.line_to( x_to,     y_to );
+    m_path.line_to( x_to-dx2, y_to-dy2 );
+    m_path.line_to( x_to-dx3, y_to-dy3 );
+
+    m_path.close_polygon();
+    drawPath(FillAndStroke);
+
+    return false;
 }
 
 
@@ -1945,7 +2104,7 @@ void Agg2D::drawPath(DrawPathFlag flag)
     case StrokeOnly:
         if (m_lineColor.a && m_lineWidth > 0.0f)
         {
-            m_rasterizer.add_path(m_strokeTransform);
+            addStrokePath();
             render(false);
         }
         break;
@@ -1959,7 +2118,7 @@ void Agg2D::drawPath(DrawPathFlag flag)
 
         if (m_lineColor.a && m_lineWidth > 0.0f)
         {
-            m_rasterizer.add_path(m_strokeTransform);
+            addStrokePath();
             render(false);
         }
         break;
@@ -2062,6 +2221,69 @@ class Agg2DRenderer
     }
   }
 
+    //-------------------------------------------------------------------------
+  template< typename Wrap, typename BaseRenderer >
+  static void render_pattern( Agg2D& gr
+                            , BaseRenderer& renBase
+                            , Agg2D::Image& img_fill
+                            , int offset_x
+                            , int offset_y
+                            , unsigned opacity )
+  {
+    //agg::wrap_mode_repeat::
+    //agg::wrap_mode_repeat_pow2::
+
+    typedef Agg2D::PixFormat                                pixfmt_a;
+    typedef agg::image_accessor_wrap<pixfmt_a, Wrap, Wrap>  img_source_a;
+    typedef agg::span_pattern_rgb<img_source_a>             span_gen_a;
+
+    pixfmt_a        img_pxf( img_fill.renBuf );    // The pattern buffer
+    img_source_a    img_src( img_pxf );
+    
+    span_gen_a      sg( img_src, gr.width(), gr.height() );
+
+
+    if( opacity < 0   ) opacity = 0;
+    if( opacity > 255 ) opacity = 255;
+
+    if( offset_x < 0 ) offset_x = img_fill.width()  - offset_x;
+    if( offset_y < 0 ) offset_y = img_fill.height() - offset_y;
+    
+    sg.alpha( opacity );
+    sg.offset_x( (unsigned)offset_x );
+    sg.offset_y( (unsigned)offset_y );
+
+    agg::render_scanlines_aa( gr.m_rasterizer, gr.m_scanline, renBase, gr.m_allocator, sg );
+  }
+
+  static inline bool is_power_of_2( unsigned v )
+  {
+     return v && !(v & (v - 1));
+  }
+
+  //-------------------------------------------------------------------------
+  template< typename BaseRenderer >
+  static void render_pattern( Agg2D& gr
+                            , BaseRenderer& renBase
+                            , Agg2D::spreadMethod_e //spreadMethod
+                            , Agg2D::Image& img_fill
+                            , int offset_x
+                            , int offset_y
+                            , unsigned opacity )
+  {
+    if( is_power_of_2( img_fill.width() ) && 
+        is_power_of_2( img_fill.height() ) )
+    {
+      typedef agg::wrap_mode_repeat_pow2    wrap_a;
+      render_pattern<wrap_a>( gr, renBase, img_fill, offset_x, offset_y, opacity );
+    }
+    else
+    {
+      typedef agg::wrap_mode_repeat         wrap_a;
+      render_pattern<wrap_a>( gr, renBase, img_fill, offset_x, offset_y, opacity );
+    }
+  }
+
 public:
     //--------------------------------------------------------------------
     template<class BaseRenderer, class SolidRenderer>
@@ -2105,6 +2327,7 @@ public:
             }
       return;
         }
+
             if ((fillColor && gr.m_fillGradientFlag == Agg2D::Radial) ||
                (!fillColor && gr.m_lineGradientFlag == Agg2D::Radial))
             {
@@ -2140,6 +2363,7 @@ public:
               }
               return;
             }
+
     if ((fillColor && gr.m_fillGradientFlag == Agg2D::RadialWithFocus) ||
       (!fillColor && gr.m_lineGradientFlag == Agg2D::RadialWithFocus))
     {
@@ -2179,6 +2403,40 @@ public:
       }
       return;
             }
+
+        if( ( fillColor && gr.m_fillGradientFlag == Agg2D::Pattern) ||
+            (!fillColor && gr.m_lineGradientFlag == Agg2D::Pattern) )
+        {
+          // TODO!!!
+
+          if (fillColor)
+          {
+            render_pattern
+            (
+              gr,
+              renBase,
+              gr.m_fillGradientSpreadMethod,
+              gr.m_fillPattern.pattern,
+              gr.m_fillPattern.offset_x,
+              gr.m_fillPattern.offset_y,
+              gr.m_fillPattern.opacity
+           );
+          }
+          else
+          {
+            render_pattern
+            (
+              gr,
+              renBase,
+              gr.m_fillGradientSpreadMethod,
+              gr.m_fillPattern.pattern,
+              gr.m_fillPattern.offset_x,
+              gr.m_fillPattern.offset_y,
+              gr.m_fillPattern.opacity
+           );
+          }
+          return;
+        }
 
                 renSolid.color(fillColor ? gr.m_fillColor : gr.m_lineColor);
                 agg::render_scanlines(gr.m_rasterizer, gr.m_scanline, renSolid);
