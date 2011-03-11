@@ -78,7 +78,10 @@ struct graphics:
     if(!saved_states)
       return false;
     restoreStateFrom(*saved_states);
+    state *t = saved_states;
     saved_states = saved_states->next;
+    t->next = 0;
+    delete t;
     return true;
   }
 };
